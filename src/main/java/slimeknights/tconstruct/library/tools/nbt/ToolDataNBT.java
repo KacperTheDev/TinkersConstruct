@@ -14,6 +14,10 @@ public class ToolDataNBT extends ModDataNBT {
     super(nbt);
   }
 
+  protected ToolDataNBT(CompoundTag nbt, Runnable onChanged) {
+    super(nbt, onChanged);
+  }
+
   @Override
   public int getSlots(SlotType type) {
     return getData().getInt(type.getName());
@@ -30,6 +34,7 @@ public class ToolDataNBT extends ModDataNBT {
     } else {
       getData().putInt(type.getName(), value);
     }
+    changed();
   }
 
   /**
@@ -51,5 +56,10 @@ public class ToolDataNBT extends ModDataNBT {
    */
   public static ToolDataNBT readFromNBT(CompoundTag data) {
     return new ToolDataNBT(data);
+  }
+
+  /** Parses mutable tool data and invokes the callback after each mutation. */
+  public static ToolDataNBT readFromNBT(CompoundTag data, Runnable onChanged) {
+    return new ToolDataNBT(data, onChanged);
   }
 }

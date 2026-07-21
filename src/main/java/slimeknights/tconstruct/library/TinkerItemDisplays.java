@@ -1,12 +1,6 @@
 package slimeknights.tconstruct.library;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegisterEvent;
-import slimeknights.tconstruct.TConstruct;
 
 import java.util.Locale;
 
@@ -14,9 +8,7 @@ import java.util.Locale;
 public class TinkerItemDisplays {
   private TinkerItemDisplays() {}
 
-  public static void init() {
-    FMLJavaModLoadingContext.get().getModEventBus().addListener(TinkerItemDisplays::registerDisplay);
-  }
+  public static void init() {}
 
   /** Used by the melter and smeltery for display of items its melting */
   public static ItemDisplayContext MELTER = create("melter", ItemDisplayContext.NONE);
@@ -34,27 +26,7 @@ public class TinkerItemDisplays {
   /** Creates a transform type */
   private static ItemDisplayContext create(String name, ItemDisplayContext fallback) {
     String key = "TCONSTRUCT_" + name.toUpperCase(Locale.ROOT);
-    if (fallback == ItemDisplayContext.NONE) {
-      return ItemDisplayContext.create(key, TConstruct.getResource(name), null);
-    }
-    return ItemDisplayContext.create(key, TConstruct.getResource(name), fallback);
+    return ItemDisplayContext.valueOf(key);
   }
 
-  /** Registers all item display types */
-  private static void registerDisplay(RegisterEvent event) {
-    if (event.getRegistryKey() == ForgeRegistries.Keys.DISPLAY_CONTEXTS) {
-      IForgeRegistry<ItemDisplayContext> registry = ForgeRegistries.DISPLAY_CONTEXTS.get();
-      register(registry, MELTER);
-      register(registry, TABLE);
-      register(registry, CASTING_TABLE);
-      register(registry, CASTING_BASIN);
-      register(registry, FLUID_CANNON);
-      register(registry, THROWN);
-    }
-  }
-
-  /** Registers a display type */
-  private static void register(IForgeRegistry<ItemDisplayContext> registry, ItemDisplayContext context) {
-    registry.register(new ResourceLocation(context.getSerializedName()), context);
-  }
 }

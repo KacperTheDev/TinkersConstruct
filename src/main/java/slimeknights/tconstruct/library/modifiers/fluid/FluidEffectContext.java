@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -43,6 +42,12 @@ public abstract class FluidEffectContext {
   protected final Projectile projectile;
   /** Item stack fallback for when the entity is not set */
   protected final ItemStack stack;
+
+  public Level getLevel() { return level; }
+  @Nullable public LivingEntity getEntity() { return entity; }
+  @Nullable public Player getPlayer() { return player; }
+  @Nullable public Projectile getProjectile() { return projectile; }
+  public ItemStack getStack() { return stack; }
 
   /** @deprecated use {@link #FluidEffectContext(Level,LivingEntity,Player,Projectile,ItemStack} */
   @Deprecated
@@ -102,7 +107,7 @@ public abstract class FluidEffectContext {
 
   /** If true, this context is not allowed to place blocks at the given position */
   public boolean placeRestricted(ItemStack stack) {
-    return player != null && !player.mayBuild() && !stack.hasAdventureModePlaceTagForBlock(level.registryAccess().registryOrThrow(Registries.BLOCK), new BlockInWorld(level, getBlockPos(), false));
+    return player != null && !player.mayBuild() && !stack.canPlaceOnBlockInAdventureMode(new BlockInWorld(level, getBlockPos(), false));
   }
 
   /** Context for fluid effects targeting an entity */
@@ -113,6 +118,10 @@ public abstract class FluidEffectContext {
     private final LivingEntity livingTarget;
     @Getter
     private final Vec3 location;
+
+    public net.minecraft.world.entity.Entity getTarget() { return target; }
+    @Nullable public LivingEntity getLivingTarget() { return livingTarget; }
+    @Override public Vec3 getLocation() { return location; }
 
     private Entity(Level level, @Nullable LivingEntity holder, @Nullable Player player, @Nullable Projectile projectile, ItemStack stack, net.minecraft.world.entity.Entity target, @Nullable LivingEntity livingTarget, @Nullable Vec3 location) {
       super(level, holder, player, projectile, stack);

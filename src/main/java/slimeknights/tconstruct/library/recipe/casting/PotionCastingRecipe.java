@@ -2,18 +2,19 @@ package slimeknights.tconstruct.library.recipe.casting;
 
 import lombok.Getter;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.minecraft.core.registries.BuiltInRegistries;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.common.IngredientLoadable;
 import slimeknights.mantle.data.loadable.field.ContextKey;
@@ -55,6 +56,10 @@ public class PotionCastingRecipe implements ICastingRecipe, IMultiRecipe<Display
   protected final Item result;
   /** Cooling time for this recipe, used for tipped arrows */
   protected final int coolingTime;
+
+  public ResourceLocation getId() {
+    return id;
+  }
 
   public PotionCastingRecipe(TypeAwareRecipeSerializer<?> serializer, ResourceLocation id, String group, Ingredient bottle, FluidIngredient fluid, Item result, int coolingTime) {
     this.serializer = serializer;
@@ -98,9 +103,16 @@ public class PotionCastingRecipe implements ICastingRecipe, IMultiRecipe<Display
   }
 
   @Override
-  public ItemStack assemble(ICastingContainer inv, RegistryAccess access) {
+  public ItemStack assemble(ICastingContainer inv, HolderLookup.Provider access) {
     ItemStack result = new ItemStack(this.result);
-    result.setTag(inv.getFluidTag());
+    PotionContents potion = inv.getFluidStack().get(DataComponents.POTION_CONTENTS);
+    if (potion != null) {
+      result.set(DataComponents.POTION_CONTENTS, potion);
+    }
+    CustomData customData = inv.getFluidStack().get(DataComponents.CUSTOM_DATA);
+    if (customData != null) {
+      result.set(DataComponents.CUSTOM_DATA, customData);
+    }
     return result;
   }
 
@@ -109,16 +121,16 @@ public class PotionCastingRecipe implements ICastingRecipe, IMultiRecipe<Display
   protected List<DisplayCastingRecipe> displayRecipes = null;
 
   @Override
-  public List<DisplayCastingRecipe> getRecipes(RegistryAccess access) {
+  public List<DisplayCastingRecipe> getRecipes(HolderLookup.Provider access) {
     if (displayRecipes == null) {
       // create a subrecipe for every potion variant
       List<ItemStack> bottles = List.of(bottle.getItems());
-      displayRecipes = ForgeRegistries.POTIONS.getValues().stream()
-        .filter(potion -> potion != Potions.EMPTY)
+      displayRecipes = BuiltInRegistries.POTION.stream().map(BuiltInRegistries.POTION::wrapAsHolder)
         .map(potion -> {
-          ItemStack result = PotionUtils.setPotion(new ItemStack(this.result), potion);
+          ItemStack result = new ItemStack(this.result);
+          result.set(DataComponents.POTION_CONTENTS, new PotionContents(potion));
           return new DisplayCastingRecipe(getId(), getType(), bottles, fluid.getFluids().stream()
-                                                              .map(fluid -> new FluidStack(fluid.getFluid(), fluid.getAmount(), result.getTag()))
+                                                              .map(fluid -> slimeknights.tconstruct.library.utils.FluidStackDataUtil.createPotion(fluid.getFluid(), fluid.getAmount(), potion))
                                                               .toList(),
                                           result, coolingTime, true);
         }).toList();
@@ -134,10 +146,10 @@ public class PotionCastingRecipe implements ICastingRecipe, IMultiRecipe<Display
     return NonNullList.of(Ingredient.EMPTY, bottle);
   }
 
-  /** @deprecated use {@link #assemble(Container, RegistryAccess)} */
+  /** @deprecated use {@link #assemble(Container, HolderLookup.Provider)} */
   @Deprecated
   @Override
-  public ItemStack getResultItem(RegistryAccess access) {
+  public ItemStack getResultItem(HolderLookup.Provider access) {
     return new ItemStack(this.result);
   }
 }

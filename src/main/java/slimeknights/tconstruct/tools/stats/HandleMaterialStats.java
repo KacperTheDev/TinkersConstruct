@@ -118,6 +118,11 @@ public record HandleMaterialStats(float durability, float miningSpeed, float mel
     private float attackSpeed;
     private float attackDamage;
 
+    public Builder durability(float durability) { this.durability = durability; return this; }
+    public Builder miningSpeed(float miningSpeed) { this.miningSpeed = miningSpeed; return this; }
+    public Builder attackSpeed(float attackSpeed) { this.attackSpeed = attackSpeed; return this; }
+    public Builder attackDamage(float attackDamage) { this.attackDamage = attackDamage; return this; }
+
     private Builder(boolean multiplier) {
       this.multiplier = multiplier;
       float defaultValue = multiplier ? 1 : 0;

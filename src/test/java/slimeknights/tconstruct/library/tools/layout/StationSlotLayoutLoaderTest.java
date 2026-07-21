@@ -9,9 +9,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.VanillaIngredientSerializer;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.test.BaseMcTest;
@@ -26,15 +23,6 @@ import static org.mockito.Mockito.mock;
 
 class StationSlotLayoutLoaderTest extends BaseMcTest {
   private static final JsonFileLoader fileLoader = new JsonFileLoader(StationSlotLayoutLoader.GSON, StationSlotLayoutLoader.FOLDER);
-
-  @BeforeAll
-  static void setup() {
-    try {
-      CraftingHelper.register(new ResourceLocation("minecraft", "item"), VanillaIngredientSerializer.INSTANCE);
-    } catch (Exception e) {
-      // just need to ensure its registered
-    }
-  }
 
   @Test
   void minimal_noTool() {
@@ -93,7 +81,7 @@ class StationSlotLayoutLoaderTest extends BaseMcTest {
     ItemStack[] stacks = ingredient.getItems();
     assertThat(stacks).hasSize(1);
     assertThat(stacks[0].getItem()).isEqualTo(item);
-    assertThat(stacks[0].getTag()).isNull();
+    assertThat(slimeknights.tconstruct.library.utils.ItemStackDataUtil.getTag(stacks[0])).isNull();
   }
 
   @Test
@@ -108,7 +96,7 @@ class StationSlotLayoutLoaderTest extends BaseMcTest {
     ItemStack stack = layout.getIcon().getValue(ItemStack.class);
     assertThat(stack).isNotNull();
     assertThat(stack.getItem()).isEqualTo(Items.IRON_INGOT);
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = slimeknights.tconstruct.library.utils.ItemStackDataUtil.getTag(stack);
     assertThat(nbt).isNotNull();
     assertThat(nbt.getAllKeys()).hasSize(1);
     assertThat(nbt.getInt("test")).isEqualTo(1);

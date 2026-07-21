@@ -55,7 +55,7 @@ public enum EmbellishmentModule implements ModifierModule, DisplayNameModifierHo
   public void addRawData(IToolStackView tool, ModifierEntry modifier, RestrictedCompoundTag tag) {
     // on build, migrate material redirects
     ModDataNBT data = tool.getPersistentData();
-    ResourceLocation key = modifier.getId();
+    ResourceLocation key = modifier.getId().location();
     MaterialVariantId materialVariant = MaterialVariantId.tryParse(data.getString(key));
     if (materialVariant != null) {
       MaterialId original = materialVariant.getId();

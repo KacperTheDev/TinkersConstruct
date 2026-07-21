@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.tconstruct.library.utils.TagUtil;
@@ -117,8 +117,8 @@ public class ServantTileEntity extends MantleBlockEntity implements IServantLogi
     // if the master position is valid, get the master block
     if (masterPos != null && tags.contains(TAG_MASTER_BLOCK, Tag.TAG_STRING)) {
       ResourceLocation masterBlockName = ResourceLocation.tryParse(tags.getString(TAG_MASTER_BLOCK));
-      if (masterBlockName != null && ForgeRegistries.BLOCKS.containsKey(masterBlockName)) {
-        masterBlock = ForgeRegistries.BLOCKS.getValue(masterBlockName);
+      if (masterBlockName != null && BuiltInRegistries.BLOCK.containsKey(masterBlockName)) {
+        masterBlock = BuiltInRegistries.BLOCK.get(masterBlockName);
       }
     }
     // if both valid, set
@@ -129,8 +129,8 @@ public class ServantTileEntity extends MantleBlockEntity implements IServantLogi
   }
 
   @Override
-  public void load(CompoundTag tags) {
-    super.load(tags);
+  protected void loadAdditional(CompoundTag tags, net.minecraft.core.HolderLookup.Provider registries) {
+    super.loadAdditional(tags, registries);
     readMaster(tags);
   }
 
@@ -140,15 +140,15 @@ public class ServantTileEntity extends MantleBlockEntity implements IServantLogi
    */
   protected CompoundTag writeMaster(CompoundTag tags) {
     if (masterPos != null && masterBlock != null) {
-      tags.put(TAG_MASTER_POS, NbtUtils.writeBlockPos(masterPos.subtract(this.worldPosition)));
+      tags.put(TAG_MASTER_POS, TagUtil.writeBlockPos(masterPos.subtract(this.worldPosition)));
       tags.putString(TAG_MASTER_BLOCK, BuiltInRegistries.BLOCK.getKey(masterBlock).toString());
     }
     return tags;
   }
 
   @Override
-  public void saveAdditional(CompoundTag tags) {
-    super.saveAdditional(tags);
+  public void saveAdditional(CompoundTag tags, net.minecraft.core.HolderLookup.Provider registries) {
+    super.saveAdditional(tags, registries);
     writeMaster(tags);
   }
 }

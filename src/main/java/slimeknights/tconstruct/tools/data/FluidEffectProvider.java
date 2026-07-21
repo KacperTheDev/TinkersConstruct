@@ -1,8 +1,10 @@
 package slimeknights.tconstruct.tools.data;
 
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
@@ -16,9 +18,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
-import net.minecraftforge.fluids.FluidType;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
+import net.neoforged.neoforge.fluids.FluidType;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.mantle.data.predicate.block.BlockPredicate;
 import slimeknights.mantle.data.predicate.entity.BlockAtEntityPredicate;
@@ -30,7 +32,6 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.Sounds;
 import slimeknights.tconstruct.common.TinkerDamageTypes;
 import slimeknights.tconstruct.common.TinkerTags;
-import slimeknights.tconstruct.common.data.FakeRegistryEntry;
 import slimeknights.tconstruct.fluids.TinkerFluids;
 import slimeknights.tconstruct.library.data.tinkering.AbstractFluidEffectProvider;
 import slimeknights.tconstruct.library.json.LevelingInt;
@@ -80,8 +81,8 @@ import slimeknights.tconstruct.world.block.DirtType;
 import java.util.function.Function;
 
 public class FluidEffectProvider extends AbstractFluidEffectProvider {
-  public FluidEffectProvider(PackOutput packOutput) {
-    super(packOutput, TConstruct.MOD_ID);
+  public FluidEffectProvider(PackOutput packOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup.Provider> lookupProvider) {
+    super(packOutput, TConstruct.MOD_ID, lookupProvider);
   }
 
   @SuppressWarnings("removal")
@@ -200,8 +201,8 @@ public class FluidEffectProvider extends AbstractFluidEffectProvider {
     // gems - direct damage and mining //
     addGem(TinkerFluids.moltenAmethyst).addBlockEffect(new HarvestTierPredicate(Tiers.STONE),     new BreakBlockFluidEffect(3));
     addGem(TinkerFluids.moltenQuartz  ).addBlockEffect(new HarvestTierPredicate(Tiers.IRON),      new BreakBlockFluidEffect(5));
-    addGem(TinkerFluids.moltenEmerald ).addBlockEffect(new HarvestTierPredicate(Tiers.IRON),      new BreakBlockFluidEffect(10, Enchantments.SILK_TOUCH, 1));
-    addGem(TinkerFluids.moltenDiamond ).addBlockEffect(new HarvestTierPredicate(Tiers.DIAMOND),   new BreakBlockFluidEffect(10, Enchantments.BLOCK_FORTUNE, 3));
+    addGem(TinkerFluids.moltenEmerald ).addBlockEffect(new HarvestTierPredicate(Tiers.IRON),      new BreakBlockFluidEffect(10, enchantment(Enchantments.SILK_TOUCH), 1));
+    addGem(TinkerFluids.moltenDiamond ).addBlockEffect(new HarvestTierPredicate(Tiers.DIAMOND),   new BreakBlockFluidEffect(10, enchantment(Enchantments.FORTUNE), 3));
     addMetal(TinkerFluids.moltenDebris).addBlockEffect(new HarvestTierPredicate(Tiers.NETHERITE), new BreakBlockFluidEffect(50));
 
     // foods - setup to give equivalent saturation on a full bowl/bottle to their food counterparts, though hunger may be slightly different
@@ -297,21 +298,21 @@ public class FluidEffectProvider extends AbstractFluidEffectProvider {
       .addEntityEffects(FluidMobEffect.builder().effect(MobEffects.CONFUSION, 5 * 20, 1).buildEntity(TimeAction.ADD));
     {
       String ie = "immersiveengineering";
-      MobEffect flammable = FakeRegistryEntry.effect(new ResourceLocation(ie, "flammable"));
+      ResourceKey<MobEffect> flammable = ResourceKey.create(Registries.MOB_EFFECT, ResourceLocation.fromNamespaceAndPath(ie, "flammable"));
       compatFluid(ie, "creosote",  50)
         .addEffect(FluidMobEffect.builder().effect(flammable, 8 * 20, 1), TimeAction.ADD)
         .addEntityEffect(new FireFluidEffect(TimeAction.ADD, 8));
       compatFluid(ie, "biodiesel", 50)
         .addEffect(FluidMobEffect.builder().effect(flammable, 8 * 20, 2), TimeAction.ADD)
         .addEntityEffect(new FireFluidEffect(TimeAction.ADD, 8));
-      FluidMobEffect conductive = new FluidMobEffect(FakeRegistryEntry.effect(new ResourceLocation(ie, "conductive")), 8 * 20, 2);
+      FluidMobEffect conductive = new FluidMobEffect(ResourceLocation.fromNamespaceAndPath(ie, "conductive"), 8 * 20, 2);
       compatFluid(ie, "redstone_acid",  50)
         .addEntityEffect(new MobEffectFluidEffect(conductive, TimeAction.ADD))
         .addBlockEffect(new MobEffectCloudFluidEffect(conductive))
         .addBlockEffect(FluidEffect.WEATHER);
-      compatFluid(ie, "phenolic_resin", 50).addEffect(FluidMobEffect.builder().effect(FakeRegistryEntry.effect(new ResourceLocation(ie, "sticky")), 8 * 20, 2), TimeAction.ADD);
-      Block concreteSprayed = FakeRegistryEntry.block(new ResourceLocation(ie, "concrete_sprayed"));
-      AreaMobEffectFluidEffect concreteFeet = new AreaMobEffectFluidEffect(new FluidMobEffect(FakeRegistryEntry.effect(new ResourceLocation(ie, "concrete_feet")), MobEffectInstance.INFINITE_DURATION, 1), TimeAction.SET, GroupCost.MAX);
+      compatFluid(ie, "phenolic_resin", 50).addEffect(FluidMobEffect.builder().effect(ResourceKey.create(Registries.MOB_EFFECT, ResourceLocation.fromNamespaceAndPath(ie, "sticky")), 8 * 20, 2), TimeAction.ADD);
+      ResourceLocation concreteSprayed = ResourceLocation.fromNamespaceAndPath(ie, "concrete_sprayed");
+      AreaMobEffectFluidEffect concreteFeet = new AreaMobEffectFluidEffect(new FluidMobEffect(ResourceLocation.fromNamespaceAndPath(ie, "concrete_feet"), MobEffectInstance.INFINITE_DURATION, 1), TimeAction.SET, GroupCost.MAX);
       compatFluid(ie, "concrete", 100)
         .addEntityEffect(new BlockAtEntityPredicate(BlockPredicate.CAN_BE_REPLACED, 0), new SetBlockFluidEffect(concreteSprayed))
         .offsetBlockEffect(BlockPredicate.CAN_BE_REPLACED, new SetBlockFluidEffect(concreteSprayed))
@@ -336,7 +337,7 @@ public class FluidEffectProvider extends AbstractFluidEffectProvider {
       return new TagPredicate(compound);
     };
     String create = "create";
-    addFluid("potion_create", FluidNameIngredient.of(new ResourceLocation(create, "potion"), FluidValues.SIP))
+    addFluid("potion_create", FluidNameIngredient.of(ResourceLocation.fromNamespaceAndPath(create, "potion"), FluidValues.SIP))
       .hidden() // we have the regular potion type showing, the create one in addition is a bit confusing
       .addCondition(new ModLoadedCondition(create))
       .addEntityEffect(new PotionFluidEffect(0.25f, createBottle.apply("REGULAR")))

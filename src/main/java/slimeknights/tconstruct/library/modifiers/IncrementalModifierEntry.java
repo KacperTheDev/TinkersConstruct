@@ -29,6 +29,10 @@ public class IncrementalModifierEntry extends ModifierEntry {
     }
   }
 
+  public int getNeeded() {
+    return needed;
+  }
+
   /**
    * Creates a new incremental modifier entry
    * @param modifier  Modifier instance

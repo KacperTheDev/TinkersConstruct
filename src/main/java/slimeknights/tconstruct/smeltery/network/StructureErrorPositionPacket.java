@@ -3,8 +3,8 @@ package slimeknights.tconstruct.smeltery.network;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent.Context;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import slimeknights.mantle.network.packet.IThreadsafePacket;
 import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.tconstruct.smeltery.block.entity.controller.HeatingStructureBlockEntity;
@@ -20,7 +20,7 @@ public class StructureErrorPositionPacket implements IThreadsafePacket {
   @Nullable
   private final BlockPos errorPos;
 
-  public StructureErrorPositionPacket(FriendlyByteBuf buffer) {
+  public StructureErrorPositionPacket(RegistryFriendlyByteBuf buffer) {
     this.controllerPos = buffer.readBlockPos();
     if (buffer.readBoolean()) {
       this.errorPos = buffer.readBlockPos();
@@ -30,7 +30,7 @@ public class StructureErrorPositionPacket implements IThreadsafePacket {
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer) {
+  public void encode(RegistryFriendlyByteBuf buffer) {
     buffer.writeBlockPos(controllerPos);
     if (errorPos != null) {
       buffer.writeBoolean(true);
@@ -41,7 +41,7 @@ public class StructureErrorPositionPacket implements IThreadsafePacket {
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
+  public void handleThreadsafe(IPayloadContext context) {
     HandleClient.handle(this);
   }
 

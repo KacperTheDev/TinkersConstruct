@@ -77,6 +77,61 @@ public class ToolAttackContext {
   /** Sound to play for this attack */
   private final SoundEvent sound;
 
+  public LivingEntity getAttacker() {
+    return attacker;
+  }
+
+  @Nullable
+  public Player getPlayerAttacker() {
+    return playerAttacker;
+  }
+
+  public InteractionHand getHand() {
+    return hand;
+  }
+
+  public EquipmentSlot getSlotType() {
+    return slotType;
+  }
+
+  @Nullable
+  public Projectile getProjectile() {
+    return projectile;
+  }
+
+  public Entity getTarget() {
+    return target;
+  }
+
+  @Nullable
+  public LivingEntity getLivingTarget() {
+    return livingTarget;
+  }
+
+  public float getBaseDamage() {
+    return baseDamage;
+  }
+
+  public float getBaseKnockback() {
+    return baseKnockback;
+  }
+
+  public float getCooldown() {
+    return cooldown;
+  }
+
+  public float getCriticalModifier() {
+    return criticalModifier;
+  }
+
+  public boolean isExtraAttack() {
+    return isExtraAttack;
+  }
+
+  public SoundEvent getSound() {
+    return sound;
+  }
+
   /** @deprecated use {@link Builder */
   @Deprecated(forRemoval = true)
   public ToolAttackContext(LivingEntity attacker, @Nullable Player playerAttacker, InteractionHand hand, EquipmentSlot slotType, Entity target, @Nullable LivingEntity livingTarget, boolean isCritical, float cooldown, boolean isExtraAttack) {
@@ -204,7 +259,6 @@ public class ToolAttackContext {
     @Setter
     private SoundEvent sound = null;
 
-
     /* Entities */
 
     /** Sets the target */
@@ -257,8 +311,8 @@ public class ToolAttackContext {
 
     /** Sets the base damage from the player attributes for the given slot containing the given tool. Should not be used if the tool is in mainhand, call {@link #applyAttributes()} instead. */
     public Builder toolAttributes(IToolStackView tool) {
-      baseDamage = ToolAttackUtil.getToolAttribute(tool, attacker, Attributes.ATTACK_DAMAGE, tool.getStats().get(ToolStats.ATTACK_DAMAGE));
-      baseKnockback = ToolAttackUtil.getToolAttribute(tool, attacker, Attributes.ATTACK_KNOCKBACK, baseKnockback) / 2;
+      baseDamage = ToolAttackUtil.getToolAttribute(tool, attacker, Attributes.ATTACK_DAMAGE.value(), tool.getStats().get(ToolStats.ATTACK_DAMAGE));
+      baseKnockback = ToolAttackUtil.getToolAttribute(tool, attacker, Attributes.ATTACK_KNOCKBACK.value(), baseKnockback) / 2;
       return this;
     }
 

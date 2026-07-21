@@ -12,15 +12,15 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.extensions.common.IClientMobEffectExtensions;
+import net.neoforged.neoforge.common.EffectCure;
+import net.neoforged.neoforge.client.extensions.common.IClientMobEffectExtensions;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.GeneralInteractionModifierHook;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /** Effect for rendering the charge up when you start using a helmet */
@@ -30,8 +30,7 @@ public class HelmetChargingEffect extends MobEffect {
   }
 
   @Override
-  public List<ItemStack> getCurativeItems() {
-    return new ArrayList<>();
+  public void fillEffectCures(Set<EffectCure> cures, MobEffectInstance effectInstance) {
   }
 
   @Override
@@ -68,9 +67,10 @@ public class HelmetChargingEffect extends MobEffect {
               } else {
                 height = (dd - duration) * 18 / drawtime;
               }
-              float v0 = sprite.getV0(), v1 = sprite.getV1();
               int yOffset = (18 - height);
-              graphics.innerBlit(sprite.atlasLocation(), x + 3, x + 21, y + 3 + yOffset, y + 21, 0, sprite.getU0(), sprite.getU1(), v0 + (v1 - v0) * yOffset / 18f, v1);
+              graphics.enableScissor(x + 3, y + 3 + yOffset, x + 21, y + 21);
+              graphics.blit(x + 3, y + 3, 0, 18, 18, sprite);
+              graphics.disableScissor();
             }
           }
         }
@@ -85,7 +85,7 @@ public class HelmetChargingEffect extends MobEffect {
   /** Starts using the helmet with the charge time rendering */
   public static int startUsingHelmet(IToolStackView tool, LivingEntity living, float speedFactor) {
     int time = GeneralInteractionModifierHook.startDrawing(tool, living, speedFactor);
-    living.addEffect(new MobEffectInstance(TinkerModifiers.helmetCharging.get(), time + 20, 0, true, false, true));
+    living.addEffect(new MobEffectInstance(TinkerModifiers.helmetCharging, time + 20, 0, true, false, true));
     return time;
   }
 }

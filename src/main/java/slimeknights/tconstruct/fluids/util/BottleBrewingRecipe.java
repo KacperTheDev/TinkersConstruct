@@ -2,37 +2,28 @@ package slimeknights.tconstruct.fluids.util;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.common.brewing.BrewingRecipe;
+import net.neoforged.neoforge.common.brewing.BrewingRecipe;
 
-/** Recipe for transforming a bottle, depending on a vanilla brewing recipe to get the ingredient */
+/** Recipe for transforming a custom bottle with the same reagent as a vanilla container conversion. */
 public class BottleBrewingRecipe extends BrewingRecipe {
-  private final Item from;
-  private final Item to;
+  public BottleBrewingRecipe(Ingredient input, Ingredient reagent, ItemStack output) {
+    super(input, reagent, output);
+  }
+
+  /** Legacy constructor for the two vanilla bottle transitions used by Tinkers. */
+  @Deprecated(forRemoval = true)
   public BottleBrewingRecipe(Ingredient input, Item from, Item to, ItemStack output) {
-    super(input, Ingredient.EMPTY, output);
-    this.from = from;
-    this.to = to;
+    this(input, Ingredient.of(getVanillaReagent(from, to)), output);
   }
 
-  @Override
-  public boolean isIngredient(ItemStack stack) {
-    for (PotionBrewing.Mix<Item> recipe : PotionBrewing.CONTAINER_MIXES) {
-      if (recipe.from.get() == from && recipe.to.get() == to) {
-        return recipe.ingredient.test(stack);
-      }
+  private static Item getVanillaReagent(Item from, Item to) {
+    if (from == net.minecraft.world.item.Items.POTION && to == net.minecraft.world.item.Items.SPLASH_POTION) {
+      return net.minecraft.world.item.Items.GUNPOWDER;
     }
-    return false;
-  }
-
-  @Override
-  public Ingredient getIngredient() {
-    for (PotionBrewing.Mix<Item> recipe : PotionBrewing.CONTAINER_MIXES) {
-      if (recipe.from.get() == from && recipe.to.get() == to) {
-        return recipe.ingredient;
-      }
+    if (from == net.minecraft.world.item.Items.SPLASH_POTION && to == net.minecraft.world.item.Items.LINGERING_POTION) {
+      return net.minecraft.world.item.Items.DRAGON_BREATH;
     }
-    return Ingredient.EMPTY;
+    throw new IllegalArgumentException("Unknown vanilla bottle transition: " + from + " -> " + to);
   }
 }

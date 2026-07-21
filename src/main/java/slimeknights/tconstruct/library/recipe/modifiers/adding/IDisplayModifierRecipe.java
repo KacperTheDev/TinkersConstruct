@@ -21,6 +21,7 @@ import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ModifierNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.tconstruct.library.utils.ItemStackDataUtil;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -143,7 +144,7 @@ public interface IDisplayModifierRecipe extends IModifierRecipe {
   /* Gets a copy of the stack with the given modifiers */
   static ItemStack withModifiers(ItemStack stack, int maxSize, List<ModifierEntry> modifierList, Consumer<ModDataNBT> persistentDataConsumer) {
     ItemStack output = stack.copyWithCount(Math.min(stack.getMaxStackSize(), maxSize));
-    CompoundTag nbt = output.getOrCreateTag();
+    CompoundTag nbt = ItemStackDataUtil.getOrCreateTag(output);
 
     // build modifiers list
     // go through the builder to ensure they are merged properly
@@ -163,6 +164,7 @@ public interface IDisplayModifierRecipe extends IModifierRecipe {
       entry.getHook(ModifierHooks.VOLATILE_DATA).addVolatileData(context, entry, volatileData);
     }
     nbt.put(ToolStack.TAG_VOLATILE_MOD_DATA, volatileNBT);
+    ItemStackDataUtil.setTag(output, nbt);
     nbt.put(ToolStack.TAG_PERSISTENT_MOD_DATA, persistentNBT);
 
     return output;

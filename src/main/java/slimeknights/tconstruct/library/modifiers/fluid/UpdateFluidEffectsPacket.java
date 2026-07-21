@@ -1,8 +1,8 @@
 package slimeknights.tconstruct.library.modifiers.fluid;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkEvent.Context;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.mantle.network.packet.IThreadsafePacket;
 import slimeknights.tconstruct.TConstruct;
@@ -14,7 +14,7 @@ import java.util.List;
 @Internal
 public record UpdateFluidEffectsPacket(List<FluidEffects.Entry> fluids) implements IThreadsafePacket {
   /** Clientside constructor, reading from the buffer */
-  public static UpdateFluidEffectsPacket decode(FriendlyByteBuf buffer) {
+  public static UpdateFluidEffectsPacket decode(RegistryFriendlyByteBuf buffer) {
     int size = buffer.readVarInt();
     List<FluidEffects.Entry> entries = new ArrayList<>(size);
     for (int i = 0; i < size; i++) {
@@ -32,7 +32,7 @@ public record UpdateFluidEffectsPacket(List<FluidEffects.Entry> fluids) implemen
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer) {
+  public void encode(RegistryFriendlyByteBuf buffer) {
     buffer.writeVarInt(fluids.size());
     for (FluidEffects.Entry entry : fluids) {
       ResourceLocation key = entry.name();
@@ -47,7 +47,7 @@ public record UpdateFluidEffectsPacket(List<FluidEffects.Entry> fluids) implemen
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
+  public void handleThreadsafe(IPayloadContext context) {
     FluidEffectManager.INSTANCE.updateFromServer(fluids);
   }
 }

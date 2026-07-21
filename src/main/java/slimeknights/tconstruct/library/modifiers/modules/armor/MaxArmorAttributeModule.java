@@ -77,12 +77,12 @@ public record MaxArmorAttributeModule(String unique, Attribute attribute, Operat
 
   @Override
   public void updateValue(IToolStackView tool, ModifierEntry modifier, EquipmentChangeContext context, Holder data, float newLevel, float oldLevel) {
-    AttributeInstance instance = context.getEntity().getAttribute(attribute);
+    AttributeInstance instance = context.getEntity().getAttribute(BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute));
     if (instance != null) {
-      instance.removeModifier(uuid);
+      instance.removeModifier(slimeknights.tconstruct.library.utils.AttributeIdUtil.fromLegacyUuid(uuid));
       float attributeValue = amount.computeForLevel(newLevel);
       if (attributeValue != 0) {
-        instance.addTransientModifier(new AttributeModifier(uuid, unique, attributeValue, operation));
+        instance.addTransientModifier(new AttributeModifier(slimeknights.tconstruct.library.utils.AttributeIdUtil.fromLegacyUuid(uuid), attributeValue, operation));
       }
     }
   }
@@ -108,6 +108,10 @@ public record MaxArmorAttributeModule(String unique, Attribute attribute, Operat
     return new Builder(attribute.get(), operation);
   }
 
+  public static Builder builder(net.minecraft.core.Holder<Attribute> attribute, Operation operation) {
+    return new Builder(attribute.value(), operation);
+  }
+
 
   @Setter
   @Accessors(fluent = true)
@@ -120,6 +124,26 @@ public record MaxArmorAttributeModule(String unique, Attribute attribute, Operat
     @Nullable
     private TagKey<Item> heldTag;
     private TooltipStyle tooltipStyle = TooltipStyle.ATTRIBUTE;
+
+    public Builder unique(String unique) {
+      this.unique = unique;
+      return this;
+    }
+
+    public Builder allowBroken(boolean allowBroken) {
+      this.allowBroken = allowBroken;
+      return this;
+    }
+
+    public Builder heldTag(@Nullable TagKey<Item> heldTag) {
+      this.heldTag = heldTag;
+      return this;
+    }
+
+    public Builder tooltipStyle(TooltipStyle tooltipStyle) {
+      this.tooltipStyle = tooltipStyle;
+      return this;
+    }
 
     public Builder allowBroken() {
       this.allowBroken = true;

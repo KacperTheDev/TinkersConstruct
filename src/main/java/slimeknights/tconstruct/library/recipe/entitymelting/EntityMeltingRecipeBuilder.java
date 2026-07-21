@@ -1,10 +1,12 @@
 package slimeknights.tconstruct.library.recipe.entitymelting;
 
+import slimeknights.tconstruct.library.data.recipe.LoadableRecipeOutput;
+
 import lombok.RequiredArgsConstructor;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import slimeknights.mantle.recipe.helper.FluidOutput;
 import slimeknights.mantle.recipe.ingredient.EntityIngredient;
@@ -12,11 +14,21 @@ import slimeknights.mantle.recipe.ingredient.EntityIngredient;
 import java.util.function.Consumer;
 
 /** Builder for entity melting recipes */
-@RequiredArgsConstructor(staticName = "melting")
 public class EntityMeltingRecipeBuilder extends AbstractRecipeBuilder<EntityMeltingRecipeBuilder> {
   private final EntityIngredient ingredient;
   private final FluidOutput output;
   private final int damage;
+
+  private EntityMeltingRecipeBuilder(EntityIngredient ingredient, FluidOutput output, int damage) {
+    this.ingredient = ingredient;
+    this.output = output;
+    this.damage = damage;
+  }
+
+  /** Creates a builder from the component-aware fluid output. */
+  public static EntityMeltingRecipeBuilder melting(EntityIngredient ingredient, FluidOutput output, int damage) {
+    return new EntityMeltingRecipeBuilder(ingredient, output, damage);
+  }
 
   /** Creates a new builder */
   public static EntityMeltingRecipeBuilder melting(EntityIngredient ingredient, FluidStack output, int damage) {
@@ -34,13 +46,13 @@ public class EntityMeltingRecipeBuilder extends AbstractRecipeBuilder<EntityMelt
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer) {
+  public void save(RecipeOutput consumer) {
     save(consumer, BuiltInRegistries.FLUID.getKey(output.get().getFluid()));
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
+  public void save(RecipeOutput consumer, ResourceLocation id) {
     ResourceLocation advancementId = this.buildOptionalAdvancement(id, "entity_melting");
-    consumer.accept(new LoadableFinishedRecipe<>(new EntityMeltingRecipe(id, ingredient, output, damage), EntityMeltingRecipe.LOADER, advancementId));
+    saveRecipe(consumer, id, new EntityMeltingRecipe(id, ingredient, output, damage), advancementId);
   }
 }

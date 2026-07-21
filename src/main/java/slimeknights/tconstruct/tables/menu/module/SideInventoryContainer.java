@@ -6,10 +6,9 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.wrapper.EmptyHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.wrapper.EmptyItemHandler;
 import slimeknights.mantle.inventory.BaseContainerMenu;
 import slimeknights.mantle.inventory.SmartItemHandlerSlot;
 
@@ -21,7 +20,8 @@ public class SideInventoryContainer<TILE extends BlockEntity> extends BaseContai
   private final int columns;
   @Getter
   private final int slotCount;
-  protected final LazyOptional<IItemHandler> itemHandler;
+
+  protected final IItemHandler itemHandler;
 
   public SideInventoryContainer(MenuType<?> containerType, int windowId, Inventory inv, @Nullable TILE tile, int x, int y, int columns) {
     this(containerType, windowId, inv, tile, null, x, y, columns);
@@ -32,24 +32,26 @@ public class SideInventoryContainer<TILE extends BlockEntity> extends BaseContai
 
     // must have a TE
     if (tile == null) {
-      this.itemHandler = LazyOptional.of(() -> EmptyHandler.INSTANCE);
+      this.itemHandler = EmptyItemHandler.INSTANCE;
     } else {
-      this.itemHandler = tile.getCapability(ForgeCapabilities.ITEM_HANDLER, inventoryDirection);
+      IItemHandler capability = tile.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, tile.getBlockPos(), inventoryDirection);
+      this.itemHandler = capability == null ? EmptyItemHandler.INSTANCE : capability;
     }
 
     // slot properties
-    IItemHandler handler = itemHandler.orElse(EmptyHandler.INSTANCE);
+    IItemHandler handler = itemHandler;
     this.slotCount = handler.getSlots();
-    this.columns = columns;
-    int rows = this.slotCount / columns;
-    if (this.slotCount % columns != 0) {
+    // Empty/temporarily invalid multiblocks can expose zero slots. Keep layout math valid.
+    this.columns = Math.max(1, columns);
+    int rows = this.slotCount / this.columns;
+    if (this.slotCount % this.columns != 0) {
       rows++;
     }
 
     // add slots
     int index = 0;
     for (int r = 0; r < rows; r++) {
-      for (int c = 0; c < columns; c++) {
+      for (int c = 0; c < this.columns; c++) {
         if (index >= this.slotCount) {
           break;
         }

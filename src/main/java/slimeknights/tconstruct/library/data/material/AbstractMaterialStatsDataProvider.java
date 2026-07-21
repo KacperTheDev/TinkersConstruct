@@ -52,7 +52,7 @@ public abstract class AbstractMaterialStatsDataProvider extends GenericDataProvi
     }
     // does not ensure we have materials for all stats, we may be adding stats for another mod
     // generate finally
-    return allOf(allMaterialStats.entrySet().stream().map(entry -> saveJson(cache, entry.getKey(), entry.getValue().serialize())));
+    return allOf(allMaterialStats.entrySet().stream().map(entry -> saveJson(cache, entry.getKey().location(), entry.getValue().serialize())));
   }
 
 
@@ -90,7 +90,7 @@ public abstract class AbstractMaterialStatsDataProvider extends GenericDataProvi
    */
   protected void addArmorStats(MaterialId location, ArmorModuleBuilder<? extends IMaterialStats> statBuilder, IMaterialStats... otherStats) {
     IMaterialStats[] stats = new IMaterialStats[4];
-    for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+    for (ArmorItem.Type slotType : slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial.ARMOR_TYPES) {
       stats[slotType.ordinal()] = statBuilder.build(slotType);
     }
     addMaterialStats(location, stats);
@@ -126,12 +126,12 @@ public abstract class AbstractMaterialStatsDataProvider extends GenericDataProvi
     public MaterialStatJson serialize() {
       Map<ResourceLocation,JsonElement> map = new HashMap<>();
       for (IMaterialStats stat : required) {
-        map.put(stat.getIdentifier(), encodeStats(stat, stat.getType()));
+        map.put(stat.getIdentifier().location(), encodeStats(stat, stat.getType()));
       }
       for (IMaterialStats stat : optional) {
         JsonObject encoded = encodeStats(stat, stat.getType());
         encoded.addProperty("optional", true);
-        map.put(stat.getIdentifier(), encoded);
+        map.put(stat.getIdentifier().location(), encoded);
       }
       return new MaterialStatJson(map);
     }

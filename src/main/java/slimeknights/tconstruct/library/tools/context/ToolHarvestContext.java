@@ -47,6 +47,20 @@ public class ToolHarvestContext {
   /** Originally targeted block state. Will be the same as {@link #state} for the original block */
   private final BlockState targetedState;
 
+  public ServerLevel getWorld() { return world; }
+  public ServerLevel getLevel() { return world; }
+  public LivingEntity getLiving() { return living; }
+  @Nullable public ServerPlayer getPlayer() { return player; }
+  @Nullable public Projectile getProjectile() { return projectile; }
+  public BlockState getState() { return state; }
+  public BlockPos getPos() { return pos; }
+  public Direction getSideHit() { return sideHit; }
+  public boolean canHarvest() { return canHarvest; }
+  public boolean isEffective() { return isEffective; }
+  public boolean isAOE() { return isAOE; }
+  public BlockPos getTargetedPos() { return targetedPos; }
+  public BlockState getTargetedState() { return targetedState; }
+
   public ToolHarvestContext(ServerLevel world, ServerPlayer player, @Nullable Projectile projectile, BlockState state, BlockPos pos, Direction sideHit, boolean canHarvest, boolean isEffective) {
     this(world, player, player, projectile, state, pos, sideHit, canHarvest, isEffective, false, pos, state);
   }

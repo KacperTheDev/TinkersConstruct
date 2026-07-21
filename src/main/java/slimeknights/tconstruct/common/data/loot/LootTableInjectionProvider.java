@@ -10,20 +10,20 @@ import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunct
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemDamageFunction;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidType;
+import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidType;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.mantle.loot.AbstractLootTableInjectionProvider;
 import slimeknights.mantle.loot.LootTableInjection;
 import slimeknights.mantle.loot.function.SetFluidLootFunction;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
-import slimeknights.tconstruct.common.data.FakeRegistryEntry;
 import slimeknights.tconstruct.common.json.ConfigEnabledCondition;
 import slimeknights.tconstruct.fluids.TinkerFluids;
 import slimeknights.tconstruct.library.json.loot.AddToolDataFunction;
+import slimeknights.tconstruct.library.json.loot.ItemNameLootEntry;
 import slimeknights.tconstruct.library.json.loot.ToolPartLootEntry;
 import slimeknights.tconstruct.library.json.predicate.material.MaterialPredicate;
 import slimeknights.tconstruct.library.materials.RandomMaterial;
@@ -156,7 +156,7 @@ public class LootTableInjectionProvider extends AbstractLootTableInjectionProvid
                                  .build());
     // diamond armor shows in bastions, add in some plate with similar weight to enchanted version
     RandomMaterial randomHighTier = RandomMaterial.random().allowHidden().tier(3, 4).material(includeInLoot).build();
-    for (ArmorItem.Type slot : ArmorItem.Type.values()) {
+    for (ArmorItem.Type slot : slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial.ARMOR_TYPES) {
       bastion.addToPool("main", LootItem.lootTableItem(TinkerTools.plateArmor.get(slot))
                                         .setWeight(6)
                                         .apply(AddToolDataFunction.builder()
@@ -179,7 +179,7 @@ public class LootTableInjectionProvider extends AbstractLootTableInjectionProvid
                                   .apply(ancientToolData3)
                                  .apply(setFluid)
                                   .build());
-    inject("fishing_treasure", new ResourceLocation("gameplay/fishing/treasure"))
+    inject("fishing_treasure", ResourceLocation.parse("gameplay/fishing/treasure"))
       .addToPool("main", LootItem.lootTableItem(TinkerTools.swasher.get())
                                  .setWeight(1) // all treasure from fishing is the same weight
                                  .apply(ancientToolData3)
@@ -196,11 +196,11 @@ public class LootTableInjectionProvider extends AbstractLootTableInjectionProvid
     // twilight forest - minotaur axe
     String tf = "twilightforest";
     ICondition tfLoaded = new ModLoadedCondition(tf);
-    LootPoolEntryContainer minotaurAxe = LootItem.lootTableItem(FakeRegistryEntry.item(TinkerTools.minotaurAxe.getId()))
+    LootPoolEntryContainer minotaurAxe = ItemNameLootEntry.item(TinkerTools.minotaurAxe.getId())
       .setWeight(1) // TF tends to use 1 for its weight
       .apply(ancientToolData3)
       .build();
-    inject("labyrinth_room", new ResourceLocation(tf, "chests/labyrinth_room"), tfLoaded)
+    inject("labyrinth_room", ResourceLocation.fromNamespaceAndPath(tf, "chests/labyrinth_room"), tfLoaded)
       .addToPool("pool1", minotaurAxe)
       .addToPool("pool2", minotaurAxe);
   }

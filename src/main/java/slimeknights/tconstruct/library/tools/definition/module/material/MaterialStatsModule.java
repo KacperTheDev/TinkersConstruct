@@ -181,6 +181,11 @@ public class MaterialStatsModule implements ToolStatsHook, ToolTraitHook, ToolMa
     @Setter @Accessors(fluent = true)
     private int primaryPart = 0;
 
+    public Builder primaryPart(int primaryPart) {
+      this.primaryPart = primaryPart;
+      return this;
+    }
+
     /** Adds a stat type */
     public Builder stat(MaterialStatsId stat, float scale) {
       stats.add(stat);

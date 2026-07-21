@@ -70,6 +70,11 @@ public interface LootingModule extends ModifierModule, LevelingIntModule, Condit
     private IJsonPredicate<LivingEntity> target = LivingEntityPredicate.ANY;
     private IJsonPredicate<DamageSource> damageSource = DamageSourcePredicate.ANY;
 
+    public Builder lootingLevel(LevelingInt lootingLevel) {
+      this.lootingLevel = lootingLevel;
+      return this;
+    }
+
     private Builder() {}
 
     /** @deprecated use {@link #lootingLevel(LevelingInt)} */

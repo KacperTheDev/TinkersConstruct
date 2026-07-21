@@ -23,7 +23,6 @@ public class ToolDefinitionData {
   private final List<WithHooks<ToolModule>> modules;
   @Getter
   private final transient ModuleHookMap hooks;
-
   protected ToolDefinitionData(List<WithHooks<ToolModule>> modules, ErrorFactory error) {
     this.modules = modules;
     this.hooks = ModuleHookMap.createMap(modules, error);

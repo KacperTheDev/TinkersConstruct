@@ -18,9 +18,9 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TagsUpdatedEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
+import net.neoforged.bus.api.EventPriority;
 import slimeknights.mantle.datagen.MantleTags;
 import slimeknights.tconstruct.library.materials.definition.IMaterial;
 import slimeknights.tconstruct.library.materials.definition.MaterialManager;
@@ -50,12 +50,12 @@ public class TinkerTags {
     DamageTypes.init();
     MenuTypes.init();
     Potions.init();
-    MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, TagsUpdatedEvent.class, event -> tagsLoaded = true);
+    NeoForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, TagsUpdatedEvent.class, event -> tagsLoaded = true);
   }
 
   /** Resource location of the hidden from recipe tags used in JEI. */
   @SuppressWarnings("removal")
-  public static final ResourceLocation HIDDEN_FROM_RECIPE_VIEWERS = new ResourceLocation("c", "hidden_from_recipe_viewers");
+  public static final ResourceLocation HIDDEN_FROM_RECIPE_VIEWERS = ResourceLocation.fromNamespaceAndPath("c", "hidden_from_recipe_viewers");
 
   /** Creates a tag that hides things from JEI */
   @SuppressWarnings("SameParameterValue") // there really is no benefit to migrating to new constructors early; just lose Neo compat
@@ -67,6 +67,7 @@ public class TinkerTags {
     private static void init() {}
     public static final TagKey<Block> WORKBENCHES = common("workbenches");
     public static final TagKey<Block> TABLES = local("tables");
+    public static final TagKey<Block> GLASS_BLOCKS_SILICA = common("glass_blocks/silica");
     public static final TagKey<Block> GLASS_PANES_SILICA = common("glass_panes/silica");
 
     /** Compat: allows other mods to add normal stone variants which can be used to create stone tools.
@@ -210,7 +211,7 @@ public class TinkerTags {
     public static final TagKey<Block> BUDDING = common("budding");
     // ceramics compat
     @SuppressWarnings("removal")
-    public static final TagKey<Block> CISTERN_CONNECTIONS = TagKey.create(Registries.BLOCK, new ResourceLocation("ceramics", "cistern_connections"));
+    public static final TagKey<Block> CISTERN_CONNECTIONS = TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("ceramics", "cistern_connections"));
 
     /** Makes a tag in the tinkers domain */
     private static TagKey<Block> local(String name) {
@@ -226,6 +227,7 @@ public class TinkerTags {
     private static void init() {}
     public static final TagKey<Item> WORKBENCHES = common("workbenches");
     public static final TagKey<Item> TABLES = local("tables");
+    public static final TagKey<Item> GLASS_BLOCKS_SILICA = common("glass_blocks/silica");
     public static final TagKey<Item> GLASS_PANES_SILICA = common("glass_panes/silica");
 
     /** Compat: allows other mods to add normal stone variants which can be used to create stone tools.
@@ -321,7 +323,7 @@ public class TinkerTags {
     public static final TagKey<Item> SCORCHED_TANKS = local("scorched_tanks");
     public static final TagKey<Item> TANKS = local("tanks");
 
-    /** Bones that drop from normal skeletons or some equivalent. Intentionally does not use {@link net.minecraftforge.common.Tags.Items#BONES} as that includes many weird bones. */
+    /** Bones that drop from normal skeletons or some equivalent. Intentionally does not use {@link net.neoforged.neoforge.common.Tags.Items#BONES} as that includes many weird bones. */
     public static final TagKey<Item> BONES = local("bones");
     /** Bones that drop from wither skeletons */
     public static final TagKey<Item> WITHER_BONES = common("wither_bones");
@@ -359,7 +361,7 @@ public class TinkerTags {
     public static final TagKey<Item> TOOL_INVENTORY_BLACKLIST = local("inventory_blacklist");
     /** List of blocks that should produce bonus gold nugget drops from the chrysophilite modifier. Will only drop bonus if the block does not drop itself */
     public static final TagKey<Item> CHRYSOPHILITE_ORES = local("chrysophilite_ores");
-    /** All ore rates that are not {@link net.minecraftforge.common.Tags.Items#ORE_RATES_SINGULAR}. Used for recipe conditioning. */
+    /** All ore rates that are not {@link net.neoforged.neoforge.common.Tags.Items#ORE_RATES_SINGULAR}. Used for recipe conditioning. */
     public static final TagKey<Item> NON_SINGULAR_ORE_RATES = local("non_singular_ore_rates");
     /** Items that cannot be autosmelted */
     public static final TagKey<Item> AUTOSMELT_BLACKLIST = local("autosmelt_blacklist");
@@ -562,6 +564,8 @@ public class TinkerTags {
     public static final TagKey<Item> URANIUM_INGOTS = common("ingots/uranium");
     /** Tag of trophies from bosses, to grant an additional upgrade slot to tools. Meant for Twilight Forest boss trophies, but suppose you can add other bosses that are not easily farmed. */
     public static final TagKey<Item> BOSS_TROPHIES = local("boss_trophies");
+    /** Quartz blocks usable as the compact quartz input in material and modifier recipes. */
+    public static final TagKey<Item> STORAGE_BLOCKS_QUARTZ = common("storage_blocks/quartz");
 
     /** Fluids in this tag won't show in JEI */
     public static final TagKey<Item> HIDDEN_IN_RECIPE_VIEWERS = hiddenFromRecipeViewers(Registries.ITEM);

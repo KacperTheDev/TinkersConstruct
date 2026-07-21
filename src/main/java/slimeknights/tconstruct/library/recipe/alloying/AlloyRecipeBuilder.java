@@ -1,12 +1,14 @@
 package slimeknights.tconstruct.library.recipe.alloying;
 
+import slimeknights.tconstruct.library.data.recipe.LoadableRecipeOutput;
+
 import lombok.RequiredArgsConstructor;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import slimeknights.mantle.recipe.helper.FluidOutput;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
@@ -21,11 +23,20 @@ import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getT
 
 /** Builder for alloy recipes */
 @SuppressWarnings("unused")
-@RequiredArgsConstructor(staticName = "alloy")
 public class AlloyRecipeBuilder extends AbstractRecipeBuilder<AlloyRecipeBuilder> {
   private final FluidOutput output;
   private final int temperature;
   private final List<AlloyIngredient> inputs = new ArrayList<>();
+
+  private AlloyRecipeBuilder(FluidOutput output, int temperature) {
+    this.output = output;
+    this.temperature = temperature;
+  }
+
+  /** Creates a builder from the component-aware fluid output. */
+  public static AlloyRecipeBuilder alloy(FluidOutput output, int temperature) {
+    return new AlloyRecipeBuilder(output, temperature);
+  }
 
   /**
    * Creates a new recipe producing the given fluid
@@ -112,19 +123,15 @@ public class AlloyRecipeBuilder extends AbstractRecipeBuilder<AlloyRecipeBuilder
   /* Building */
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer) {
+  public void save(RecipeOutput consumer) {
     save(consumer, BuiltInRegistries.FLUID.getKey(output.get().getFluid()));
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
+  public void save(RecipeOutput consumer, ResourceLocation id) {
     if (inputs.size() < 2) {
       throw new IllegalStateException("Invalid alloying recipe " + id + ", must have at least two inputs");
     }
-    consumer.accept(new LoadableFinishedRecipe<>(
-      new AlloyRecipe(id, inputs, output, temperature),
-      AlloyRecipe.LOADER,
-      this.buildOptionalAdvancement(id, "alloys")
-    ));
+    saveRecipe(consumer, id, new AlloyRecipe(id, inputs, output, temperature), this.buildOptionalAdvancement(id, "alloys"));
   }
 }

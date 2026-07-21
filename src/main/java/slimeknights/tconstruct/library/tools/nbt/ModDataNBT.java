@@ -1,13 +1,13 @@
 package slimeknights.tconstruct.library.tools.nbt;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import slimeknights.tconstruct.library.utils.ResourceId;
 
 import java.util.function.BiFunction;
 
@@ -17,11 +17,21 @@ import java.util.function.BiFunction;
  * Note unlike other NBT classes, the data inside this one is mutable as most of it is directly used by the tools.
  */
 @EqualsAndHashCode
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ModDataNBT implements IModDataView {
   /** Compound representing modifier data */
   @Getter(AccessLevel.PROTECTED)
   private final CompoundTag data;
+  @EqualsAndHashCode.Exclude
+  private final Runnable onChanged;
+
+  protected ModDataNBT(CompoundTag data) {
+    this(data, () -> {});
+  }
+
+  protected ModDataNBT(CompoundTag data, Runnable onChanged) {
+    this.data = data;
+    this.onChanged = onChanged;
+  }
 
   /**
    * Creates a new mod data containing empty data
@@ -58,6 +68,11 @@ public class ModDataNBT implements IModDataView {
    */
   public void put(ResourceLocation name, Tag nbt) {
     data.put(name.toString(), nbt);
+    onChanged.run();
+  }
+
+  public void put(ResourceId name, Tag nbt) {
+    put(name.location(), nbt);
   }
 
   /**
@@ -67,6 +82,11 @@ public class ModDataNBT implements IModDataView {
    */
   public void putInt(ResourceLocation name, int value) {
     data.putInt(name.toString(), value);
+    onChanged.run();
+  }
+
+  public void putInt(ResourceId name, int value) {
+    putInt(name.location(), value);
   }
 
   /**
@@ -76,6 +96,11 @@ public class ModDataNBT implements IModDataView {
    */
   public void putBoolean(ResourceLocation name, boolean value) {
     data.putBoolean(name.toString(), value);
+    onChanged.run();
+  }
+
+  public void putBoolean(ResourceId name, boolean value) {
+    putBoolean(name.location(), value);
   }
 
   /**
@@ -85,6 +110,11 @@ public class ModDataNBT implements IModDataView {
    */
   public void putFloat(ResourceLocation name, float value) {
     data.putFloat(name.toString(), value);
+    onChanged.run();
+  }
+
+  public void putFloat(ResourceId name, float value) {
+    putFloat(name.location(), value);
   }
 
   /**
@@ -94,6 +124,11 @@ public class ModDataNBT implements IModDataView {
    */
   public void putString(ResourceLocation name, String value) {
     data.putString(name.toString(), value);
+    onChanged.run();
+  }
+
+  public void putString(ResourceId name, String value) {
+    putString(name.location(), value);
   }
 
   /**
@@ -102,6 +137,11 @@ public class ModDataNBT implements IModDataView {
    */
   public void remove(ResourceLocation name) {
     data.remove(name.toString());
+    onChanged.run();
+  }
+
+  public void remove(ResourceId name) {
+    remove(name.location());
   }
 
 
@@ -119,6 +159,12 @@ public class ModDataNBT implements IModDataView {
   public void copyFrom(CompoundTag data) {
     this.data.getAllKeys().clear();
     this.data.merge(data);
+    onChanged.run();
+  }
+
+  /** Marks direct subclass mutations as complete. */
+  protected final void changed() {
+    onChanged.run();
   }
 
   /**

@@ -1,9 +1,10 @@
 package slimeknights.tconstruct.library.materials.stats;
 
 import io.netty.buffer.Unpooled;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import org.junit.jupiter.api.Test;
-import slimeknights.mantle.data.registry.IdAwareComponentRegistry;
+import net.minecraft.resources.ResourceLocation;
+import slimeknights.mantle.data.registry.AbstractNamedComponentRegistry;
 import slimeknights.tconstruct.fixture.MaterialFixture;
 import slimeknights.tconstruct.fixture.MaterialStatsFixture;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
@@ -13,6 +14,7 @@ import slimeknights.tconstruct.tools.stats.HeadMaterialStats;
 import slimeknights.tconstruct.tools.stats.StatlessMaterialStats;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,12 +23,44 @@ import static org.assertj.core.api.Assertions.assertThat;
 class UpdateMaterialStatsPacketTest extends BaseMcTest {
 
   public static final MaterialId MATERIAL_ID = MaterialFixture.MATERIAL_1.getIdentifier();
-  private static final IdAwareComponentRegistry<MaterialStatType<?>> LOADER = new IdAwareComponentRegistry<>("Unknown stat type");
+  private static final StatTypeLoader LOADER = new StatTypeLoader();
   static {
     LOADER.register(MaterialStatsFixture.COMPLEX_TYPE);
     LOADER.register(HeadMaterialStats.TYPE);
     LOADER.register(HandleMaterialStats.TYPE);
     LOADER.register(StatlessMaterialStats.BINDING.getType());
+  }
+
+  private static class StatTypeLoader extends AbstractNamedComponentRegistry<MaterialStatType<?>> {
+    private final Map<ResourceLocation,MaterialStatType<?>> values = new HashMap<>();
+
+    private StatTypeLoader() {
+      super("Unknown stat type");
+    }
+
+    void register(MaterialStatType<?> type) {
+      values.put(type.getId().location(), type);
+    }
+
+    @Override
+    public MaterialStatType<?> getValue(ResourceLocation name) {
+      return values.get(name);
+    }
+
+    @Override
+    public Collection<ResourceLocation> getKeys() {
+      return values.keySet();
+    }
+
+    @Override
+    public Collection<MaterialStatType<?>> getValues() {
+      return values.values();
+    }
+
+    @Override
+    public ResourceLocation getKey(MaterialStatType<?> value) {
+      return value.getId().location();
+    }
   }
 
   @Test
@@ -64,7 +98,7 @@ class UpdateMaterialStatsPacketTest extends BaseMcTest {
   }
 
   private UpdateMaterialStatsPacket sendAndReceivePacket(Map<MaterialId, Collection<IMaterialStats>> materialToStats) {
-    FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+    RegistryFriendlyByteBuf buffer = createRegistryBuffer();
 
     UpdateMaterialStatsPacket packetToEncode = new UpdateMaterialStatsPacket(materialToStats);
     packetToEncode.encode(buffer);

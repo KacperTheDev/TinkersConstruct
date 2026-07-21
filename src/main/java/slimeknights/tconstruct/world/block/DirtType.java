@@ -36,6 +36,11 @@ public enum DirtType implements StringRepresentable {
   /** Tag for dirt blocks of this type, including blocks with grass on top */
   private final TagKey<Block> blockTag;
 
+  public Tiers getHarvestTier() { return harvestTier; }
+  public MapColor getMapColor() { return mapColor; }
+  @Override public String getSerializedName() { return serializedName; }
+  public TagKey<Block> getBlockTag() { return blockTag; }
+
   DirtType(Tiers harvestTier, MapColor mapColor) {
     this.harvestTier = harvestTier;
     this.mapColor = mapColor;

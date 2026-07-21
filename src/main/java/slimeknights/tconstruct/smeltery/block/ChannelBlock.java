@@ -6,6 +6,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -30,7 +31,7 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import slimeknights.mantle.datagen.MantleTags;
 import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.mantle.util.RegistryHelper;
@@ -151,7 +152,7 @@ public class ChannelBlock extends Block implements EntityBlock {
 	}
 
   @Override
-  public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+  public boolean isPathfindable(BlockState state, PathComputationType type) {
     return false;
   }
 
@@ -165,8 +166,7 @@ public class ChannelBlock extends Block implements EntityBlock {
 	 * @return  True if its a fluid handler
 	 */
 	private static boolean isFluidHandler(LevelAccessor world, Direction side, BlockPos pos) {
-		BlockEntity te = world.getBlockEntity(pos);
-		return te != null && te.getCapability(ForgeCapabilities.FLUID_HANDLER, side).isPresent();
+		return world instanceof Level level && level.getCapability(Capabilities.FluidHandler.BLOCK, pos, side) != null;
 	}
 
 	/**
@@ -285,14 +285,22 @@ public class ChannelBlock extends Block implements EntityBlock {
 		return null;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
-	public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+	protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+		return interact(state, world, pos, player, stack, hit) == InteractionResult.SUCCESS
+				 ? ItemInteractionResult.SUCCESS : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+	}
+
+	@Override
+	protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+		return interact(state, world, pos, player, ItemStack.EMPTY, hit);
+	}
+
+	private InteractionResult interact(BlockState state, Level world, BlockPos pos, Player player, ItemStack stack, BlockHitResult hit) {
 		Direction hitFace = hit.getDirection();
 		if (world.getBlockState(pos.relative(hitFace)).canBeReplaced()) {
 			// if the player is holding a channel, skip unless we clicked the top
 			// they can shift click to place one on the top
-			ItemStack stack = player.getItemInHand(hand);
 			if (stack.getItem() == this.asItem()) {
 				return InteractionResult.PASS;
 			}

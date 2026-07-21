@@ -9,7 +9,7 @@
             {
               "fluid": {
                 "amount": 50,
-                "fluid": "tconstruct:blazing_blood"
+                "id": "tconstruct:blazing_blood"
               },
               "function": "mantle:set_fluid"
             },
@@ -30,32 +30,14 @@
           "type": "minecraft:item",
           "functions": [
             {
-              "function": "tconstruct:add_tool_data",
-              "materials": [
-                {
-                  "type": "tconstruct:ancient"
-                },
-                {
-                  "type": "tconstruct:ancient"
-                }
-              ]
+              "function": "tconstruct:add_tool_data"
             }
           ],
           "name": "tconstruct:battlesign",
           "weight": 5
         },
         {
-          "type": "tconstruct:tool_part",
-          "material": {
-            "type": "tconstruct:random",
-            "allow_hidden": true,
-            "material": {
-              "type": "mantle:tag",
-              "tag": "tconstruct:bartered"
-            }
-          },
-          "tag": "tconstruct:parts/bartered",
-          "weight": 8
+          "type": "tconstruct:tool_part"
         }
       ],
       "name": "main"

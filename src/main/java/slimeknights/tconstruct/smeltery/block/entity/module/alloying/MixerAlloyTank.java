@@ -6,16 +6,14 @@ import lombok.Setter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.common.util.NonNullConsumer;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
-import net.minecraftforge.fluids.capability.templates.EmptyFluidHandler;
+import net.minecraft.server.level.ServerLevel;
+import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.fluids.capability.templates.EmptyFluidHandler;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
-import slimeknights.mantle.util.WeakConsumerWrapper;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.recipe.alloying.IMutableAlloyTank;
 
@@ -41,9 +39,7 @@ public class MixerAlloyTank implements IMutableAlloyTank {
 
   // side tank cache
   /** Cache of tanks for each of the sides */
-  private final Map<Direction,LazyOptional<IFluidHandler>> inputs = new EnumMap<>(Direction.class);
-  /** Map of invalidation listeners for each side */
-  private final Map<Direction,NonNullConsumer<LazyOptional<IFluidHandler>>> listeners = new EnumMap<>(Direction.class);
+  private final Map<Direction,InputCache> inputs = new EnumMap<>(Direction.class);
   /** Map of tank index to tank on the side */
   @Nullable
   private IFluidHandler[] indexedList = null;
@@ -53,6 +49,33 @@ public class MixerAlloyTank implements IMutableAlloyTank {
   private boolean needsRefresh = true;
   /** Number of currently held tanks */
   private int currentTanks = 0;
+
+  private final class InputCache {
+    private final Direction direction;
+    private final BlockPos target;
+    @Nullable
+    private final BlockCapabilityCache<IFluidHandler,Direction> cache;
+    private boolean present;
+
+    private InputCache(Level level, Direction direction) {
+      this.direction = direction;
+      this.target = parent.getBlockPos().relative(direction);
+      this.cache = level instanceof ServerLevel serverLevel ? BlockCapabilityCache.create(
+        Capabilities.FluidHandler.BLOCK, serverLevel, target, direction.getOpposite(),
+        () -> !parent.isRemoved() && inputs.get(direction) == this,
+        () -> refresh(direction, true)) : null;
+    }
+
+    @Nullable
+    private IFluidHandler get() {
+      Level level = parent.getLevel();
+      IFluidHandler handler = level == null ? null : cache == null
+        ? level.getCapability(Capabilities.FluidHandler.BLOCK, target, direction.getOpposite())
+        : cache.getCapability();
+      present = handler != null;
+      return handler;
+    }
+  }
 
   @Override
   public int getTanks() {
@@ -69,9 +92,10 @@ public class MixerAlloyTank implements IMutableAlloyTank {
         int nextTank = 0;
         for (Direction direction : Direction.values()) {
           if (direction != Direction.DOWN) {
-            LazyOptional<IFluidHandler> handler = inputs.getOrDefault(direction, LazyOptional.empty());
-            if (handler.isPresent()) {
-              indexedList[nextTank] = handler.orElse(EmptyFluidHandler.INSTANCE);
+            InputCache cache = inputs.get(direction);
+            IFluidHandler handler = cache == null ? null : cache.get();
+            if (handler != null) {
+              indexedList[nextTank] = handler;
               nextTank++;
             }
           }
@@ -140,24 +164,10 @@ public class MixerAlloyTank implements IMutableAlloyTank {
           BlockPos target = parent.getBlockPos().relative(direction);
           // limit by blocks as that gives the modpack more control, say they want to allow only scorched tanks
           if (world.getBlockState(target).is(TinkerTags.Blocks.ALLOYER_TANKS)) {
-            BlockEntity te = world.getBlockEntity(target);
-            if (te != null) {
-              // if we found a tank, increment the number of tanks
-              LazyOptional<IFluidHandler> capability = te.getCapability(ForgeCapabilities.FLUID_HANDLER, direction.getOpposite());
-              if (capability.isPresent()) {
-                // attach a listener so we know when the side invalidates
-                capability.addListener(listeners.computeIfAbsent(direction, dir -> new WeakConsumerWrapper<>(this, (self, handler) -> {
-                  if (handler == self.inputs.get(dir)) {
-                    refresh(dir, false);
-                  }
-                })));
-                inputs.put(direction, capability);
-                currentTanks++;
-              } else {
-                inputs.put(direction, LazyOptional.empty());
-              }
-            } else {
-              inputs.put(direction, LazyOptional.empty());
+            InputCache cache = new InputCache(world, direction);
+            inputs.put(direction, cache);
+            if (cache.get() != null) {
+              currentTanks++;
             }
           }
         }
@@ -175,7 +185,8 @@ public class MixerAlloyTank implements IMutableAlloyTank {
     if (direction == Direction.DOWN) {
       return;
     }
-    if (!checkInput || (inputs.containsKey(direction) && inputs.get(direction).isPresent())) {
+    InputCache cache = inputs.get(direction);
+    if (!checkInput || (cache != null && cache.present)) {
       currentTanks--;
     }
     inputs.remove(direction);

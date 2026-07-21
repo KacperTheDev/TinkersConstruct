@@ -1,10 +1,12 @@
 package slimeknights.tconstruct.library.recipe.tinkerstation.building;
 
+import slimeknights.tconstruct.library.data.recipe.LoadableRecipeOutput;
+
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
@@ -33,6 +35,7 @@ public class ToolBuildingRecipeBuilder extends AbstractRecipeBuilder<ToolBuildin
   private ResourceLocation layoutSlot = null;
   private final List<Ingredient> extraRequirements = new ArrayList<>();
   private List<IToolPart> partsOverride = null;
+
   private final List<MaterialVariantId> extraMaterials = new ArrayList<>();
   /** Modifier ID for the tipped arrow transformation recipe. Not typically needed by addons, just didn't feel like making another builder. */
   @Nullable @Setter
@@ -72,12 +75,12 @@ public class ToolBuildingRecipeBuilder extends AbstractRecipeBuilder<ToolBuildin
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumerIn) {
+  public void save(RecipeOutput consumerIn) {
     this.save(consumerIn, BuiltInRegistries.ITEM.getKey(this.output.asItem()));
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumerIn, ResourceLocation id) {
+  public void save(RecipeOutput consumerIn, ResourceLocation id) {
     ResourceLocation advancementId = this.buildOptionalAdvancement(id, "parts");
     if (tippedModifier != null) {
       if (extraMaterials.isEmpty()) {
@@ -86,9 +89,9 @@ public class ToolBuildingRecipeBuilder extends AbstractRecipeBuilder<ToolBuildin
       if (extraRequirements.size() != 1) {
         throw new IllegalArgumentException("Must have exactly one ingredient for modifier transform");
       }
-      consumerIn.accept(new LoadableFinishedRecipe<>(new TippedToolTransformRecipe(id, group, output, layoutSlot, extraRequirements.get(0), extraMaterials, tippedModifier), TippedToolTransformRecipe.LOADER, advancementId));
+      saveRecipe(consumerIn, id, new TippedToolTransformRecipe(id, group, output, layoutSlot, extraRequirements.get(0), extraMaterials, tippedModifier), advancementId);
     } else {
-      consumerIn.accept(new LoadableFinishedRecipe<>(new ToolBuildingRecipe(id, group, output, outputSize, layoutSlot, extraRequirements, partsOverride, extraMaterials), ToolBuildingRecipe.LOADER, advancementId));
+      saveRecipe(consumerIn, id, new ToolBuildingRecipe(id, group, output, outputSize, layoutSlot, extraRequirements, partsOverride, extraMaterials), advancementId);
     }
   }
 }

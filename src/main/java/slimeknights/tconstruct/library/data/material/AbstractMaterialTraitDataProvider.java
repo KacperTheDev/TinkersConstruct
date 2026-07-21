@@ -54,7 +54,7 @@ public abstract class AbstractMaterialTraitDataProvider extends GenericDataProvi
     }
 
     // generate
-    return allOf(allMaterialTraits.entrySet().stream().map(entry -> saveJson(cache, entry.getKey(), entry.getValue().build())));
+    return allOf(allMaterialTraits.entrySet().stream().map(entry -> saveJson(cache, entry.getKey().location(), entry.getValue().build())));
   }
 
 
@@ -138,7 +138,7 @@ public abstract class AbstractMaterialTraitDataProvider extends GenericDataProvi
   @CanIgnoreReturnValue
   public static class MaterialTraitsBuilder {
     private final List<ModifierEntry> defaultTraits = new ArrayList<>();
-    private final Map<ResourceLocation,List<ModifierEntry>> perStats = new HashMap<>();
+    private final Map<MaterialStatsId,List<ModifierEntry>> perStats = new HashMap<>();
 
     /** Adds the given traits to the list */
     private static void addAll(List<ModifierEntry> list, LazyModifier[] traits) {
@@ -207,7 +207,8 @@ public abstract class AbstractMaterialTraitDataProvider extends GenericDataProvi
     private MaterialTraitsJson build() {
       return new MaterialTraitsJson(
         defaultTraits.isEmpty() ? null : defaultTraits,
-        perStats.isEmpty() ? null : perStats
+        perStats.isEmpty() ? null : perStats.entrySet().stream().collect(java.util.stream.Collectors.toMap(
+          entry -> entry.getKey().location(), Map.Entry::getValue))
       );
     }
   }

@@ -5,15 +5,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:ambidextrous"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -23,15 +15,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:aqua_affinity"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -41,15 +25,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:autosmelt"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -59,15 +35,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:ballista"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -77,15 +45,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:blocking"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -95,15 +55,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:bonking"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -113,15 +65,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:bouncy"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -131,15 +75,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:boundless"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -149,15 +85,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:brushing"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -167,15 +95,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:bucketing"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -185,15 +105,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:bulk_quiver"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -203,15 +115,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:bursting"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -221,15 +125,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:channeling"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -239,15 +135,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:crafting_table"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -257,15 +145,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:crystalshot"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -275,15 +155,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:double_jump"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -293,15 +165,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:drill_attack"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -311,15 +175,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:dual_wielding"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -329,15 +185,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:exchanging"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -347,15 +195,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:expanded"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -365,15 +205,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:firestarter"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -383,15 +215,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:flamewake"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -401,15 +225,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:flinging"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -419,15 +235,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:frost_walker"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -437,15 +245,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:gilded"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -455,15 +255,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:glowing"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -473,15 +265,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:grapple"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -491,15 +275,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:luck"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -509,15 +285,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:melting"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -527,15 +295,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:multishot"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -545,15 +305,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:parrying"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -563,15 +315,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:pathing"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -581,15 +325,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:pockets"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -599,15 +335,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:protection"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -617,15 +345,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:reach"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -635,15 +355,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:reflecting"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -653,15 +365,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:returning"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -671,15 +375,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:silky"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -689,15 +385,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:slimeball"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -707,15 +395,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:sliver"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -725,15 +405,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:slurping"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -743,15 +415,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:snowdrift"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -761,15 +425,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:soul_belt"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -779,15 +435,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:spilling"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -797,15 +445,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:spitting"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -815,15 +455,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:splashing"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -833,15 +465,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:springing"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -851,15 +475,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:strength"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -869,15 +485,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:stripping"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -887,15 +495,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:throwing"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -905,15 +505,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:tilling"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -923,15 +515,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:tool_belt"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -941,15 +525,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:trick_quiver"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -959,15 +535,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:unbreakable"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -977,15 +545,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:warping"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -995,15 +555,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:wetting"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -1013,15 +565,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_modifier",
-              "check": "upgrades",
-              "modifier": {
-                "type": "tconstruct:single",
-                "modifier": "tconstruct:wings"
-              }
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -1029,16 +573,14 @@
     }
   },
   "display": {
-    "announce_to_chat": true,
     "description": {
       "translate": "advancements.tconstruct.smeltery.abilities.description"
     },
     "frame": "challenge",
-    "hidden": false,
     "icon": {
-      "item": "tconstruct:silky_cloth"
+      "count": 1,
+      "id": "tconstruct:silky_cloth"
     },
-    "show_toast": true,
     "title": {
       "translate": "advancements.tconstruct.smeltery.abilities.title"
     }

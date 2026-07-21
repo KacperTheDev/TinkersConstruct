@@ -2,8 +2,10 @@ package slimeknights.tconstruct.library.tools.helper;
 
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
-
-import static net.minecraft.world.damagesource.CombatRules.getDamageAfterAbsorb;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.CombatRules;
 
 /**
  * Utinet.minecraft.world.damagesource.CombatRulesation logic
@@ -29,6 +31,12 @@ public class ArmorUtil {
        + 0.2f*atProduct - 5f*boostedToughness) / 8f,
       damage * 25f / (125f - armor),
       damage);
+  }
+
+  /** Legacy armor formula retained for callers that do not have an entity and damage source. */
+  static float getDamageAfterArmorAbsorb(float damage, float armor, float toughness) {
+    float effectiveArmor = Mth.clamp(armor - damage / (2.0F + toughness / 4.0F), armor * 0.2F, 20.0F);
+    return damage * (1.0F - effectiveArmor / 25.0F);
   }
 
   /**
@@ -71,7 +79,7 @@ public class ArmorUtil {
   }
 
   /**
-   * Calculates the final damage for use in {@link net.minecraftforge.event.entity.living.LivingHurtEvent}. Requires applying several inverse functions to cancel out vanilla formulas that are applied later
+   * Calculates the final damage for use in {@link net.neoforged.neoforge.event.entity.living.LivingHurtEvent}. Requires applying several inverse functions to cancel out vanilla formulas that are applied later
    * @param originalDamage     Original damage to be dealt
    * @param armor              Armor amount on the player
    * @param toughness          Armor toughness attribute
@@ -92,7 +100,7 @@ public class ArmorUtil {
     float damage = originalDamage;
     // if there is no armor value though, no work is needed
     if (armor > 0) {
-      damage = getDamageAfterAbsorb(damage, armor, toughness);
+      damage = getDamageAfterArmorAbsorb(damage, armor, toughness);
     }
 
     // next, we want to apply our modifiers bonus M(x), it works out to be a reduction between 0 and 80%
@@ -118,8 +126,46 @@ public class ArmorUtil {
     return damage;
   }
 
-  private static final String DIAMOND_ARMOR = "textures/models/armor/diamond_layer_1.png";
-  private static final String DIAMOND_LEGGINGS = "textures/models/armor/diamond_layer_2.png";
+  /**
+   * Native 1.21 variant which includes damage-source-dependent armor effectiveness.
+   */
+  public static float getDamageForEvent(LivingEntity entity, DamageSource source, float originalDamage, float armor, float toughness,
+                                        float vanillaModifiers, float finalModifiers, float modifierCap) {
+    if (vanillaModifiers == finalModifiers && modifierCap == 20) {
+      return originalDamage;
+    }
+    float damage = originalDamage;
+    if (armor > 0) {
+      damage = CombatRules.getDamageAfterAbsorb(entity, damage, source, armor, toughness);
+    }
+    if (finalModifiers != 0) {
+      damage = getDamageAfterMagicAbsorb(damage, finalModifiers, modifierCap);
+    }
+    if (vanillaModifiers > 0) {
+      damage = getDamageBeforeMagicAbsorb(damage, vanillaModifiers);
+    }
+    if (armor <= 0 || damage <= 0) {
+      return damage;
+    }
+
+    float low = damage;
+    float high = Math.max(originalDamage, damage);
+    while (CombatRules.getDamageAfterAbsorb(entity, high, source, armor, toughness) < damage && high < Float.MAX_VALUE / 2) {
+      high *= 2;
+    }
+    for (int i = 0; i < 32; i++) {
+      float mid = (low + high) * 0.5F;
+      if (CombatRules.getDamageAfterAbsorb(entity, mid, source, armor, toughness) < damage) {
+        low = mid;
+      } else {
+        high = mid;
+      }
+    }
+    return (low + high) * 0.5F;
+  }
+
+  private static final ResourceLocation DIAMOND_ARMOR = ResourceLocation.withDefaultNamespace("textures/models/armor/diamond_layer_1.png");
+  private static final ResourceLocation DIAMOND_LEGGINGS = ResourceLocation.withDefaultNamespace("textures/models/armor/diamond_layer_2.png");
 
   /**
    * We override the armor model to not use the "vanilla" texture in favor of our own system that fetches the texture from NBT.
@@ -127,7 +173,7 @@ public class ArmorUtil {
    * Since we don't end up using that texture, bypass the error by just returning a vanilla texture.
    * We would just use our system, but it notably supports returning no texture to not render (would still lead to errors) and requires unneeded stack parsing, so faster to just use an arbitrary texture we know exists.
    */
-  public static String getDummyArmorTexture(EquipmentSlot slot) {
+  public static ResourceLocation getDummyArmorTexture(EquipmentSlot slot) {
     return slot == EquipmentSlot.LEGS ? DIAMOND_LEGGINGS : DIAMOND_ARMOR;
   }
 }

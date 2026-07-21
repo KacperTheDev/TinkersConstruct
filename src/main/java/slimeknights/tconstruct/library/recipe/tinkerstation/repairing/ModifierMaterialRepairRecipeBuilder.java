@@ -1,7 +1,9 @@
 package slimeknights.tconstruct.library.recipe.tinkerstation.repairing;
 
+import slimeknights.tconstruct.library.data.recipe.LoadableRecipeOutput;
+
 import lombok.RequiredArgsConstructor;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
@@ -24,22 +26,22 @@ public class ModifierMaterialRepairRecipeBuilder extends AbstractRecipeBuilder<M
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer) {
-    save(consumer, modifier);
+  public void save(RecipeOutput consumer) {
+    save(consumer, modifier.location());
   }
 
   /** Builds the recipe for the crafting table using a repair kit */
   @SuppressWarnings("removal")
-  public ModifierMaterialRepairRecipeBuilder saveCraftingTable(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
+  public ModifierMaterialRepairRecipeBuilder saveCraftingTable(RecipeOutput consumer, ResourceLocation id) {
     ResourceLocation advancementId = buildOptionalAdvancement(id, "tinker_station");
-    consumer.accept(new LoadableFinishedRecipe<>(new ModifierMaterialRepairKitRecipe(id, modifier, material, statType), ModifierMaterialRepairKitRecipe.LOADER, advancementId));
+    saveRecipe(consumer, id, new ModifierMaterialRepairKitRecipe(id, modifier, material, statType), advancementId);
     return this;
   }
 
   @SuppressWarnings("removal")
   @Override
-  public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
+  public void save(RecipeOutput consumer, ResourceLocation id) {
     ResourceLocation advancementId = buildOptionalAdvancement(id, "tinker_station");
-    consumer.accept(new LoadableFinishedRecipe<>(new ModifierMaterialRepairRecipe(id, modifier, material, statType), ModifierMaterialRepairRecipe.LOADER, advancementId));
+    saveRecipe(consumer, id, new ModifierMaterialRepairRecipe(id, modifier, material, statType), advancementId);
   }
 }

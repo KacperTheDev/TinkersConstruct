@@ -4,9 +4,9 @@
   "grid": [
     [
       {
-        "type": "forge:nbt",
+        "type": "tconstruct:book_stack",
         "item": "tconstruct:pickaxe",
-        "nbt": {
+        "custom_data": {
           "tic_broken": false,
           "tic_display": true,
           "Damage": 70,
@@ -24,20 +24,22 @@
     ]
   ],
   "result": {
-    "type": "forge:nbt",
-    "item": "tconstruct:pickaxe",
-    "nbt": {
-      "tic_broken": false,
-      "tic_display": true,
-      "Damage": 10,
-      "tic_materials": [
-        "tconstruct:ui_render#head",
-        "tconstruct:ui_render#handle",
-        "tconstruct:ui_render#extra"
-      ],
-      "tic_stats": { "tconstruct:durability": 100 }
-    }
-  },
+              "type": "tconstruct:book_stack",
+              "item": "tconstruct:pickaxe",
+              "custom_data": {
+                "tic_broken": false,
+                "tic_display": true,
+                "Damage": 10,
+                "tic_materials": [
+                  "tconstruct:ui_render#head",
+                  "tconstruct:ui_render#handle",
+                  "tconstruct:ui_render#extra"
+                ],
+                "tic_stats": {
+                  "tconstruct:durability": 100
+                }
+              }
+            },
   "description": [
     {
       "text": "Araçlarının kırılmasını istemiyorsan onları onarmak önemli bir iştir. Onarıcı İstasyonuna veya Onarcı Örsüne araç ve baş/sac malzemesini koy ve o onarılacaktır. Farklı olarak çalışma masasında da kullanılabilir onarım takımını da kullanabilirsin!",

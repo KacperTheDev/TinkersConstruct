@@ -174,5 +174,17 @@ public class EquipmentIterator extends AbstractIterator<EquipmentEntry> {
     private EquipmentSlot slot;
     /** Active modifier */
     private ModifierEntry modifier;
+
+    public IToolStackView tool() {
+      return tool;
+    }
+
+    public EquipmentSlot slot() {
+      return slot;
+    }
+
+    public ModifierEntry modifier() {
+      return modifier;
+    }
   }
 }

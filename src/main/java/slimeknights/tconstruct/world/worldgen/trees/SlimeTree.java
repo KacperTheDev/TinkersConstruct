@@ -1,28 +1,29 @@
 package slimeknights.tconstruct.world.worldgen.trees;
 
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.block.grower.AbstractTreeGrower;
+import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import slimeknights.tconstruct.world.TinkerStructures;
 import slimeknights.tconstruct.world.block.FoliageType;
 
-public class SlimeTree extends AbstractTreeGrower {
+import java.util.Optional;
 
-  private final FoliageType foliageType;
+public final class SlimeTree {
+  private SlimeTree() {}
 
-  public SlimeTree(FoliageType foliageType) {
-    this.foliageType = foliageType;
-  }
-
-  @Override
-  protected ResourceKey<ConfiguredFeature<?, ?>> getConfiguredFeature(RandomSource random, boolean largeHive) {
-    return switch (this.foliageType) {
+  /** Creates the native 1.21 tree grower matching the former AbstractTreeGrower selection logic. */
+  public static TreeGrower create(FoliageType foliageType) {
+    ResourceKey<ConfiguredFeature<?, ?>> tree = switch (foliageType) {
       case EARTH -> TinkerStructures.earthSlimeTree;
       case SKY -> TinkerStructures.skySlimeTree;
-      case ENDER -> random.nextFloat() < 0.85f ? TinkerStructures.enderSlimeTreeTall : TinkerStructures.enderSlimeTree;
+      case ENDER -> TinkerStructures.enderSlimeTree;
       case BLOOD -> TinkerStructures.bloodSlimeFungus;
       case ICHOR -> TinkerStructures.ichorSlimeFungus;
     };
+    if (foliageType == FoliageType.ENDER) {
+      return new TreeGrower("tconstruct_ender_slime", 0.85f, Optional.empty(), Optional.empty(), Optional.of(tree),
+                            Optional.of(TinkerStructures.enderSlimeTreeTall), Optional.empty(), Optional.empty());
+    }
+    return new TreeGrower("tconstruct_" + foliageType.getSerializedName() + "_slime", Optional.empty(), Optional.of(tree), Optional.empty());
   }
 }

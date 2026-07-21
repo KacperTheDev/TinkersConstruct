@@ -61,6 +61,9 @@ import javax.annotation.Nullable;
 public class ThrownTool extends ThrownTrident implements ToolProjectile {
   /** Key to sync the stack to the client */
   protected static final EntityDataAccessor<ItemStack> STACK = SynchedEntityData.defineId(ThrownTool.class, EntityDataSerializers.ITEM_STACK);
+  /** Local replacements for private vanilla trident state. */
+  private static final EntityDataAccessor<Byte> ID_LOYALTY = SynchedEntityData.defineId(ThrownTool.class, EntityDataSerializers.BYTE);
+  private static final EntityDataAccessor<Boolean> ID_FOIL = SynchedEntityData.defineId(ThrownTool.class, EntityDataSerializers.BOOLEAN);
   /** Movement speed in water */
   protected static final EntityDataAccessor<Float> WATER_INERTIA = SynchedEntityData.defineId(ThrownTool.class, EntityDataSerializers.FLOAT);
   /** Volatile integer key for the loyalty level */
@@ -70,6 +73,7 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
 
   @Nullable
   private IToolStackView tool = null;
+  private ItemStack tridentItem = ItemStack.EMPTY;
   private float charge = 1;
   private float multiplier = 1;
   private boolean noDespawn = false;
@@ -126,7 +130,6 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
     return entityData.get(WATER_INERTIA);
   }
 
-  @Override
   public boolean isChanneling() {
     return !tridentItem.isEmpty() && getTool().getModifiers().getLevel(ModifierIds.channeling) > 0;
   }
@@ -355,7 +358,7 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
       if (current.isEmpty()) {
         inventory.setItem(originalSlot, pickup);
         return true;
-      } else if (current.getCount() < current.getMaxStackSize() && ItemStack.isSameItemSameTags(current, pickup)) {
+      } else if (current.getCount() < current.getMaxStackSize() && ItemStack.isSameItemSameComponents(current, pickup)) {
         current.grow(1);
         return true;
       }
@@ -376,10 +379,12 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
   /* Client */
 
   @Override
-  protected void defineSynchedData() {
-    super.defineSynchedData();
-    this.entityData.define(STACK, ItemStack.EMPTY);
-    this.entityData.define(WATER_INERTIA, 0.6f);
+  protected void defineSynchedData(SynchedEntityData.Builder builder) {
+    super.defineSynchedData(builder);
+    builder.define(STACK, ItemStack.EMPTY);
+    builder.define(ID_LOYALTY, (byte)0);
+    builder.define(ID_FOIL, false);
+    builder.define(WATER_INERTIA, 0.6f);
   }
 
   @Override

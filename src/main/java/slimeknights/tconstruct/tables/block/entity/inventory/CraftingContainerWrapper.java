@@ -7,6 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingInput;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,5 +91,15 @@ public class CraftingContainerWrapper implements CraftingContainer {
       stacks.add(getItem(i));
     }
     return stacks;
+  }
+
+  /** Creates the native immutable recipe input together with its position in the full crafting grid. */
+  public CraftingInput.Positioned asPositionedCraftingInput() {
+    return CraftingInput.ofPositioned(width, height, getItems());
+  }
+
+  /** Creates the native immutable recipe input from the current crafting grid. */
+  public CraftingInput asCraftingInput() {
+    return asPositionedCraftingInput().input();
   }
 }

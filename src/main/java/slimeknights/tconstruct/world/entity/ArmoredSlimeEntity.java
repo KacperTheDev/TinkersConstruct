@@ -1,10 +1,13 @@
 package slimeknights.tconstruct.world.entity;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -12,6 +15,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -20,6 +24,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -37,9 +42,9 @@ public abstract class ArmoredSlimeEntity extends Slime {
   public ArmoredSlimeEntity(EntityType<? extends ArmoredSlimeEntity> type, Level world) {
     super(type, world);
     if (!world.isClientSide) {
-      tryAddAttribute(Attributes.ARMOR, new AttributeModifier("tconstruct.small_armor_bonus", 3, Operation.MULTIPLY_TOTAL));
-      tryAddAttribute(Attributes.ARMOR_TOUGHNESS, new AttributeModifier("tconstruct.small_toughness_bonus", 3, Operation.MULTIPLY_TOTAL));
-      tryAddAttribute(Attributes.KNOCKBACK_RESISTANCE, new AttributeModifier("tconstruct.small_resistence_bonus", 3, Operation.MULTIPLY_TOTAL));
+      tryAddAttribute(Attributes.ARMOR, new AttributeModifier(ResourceLocation.fromNamespaceAndPath("tconstruct", "small_armor_bonus"), 3, Operation.ADD_MULTIPLIED_TOTAL));
+      tryAddAttribute(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(ResourceLocation.fromNamespaceAndPath("tconstruct", "small_toughness_bonus"), 3, Operation.ADD_MULTIPLIED_TOTAL));
+      tryAddAttribute(Attributes.KNOCKBACK_RESISTANCE, new AttributeModifier(ResourceLocation.fromNamespaceAndPath("tconstruct", "small_resistence_bonus"), 3, Operation.ADD_MULTIPLIED_TOTAL));
     }
     this.entityData.set(METAL, false);
   }
@@ -51,9 +56,9 @@ public abstract class ArmoredSlimeEntity extends Slime {
   }
 
   @Override
-  protected void defineSynchedData() {
-    super.defineSynchedData();
-    this.entityData.define(METAL, false);
+  protected void defineSynchedData(SynchedEntityData.Builder builder) {
+    super.defineSynchedData(builder);
+    builder.define(METAL, false);
   }
 
   /** Sets this slime to have a metal core */
@@ -67,7 +72,7 @@ public abstract class ArmoredSlimeEntity extends Slime {
   }
 
   /** Adds an attribute if possible */
-  private void tryAddAttribute(Attribute attribute, AttributeModifier modifier) {
+  private void tryAddAttribute(Holder<Attribute> attribute, AttributeModifier modifier) {
     AttributeInstance instance = getAttribute(attribute);
     if (instance != null) {
       instance.addTransientModifier(modifier);
@@ -76,8 +81,8 @@ public abstract class ArmoredSlimeEntity extends Slime {
 
   @Nullable
   @Override
-  public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance difficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
-    SpawnGroupData spawnData = super.finalizeSpawn(pLevel, difficulty, pReason, pSpawnData, pDataTag);
+  public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance difficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData) {
+    SpawnGroupData spawnData = super.finalizeSpawn(pLevel, difficulty, pReason, pSpawnData);
     this.setCanPickUpLoot(this.random.nextFloat() < (0.55f * difficulty.getSpecialMultiplier()));
 
     this.populateDefaultEquipmentSlots(random, difficulty);
@@ -98,7 +103,7 @@ public abstract class ArmoredSlimeEntity extends Slime {
   protected abstract void populateDefaultEquipmentSlots(RandomSource random, DifficultyInstance difficulty);
 
   @Override
-  protected void populateDefaultEquipmentEnchantments(RandomSource random, DifficultyInstance difficulty) {
+  protected void populateDefaultEquipmentEnchantments(ServerLevelAccessor level, RandomSource random, DifficultyInstance difficulty) {
     // no-op, unused
   }
 
@@ -114,7 +119,10 @@ public abstract class ArmoredSlimeEntity extends Slime {
   }
 
   @Override
-  protected void dropCustomDeathLoot(DamageSource source, int looting, boolean recentlyHit) {
+  protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
+    int looting = source.getEntity() instanceof LivingEntity attacker
+      ? EnchantmentHelper.getEnchantmentLevel(slimeknights.mantle.util.RegistryHelper.getHolder(attacker.registryAccess(), net.minecraft.world.item.enchantment.Enchantments.LOOTING), attacker)
+      : 0;
     ItemStack stack = this.getItemBySlot(EquipmentSlot.HEAD);
     float slotChance = this.getEquipmentDropChance(EquipmentSlot.HEAD);
     // items do not always drop if a large slime, increases chance of inheritance
@@ -123,7 +131,7 @@ public abstract class ArmoredSlimeEntity extends Slime {
       slotChance = 0.25f;
     }
     boolean alwaysDrop = slotChance > 1.0F;
-    if (!stack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(stack) && (recentlyHit || alwaysDrop)) {
+    if (!stack.isEmpty() && !EnchantmentHelper.has(stack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP) && (recentlyHit || alwaysDrop)) {
       if ((this.random.nextFloat() - (looting * 0.01f)) < slotChance) {
         if (!alwaysDrop && stack.isDamageableItem()) {
           int max = stack.getMaxDamage();
@@ -189,7 +197,6 @@ public abstract class ArmoredSlimeEntity extends Slime {
     if (reason == Entity.RemovalReason.KILLED) {
       this.gameEvent(GameEvent.ENTITY_DIE);
     }
-    this.invalidateCaps();
   }
 
   @Override

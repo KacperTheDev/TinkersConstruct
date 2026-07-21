@@ -3,11 +3,14 @@ package slimeknights.tconstruct.library.modifiers.hook.behavior;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.EquipmentSlot.Type;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.core.registries.BuiltInRegistries;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
@@ -55,9 +58,9 @@ public interface AttributesModifierHook {
       // base melee stats - skip if not melee
       StatsNBT statsNBT = tool.getStats();
       if (slot == EquipmentSlot.MAINHAND && EntityInteractionModifierHook.isMeleeWeapon(tool)) {
-        builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(Item.BASE_ATTACK_DAMAGE_UUID, "tconstruct.tool.attack_damage", statsNBT.get(ToolStats.ATTACK_DAMAGE), AttributeModifier.Operation.ADDITION));
+        builder.put(Attributes.ATTACK_DAMAGE.value(), new AttributeModifier(Item.BASE_ATTACK_DAMAGE_ID, statsNBT.get(ToolStats.ATTACK_DAMAGE), AttributeModifier.Operation.ADD_VALUE));
         // base attack speed is 4, but our numbers start from 4
-        builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(Item.BASE_ATTACK_SPEED_UUID, "tconstruct.tool.attack_speed", statsNBT.get(ToolStats.ATTACK_SPEED) - 4d, AttributeModifier.Operation.ADDITION));
+        builder.put(Attributes.ATTACK_SPEED.value(), new AttributeModifier(Item.BASE_ATTACK_SPEED_ID, statsNBT.get(ToolStats.ATTACK_SPEED) - 4d, AttributeModifier.Operation.ADD_VALUE));
       }
 
       if (slot.getType() == Type.HAND) {
@@ -66,15 +69,15 @@ public interface AttributesModifierHook {
           UUID uuid = HELD_ARMOR_UUID[slot.getIndex()];
           double value = statsNBT.get(ToolStats.ARMOR);
           if (value != 0) {
-            builder.put(Attributes.ARMOR, new AttributeModifier(uuid, "tconstruct.held.armor", value, AttributeModifier.Operation.ADDITION));
+            builder.put(Attributes.ARMOR.value(), new AttributeModifier(slimeknights.tconstruct.library.utils.AttributeIdUtil.fromLegacyUuid(uuid), value, AttributeModifier.Operation.ADD_VALUE));
           }
           value = statsNBT.get(ToolStats.ARMOR_TOUGHNESS);
           if (value != 0) {
-            builder.put(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(uuid, "tconstruct.held.toughness", value, AttributeModifier.Operation.ADDITION));
+            builder.put(Attributes.ARMOR_TOUGHNESS.value(), new AttributeModifier(slimeknights.tconstruct.library.utils.AttributeIdUtil.fromLegacyUuid(uuid), value, AttributeModifier.Operation.ADD_VALUE));
           }
           value = statsNBT.get(ToolStats.KNOCKBACK_RESISTANCE);
           if (value != 0) {
-            builder.put(Attributes.KNOCKBACK_RESISTANCE, new AttributeModifier(uuid, "tconstruct.held.knockback_resistance", value, AttributeModifier.Operation.ADDITION));
+            builder.put(Attributes.KNOCKBACK_RESISTANCE.value(), new AttributeModifier(slimeknights.tconstruct.library.utils.AttributeIdUtil.fromLegacyUuid(uuid), value, AttributeModifier.Operation.ADD_VALUE));
           }
         }
 
@@ -84,6 +87,24 @@ public interface AttributesModifierHook {
           entry.getHook(ModifierHooks.ATTRIBUTES).addAttributes(tool, entry, slot, attributeConsumer);
         }
       }
+    }
+    return builder.build();
+  }
+
+  /** Converts the legacy public multimap contract to the native 1.21 item component. */
+  static ItemAttributeModifiers toComponent(Multimap<Attribute,AttributeModifier> attributes, EquipmentSlot slot) {
+    ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder();
+    EquipmentSlotGroup group = EquipmentSlotGroup.bySlot(slot);
+    attributes.forEach((attribute, modifier) -> builder.add(BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute), modifier, group));
+    return builder.build();
+  }
+
+  static ItemAttributeModifiers getHeldAttributeModifiers(IToolStackView tool) {
+    ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder();
+    for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND}) {
+      EquipmentSlotGroup group = EquipmentSlotGroup.bySlot(slot);
+      getHeldAttributeModifiers(tool, slot).forEach((attribute, modifier) ->
+        builder.add(BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute), modifier, group));
     }
     return builder.build();
   }

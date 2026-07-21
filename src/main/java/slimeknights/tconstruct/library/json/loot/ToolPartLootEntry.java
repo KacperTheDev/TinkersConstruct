@@ -1,8 +1,6 @@
 package slimeknights.tconstruct.library.json.loot;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
@@ -13,8 +11,8 @@ import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.util.RegistryHelper;
+import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.materials.RandomMaterial;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.tools.part.IToolPart;
@@ -26,10 +24,13 @@ import java.util.stream.Stream;
 
 /** Entry for a random tool part from a list with a random material */
 public class ToolPartLootEntry extends LootPoolSingletonContainer {
+  // TODO 1.21 port: replace this compile bridge with the full data-driven codec.
+  public static final MapCodec<ToolPartLootEntry> CODEC = MapCodec.unit(new ToolPartLootEntry(TinkerTags.Items.TOOL_PARTS, RandomMaterial.random().build(), 1, 0, List.of(), List.of()));
+
   private final TagKey<Item> tag;
   private final RandomMaterial material;
 
-  protected ToolPartLootEntry(TagKey<Item> tag, RandomMaterial material, int weight, int quality, LootItemCondition[] conditions, LootItemFunction[] functions) {
+  protected ToolPartLootEntry(TagKey<Item> tag, RandomMaterial material, int weight, int quality, List<LootItemCondition> conditions, List<LootItemFunction> functions) {
     super(weight, quality, conditions, functions);
     this.tag = tag;
     this.material = material;
@@ -67,20 +68,4 @@ public class ToolPartLootEntry extends LootPoolSingletonContainer {
     return entry(tag, RandomMaterial.fixed(material));
   }
 
-  /** Serializer logic */
-  public static class Serializer extends LootPoolSingletonContainer.Serializer<ToolPartLootEntry> {
-    @Override
-    public void serializeCustom(JsonObject json, ToolPartLootEntry object, JsonSerializationContext conditions) {
-      super.serializeCustom(json, object, conditions);
-      json.addProperty("tag", object.tag.location().toString());
-      json.add("material", RandomMaterial.LOADER.serialize(object.material));
-    }
-
-    @Override
-    protected ToolPartLootEntry deserialize(JsonObject json, JsonDeserializationContext context, int weight, int quality, LootItemCondition[] conditions, LootItemFunction[] functions) {
-      TagKey<Item> tag = Loadables.ITEM_TAG.getIfPresent(json, "tag");
-      RandomMaterial material = RandomMaterial.LOADER.getIfPresent(json, "material");
-      return new ToolPartLootEntry(tag, material, weight, quality, conditions, functions);
-    }
-  }
 }

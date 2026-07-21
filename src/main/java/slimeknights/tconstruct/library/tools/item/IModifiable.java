@@ -3,6 +3,9 @@ package slimeknights.tconstruct.library.tools.item;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ItemLike;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.modules.build.RarityModule;
@@ -29,6 +32,11 @@ public interface IModifiable extends ItemLike {
 
   /** Gets the definition of this tool for building and applying modifiers */
   ToolDefinition getToolDefinition();
+
+  /** Called immediately before the server performs the primary block break. */
+  default boolean onBlockStartBreak(ItemStack stack, BlockPos pos, Player player) {
+    return false;
+  }
 
   /** Gets the tool definition for the given item, or {@link ToolDefinition#EMPTY} if its not modifiable. */
   static ToolDefinition getToolDefinition(Item item) {

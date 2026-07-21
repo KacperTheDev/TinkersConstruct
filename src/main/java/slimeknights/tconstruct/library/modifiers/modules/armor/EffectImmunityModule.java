@@ -3,6 +3,7 @@ package slimeknights.tconstruct.library.modifiers.modules.armor;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.core.Holder;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.tconstruct.TConstruct;
@@ -50,6 +51,14 @@ public record EffectImmunityModule(MobEffect effect, LevelingInt maxLevel, Modif
 
   public EffectImmunityModule(MobEffect effect) {
     this(effect, ANY_LEVEL);
+  }
+
+  public EffectImmunityModule(Holder<MobEffect> effect) {
+    this(effect.value());
+  }
+
+  public EffectImmunityModule(Holder<MobEffect> effect, LevelingInt maxLevel) {
+    this(effect.value(), maxLevel);
   }
 
   public EffectImmunityModule(Supplier<? extends MobEffect> effect, LevelingInt maxLevel) {

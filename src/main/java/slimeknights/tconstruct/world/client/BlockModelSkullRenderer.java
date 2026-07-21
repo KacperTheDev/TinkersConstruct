@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.ForgeHooksClient;
+import net.neoforged.neoforge.client.ClientHooks;
 import org.joml.Quaternionf;
 import slimeknights.tconstruct.smeltery.client.util.TintedVertexBuilder;
 
@@ -36,6 +36,14 @@ public class BlockModelSkullRenderer extends SkullModelBase {
   }
 
   @Override
+  public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int light, int overlay, int packedColor) {
+    renderToBuffer(poseStack, buffer, light, overlay,
+      (packedColor >> 16 & 255) / 255.0F, (packedColor >> 8 & 255) / 255.0F,
+      (packedColor & 255) / 255.0F, (packedColor >>> 24) / 255.0F);
+  }
+
+  /** @deprecated use the native packed-color overload */
+  @Deprecated(forRemoval = false)
   public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int light, int overlay, float red, float green, float blue, float alpha) {
     poseStack.pushPose();
 
@@ -45,7 +53,7 @@ public class BlockModelSkullRenderer extends SkullModelBase {
     poseStack.scale(0.5F, -0.5F, -0.5F);
 
     // simplified from ItemRender#render
-    BakedModel model = ForgeHooksClient.handleCameraTransforms(poseStack, this.model, ItemDisplayContext.HEAD, false);
+    BakedModel model = ClientHooks.handleCameraTransforms(poseStack, this.model, ItemDisplayContext.HEAD, false);
     poseStack.translate(-0.5F, -0.5F, -0.5F);
     // we don't really use rotation, but just in case
     if (yRot != 0 || xRot != 0) {

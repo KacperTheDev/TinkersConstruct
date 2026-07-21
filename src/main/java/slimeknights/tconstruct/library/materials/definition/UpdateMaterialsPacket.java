@@ -3,9 +3,9 @@ package slimeknights.tconstruct.library.materials.definition;
 import com.google.common.collect.ImmutableMap;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.tags.TagKey;
-import net.minecraftforge.network.NetworkEvent.Context;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import slimeknights.mantle.network.packet.IThreadsafePacket;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.utils.GenericTagUtil;
@@ -22,7 +22,7 @@ public class UpdateMaterialsPacket implements IThreadsafePacket {
   private final Map<MaterialId,MaterialId> redirects;
   private final Map<TagKey<IMaterial>,List<IMaterial>> tags;
 
-  public UpdateMaterialsPacket(FriendlyByteBuf buffer) {
+  public UpdateMaterialsPacket(RegistryFriendlyByteBuf buffer) {
     int materialCount = buffer.readInt();
     ImmutableMap.Builder<MaterialId,IMaterial> materials = ImmutableMap.builder();
 
@@ -32,7 +32,7 @@ public class UpdateMaterialsPacket implements IThreadsafePacket {
       int sortOrder = buffer.readVarInt();
       boolean craftable = buffer.readBoolean();
       boolean hidden = buffer.readBoolean();
-      materials.put(id, new Material(id, tier, sortOrder, craftable, hidden));
+      materials.put(id, new Material(id.location(), tier, sortOrder, craftable, hidden));
     }
     this.materials = materials.build();
     // process redirects
@@ -49,10 +49,10 @@ public class UpdateMaterialsPacket implements IThreadsafePacket {
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer) {
+  public void encode(RegistryFriendlyByteBuf buffer) {
     buffer.writeInt(this.materials.size());
     this.materials.values().forEach(material -> {
-      buffer.writeResourceLocation(material.getIdentifier());
+      buffer.writeResourceLocation(material.getIdentifier().location());
       buffer.writeVarInt(material.getTier());
       buffer.writeVarInt(material.getSortOrder());
       buffer.writeBoolean(material.isCraftable());
@@ -63,11 +63,11 @@ public class UpdateMaterialsPacket implements IThreadsafePacket {
       buffer.writeUtf(key.toString());
       buffer.writeUtf(value.toString());
     });
-    GenericTagUtil.encodeTags(buffer, IMaterial::getIdentifier, this.tags);
+    GenericTagUtil.encodeTags(buffer, IMaterial::getIdentifier, MaterialId::location, this.tags);
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
+  public void handleThreadsafe(IPayloadContext context) {
     MaterialRegistry.updateMaterialsFromServer(this);
   }
 }

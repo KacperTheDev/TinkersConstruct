@@ -7,8 +7,8 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.client.render.FluidRenderer;
 import slimeknights.tconstruct.shared.particle.FluidParticleData;
 
@@ -40,22 +40,22 @@ public class FluidParticle extends TextureSheetParticle {
 
   @Override
   protected float getU0() {
-    return this.sprite.getU((this.uCoord + 1.0F) / 4.0F * 16.0F);
+    return this.sprite.getU((this.uCoord + 1.0F) / 4.0F);
   }
 
   @Override
   protected float getU1() {
-    return this.sprite.getU(this.uCoord / 4.0F * 16.0F);
+    return this.sprite.getU(this.uCoord / 4.0F);
   }
 
   @Override
   protected float getV0() {
-    return this.sprite.getV(this.vCoord / 4.0F * 16.0F);
+    return this.sprite.getV(this.vCoord / 4.0F);
   }
 
   @Override
   protected float getV1() {
-    return this.sprite.getV((this.vCoord + 1.0F) / 4.0F * 16.0F);
+    return this.sprite.getV((this.vCoord + 1.0F) / 4.0F);
   }
 
   @Override

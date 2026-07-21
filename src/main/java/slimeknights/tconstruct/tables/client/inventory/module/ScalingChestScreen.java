@@ -5,8 +5,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 import slimeknights.mantle.client.screen.MultiModuleScreen;
 import slimeknights.mantle.inventory.BaseContainerMenu;
 import slimeknights.mantle.inventory.EmptyItemHandler;
@@ -19,9 +19,10 @@ public class ScalingChestScreen<T extends BlockEntity> extends DynamicContainerS
   public ScalingChestScreen(MultiModuleScreen<?> parent, BaseContainerMenu<T> container, Inventory playerInventory, Component title) {
     super(parent, container, playerInventory, title);
     BlockEntity tile = container.getTile();
-    IItemHandler handler = Optional.ofNullable(tile)
-                                   .flatMap(t -> t.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve())
-                                   .orElse(EmptyItemHandler.INSTANCE);
+    IItemHandler handler = tile == null ? null : tile.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, tile.getBlockPos(), null);
+    if (handler == null) {
+      handler = EmptyItemHandler.INSTANCE;
+    }
     this.scaling = handler instanceof IScalingContainer ? (IScalingContainer) handler : handler::getSlots;
     this.slotCount = scaling.getVisualSize();
     this.sliderActive = true;

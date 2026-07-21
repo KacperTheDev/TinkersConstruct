@@ -7,15 +7,7 @@
           "type": "minecraft:item",
           "functions": [
             {
-              "function": "tconstruct:add_tool_data",
-              "materials": [
-                {
-                  "type": "tconstruct:ancient"
-                },
-                {
-                  "type": "tconstruct:ancient"
-                }
-              ]
+              "function": "tconstruct:add_tool_data"
             },
             {
               "add": false,

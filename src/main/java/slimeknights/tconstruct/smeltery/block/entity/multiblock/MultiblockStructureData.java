@@ -4,7 +4,6 @@ import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,6 +12,7 @@ import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.tconstruct.common.multiblock.IMasterLogic;
 import slimeknights.tconstruct.common.multiblock.IServantLogic;
+import slimeknights.tconstruct.library.utils.TagUtil;
 import slimeknights.tconstruct.smeltery.block.component.SearedBlock;
 
 import javax.annotation.Nullable;
@@ -75,7 +75,8 @@ public class MultiblockStructureData {
     innerX = maxInside.getX() - minInside.getX() + 1;
     innerY = maxInside.getY() - minInside.getY() + 1;
     innerZ = maxInside.getZ() - minInside.getZ() + 1;
-    bounds = new AABB(minInside, maxInside.offset(1, 1, 1));
+    BlockPos maxExclusive = maxInside.offset(1, 1, 1);
+    bounds = new AABB(minInside.getX(), minInside.getY(), minInside.getZ(), maxExclusive.getX(), maxExclusive.getY(), maxExclusive.getZ());
   }
 
   /**
@@ -243,8 +244,8 @@ public class MultiblockStructureData {
    */
   public CompoundTag writeClientTag(BlockPos controllerPos) {
     CompoundTag nbt = new CompoundTag();
-    nbt.put(TAG_MIN, NbtUtils.writeBlockPos(minPos.subtract(controllerPos)));
-    nbt.put(TAG_MAX, NbtUtils.writeBlockPos(maxPos.subtract(controllerPos)));
+    nbt.put(TAG_MIN, TagUtil.writeBlockPos(minPos.subtract(controllerPos)));
+    nbt.put(TAG_MAX, TagUtil.writeBlockPos(maxPos.subtract(controllerPos)));
     return nbt;
   }
 
@@ -270,7 +271,7 @@ public class MultiblockStructureData {
   protected static ListTag writePosList(Collection<BlockPos> collection, BlockPos basePos) {
     ListTag list = new ListTag();
     for (BlockPos pos : collection) {
-      list.add(NbtUtils.writeBlockPos(pos.subtract(basePos)));
+      list.add(TagUtil.writeBlockPos(pos.subtract(basePos)));
     }
     return list;
   }

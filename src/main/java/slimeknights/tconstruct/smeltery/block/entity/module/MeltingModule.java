@@ -2,11 +2,13 @@ package slimeknights.tconstruct.smeltery.block.entity.module;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.tconstruct.common.network.InventorySlotSyncPacket;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
@@ -52,7 +54,7 @@ public class MeltingModule implements IMeltingContainer, ContainerData {
   private int requiredTemp = 0;
 
   /** Last recipe this slot contained */
-  private IMeltingRecipe lastRecipe;
+  private RecipeHolder<IMeltingRecipe> lastRecipe;
 
   /** Current item in this slot */
   @Getter
@@ -86,7 +88,7 @@ public class MeltingModule implements IMeltingContainer, ContainerData {
     // clear progress if setting to empty or the items do not match
     if (newStack.isEmpty()) {
       resetRecipe();
-    } else if (this.stack.isEmpty() || !ItemHandlerHelper.canItemStacksStack(this.stack, newStack)) {
+    } else if (this.stack.isEmpty() || !ItemStack.isSameItemSameComponents(this.stack, newStack)) {
       currentTime = 0;
     }
 
@@ -171,15 +173,15 @@ public class MeltingModule implements IMeltingContainer, ContainerData {
     }
 
     // first, try last recipe for the slot
-    IMeltingRecipe last = lastRecipe;
-    if (last != null && last.matches(this, world)) {
-      return last;
+    RecipeHolder<IMeltingRecipe> last = lastRecipe;
+    if (last != null && last.value().matches(this, world)) {
+      return last.value();
     }
     // if that fails, try to find a new recipe
-    Optional<IMeltingRecipe> newRecipe = world.getRecipeManager().getRecipeFor(TinkerRecipeTypes.MELTING.get(), this, world);
+    Optional<RecipeHolder<IMeltingRecipe>> newRecipe = world.getRecipeManager().getRecipeFor(TinkerRecipeTypes.MELTING.get(), this, world);
     if (newRecipe.isPresent()) {
       lastRecipe = newRecipe.get();
-      return lastRecipe;
+      return lastRecipe.value();
     }
     return null;
   }
@@ -208,27 +210,41 @@ public class MeltingModule implements IMeltingContainer, ContainerData {
    * Writes this module to NBT
    * @return  Module in NBT
    */
-  public CompoundTag writeToTag() {
-    CompoundTag nbt = new CompoundTag();
-    if (!stack.isEmpty()) {
-      stack.save(nbt);
-      nbt.putInt(TAG_CURRENT_TIME, currentTime);
-      nbt.putInt(TAG_REQUIRED_TIME, requiredTime);
-      nbt.putInt(TAG_REQUIRED_TEMP, requiredTemp);
+  public CompoundTag writeToTag(HolderLookup.Provider provider) {
+    if (stack.isEmpty()) {
+      return new CompoundTag();
     }
-    return nbt;
+    CompoundTag prefix = new CompoundTag();
+    prefix.putInt(TAG_CURRENT_TIME, currentTime);
+    prefix.putInt(TAG_REQUIRED_TIME, requiredTime);
+    prefix.putInt(TAG_REQUIRED_TEMP, requiredTemp);
+    return (CompoundTag) stack.save(provider, prefix);
   }
 
-  /**
-   * Reads this module from NBT
-   * @param nbt  NBT
-   */
-  public void readFromTag(CompoundTag nbt) {
-    stack = ItemStack.of(nbt);
+  /** Backwards-compatible runtime helper. Disk saving should use the provider overload. */
+  public CompoundTag writeToTag() {
+    return parent.getLevel() == null ? new CompoundTag() : writeToTag(parent.getLevel().registryAccess());
+  }
+
+  /** Reads this module from NBT using the registry provider supplied by BlockEntity loading. */
+  public void readFromTag(CompoundTag nbt, HolderLookup.Provider provider) {
+    stack = ItemStack.parseOptional(provider, nbt);
     if (!stack.isEmpty()) {
       currentTime = nbt.getInt(TAG_CURRENT_TIME);
       requiredTime = nbt.getInt(TAG_REQUIRED_TIME);
       requiredTemp = nbt.getInt(TAG_REQUIRED_TEMP);
+    } else {
+      resetRecipe();
+    }
+  }
+
+  /** Backwards-compatible runtime helper. Disk loading should use the provider overload. */
+  public void readFromTag(CompoundTag nbt) {
+    if (parent.getLevel() == null) {
+      stack = ItemStack.EMPTY;
+      resetRecipe();
+    } else {
+      readFromTag(nbt, parent.getLevel().registryAccess());
     }
   }
 

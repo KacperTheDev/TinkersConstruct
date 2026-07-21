@@ -2,7 +2,8 @@ package slimeknights.tconstruct.library.materials.stats;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import slimeknights.mantle.data.listener.MergingJsonFileLoader;
+import slimeknights.tconstruct.test.MergingJsonFileLoader;
+import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.test.BaseMcTest;
@@ -17,7 +18,7 @@ class MaterialStatsManagerTest extends BaseMcTest {
   private static final MaterialStatsId STATS_ID_DONT_CARE = new MaterialStatsId("dont", "care");
 
   private final MaterialStatsManager materialStatsManager = new MaterialStatsManager(() -> {});
-  private final MergingJsonFileLoader<?> fileLoader = new MergingJsonFileLoader<>(materialStatsManager);
+  private final MergingJsonFileLoader<?> fileLoader = new MergingJsonFileLoader<>(materialStatsManager, JsonHelper.DEFAULT_GSON, MaterialStatsManager.FOLDER);
 
   @Test
   void testLoadFile_statsExist() {
@@ -114,7 +115,7 @@ class MaterialStatsManagerTest extends BaseMcTest {
   @Test
   void loadMissingFile_ignored() {
     MaterialId material = new MaterialId(TConstruct.getResource("nonexistant"));
-    fileLoader.loadAndParseFiles(null);
+    fileLoader.loadAndParseFiles(null, new MaterialId[0]);
 
     // ensure that we get this far and that querying the missing material causes no errors
     Optional<ComplexTestStats> optionalStats = materialStatsManager.getStats(material, STATS_ID_DONT_CARE);

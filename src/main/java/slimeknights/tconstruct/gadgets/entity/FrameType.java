@@ -19,6 +19,10 @@ public enum FrameType implements StringRepresentable {
   @Getter
   private final int id = ordinal();
 
+  public int getId() {
+    return id;
+  }
+
   public static FrameType byId(int id) {
     if (id < 0 || id >= VALUES.length) {
       id = 0;

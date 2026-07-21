@@ -2,8 +2,8 @@ package slimeknights.tconstruct.tables.network;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent.Context;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import slimeknights.mantle.network.packet.IThreadsafePacket;
 import slimeknights.tconstruct.tables.client.inventory.BaseTabbedScreen;
 
@@ -13,10 +13,10 @@ public class UpdateStationScreenPacket implements IThreadsafePacket {
   private UpdateStationScreenPacket() {}
 
   @Override
-  public void encode(FriendlyByteBuf packetBuffer) {}
+  public void encode(RegistryFriendlyByteBuf packetBuffer) {}
 
   @Override
-  public void handleThreadsafe(Context context) {
+  public void handleThreadsafe(IPayloadContext context) {
     HandleClient.handle();
   }
 

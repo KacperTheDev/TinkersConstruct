@@ -1,0 +1,28 @@
+{
+  "type": "tconstruct:crafting_shaped_materials",
+  "key": {
+    "A": {
+      "type": "tconstruct:material",
+      "match": {
+        "item": "tconstruct:fake_storage_block"
+      },
+      "material": {
+        "type": "mantle:tag",
+        "tag": "tconstruct:compatibility_metals/alloys"
+      }
+    },
+    "B": {
+      "tag": "tconstruct:seared_blocks"
+    }
+  },
+  "parts": "A",
+  "pattern": [
+    "AAA",
+    " B ",
+    "BBB"
+  ],
+  "result": {
+    "count": 1,
+    "id": "tconstruct:tinkers_anvil"
+  }
+}

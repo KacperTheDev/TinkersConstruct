@@ -1,13 +1,13 @@
 package slimeknights.tconstruct.library.recipe.casting.material;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
@@ -68,7 +68,7 @@ public class CompositeCastingRecipe extends MaterialCastingRecipe {
 
   /* JEI display */
   @Override
-  public List<IDisplayableCastingRecipe> getRecipes(RegistryAccess access) {
+  public List<IDisplayableCastingRecipe> getRecipes(HolderLookup.Provider access) {
     if (multiRecipes == null) {
       RecipeType<?> type = getType();
       ImmutableList.Builder<IDisplayableCastingRecipe> recipes = ImmutableList.builder();

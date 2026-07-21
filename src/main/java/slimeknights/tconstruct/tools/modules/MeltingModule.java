@@ -7,11 +7,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.json.LevelingInt;
@@ -76,7 +77,7 @@ public record MeltingModule(LevelingInt temperature, LevelingInt nuggetsPerMetal
 
   /* Melting container */
   /** Last melting recipe used */
-  private static IMeltingRecipe lastRecipe = null;
+  private static RecipeHolder<IMeltingRecipe> lastRecipe = null;
   /** Current item stack being processed */
   private static ItemStack stack = ItemStack.EMPTY;
   /** Current modifier level being processed */
@@ -114,15 +115,16 @@ public record MeltingModule(LevelingInt temperature, LevelingInt nuggetsPerMetal
     level = modifier.intEffectiveLevel();
     MeltingModule.stack = stack;
     // first, update inventory
-    IMeltingRecipe recipe = lastRecipe;
-    if (recipe == null || !recipe.matches(this, world)) {
-      recipe = world.getRecipeManager().getRecipeFor(TinkerRecipeTypes.MELTING.get(), this, world).orElse(null);
-      if (recipe == null) {
+    RecipeHolder<IMeltingRecipe> holder = lastRecipe;
+    if (holder == null || !holder.value().matches(this, world)) {
+      holder = world.getRecipeManager().getRecipeFor(TinkerRecipeTypes.MELTING.get(), this, world).orElse(null);
+      if (holder == null) {
         MeltingModule.stack = ItemStack.EMPTY;
         return FluidStack.EMPTY;
       }
-      lastRecipe = recipe;
+      lastRecipe = holder;
     }
+    IMeltingRecipe recipe = holder.value();
     // get the result if the temperature is right
     FluidStack result = FluidStack.EMPTY;
     if (recipe.getTemperature(this) <= temperature.compute(level)) {

@@ -1,36 +1,16 @@
 package slimeknights.tconstruct.test;
 
-import net.minecraft.SharedConstants;
-import net.minecraft.server.Bootstrap;
-import net.minecraftforge.common.TierSortingRegistry;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.network.NetworkHooks;
-import net.minecraftforge.network.NetworkRegistry;
-import org.junit.jupiter.api.BeforeAll;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import static org.mockito.ArgumentMatchers.any;
+import io.netty.buffer.Unpooled;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 
 public class BaseMcTest {
 
-  @SuppressWarnings({"ResultOfMethodCallIgnored", "unused"})
-  @BeforeAll
-  static void setUpRegistries() {
-    SharedConstants.setVersion(TestWorldVersion.INSTANCE);
-    try (MockedStatic<NetworkHooks> mockNetwork = Mockito.mockStatic(NetworkHooks.class)) {
-      Bootstrap.bootStrap();
-    }
-    ModLoadingContext.get().setActiveContainer(new TestModContainer(TestModInfo.INSTANCE));
-
-    // ensure during static initialization, we don't load channel stuff that we lack access to
-    try (MockedStatic<NetworkRegistry> mockNetwork = Mockito.mockStatic(NetworkRegistry.class)) {
-      mockNetwork.when(() -> NetworkRegistry.newSimpleChannel(any(), any(), any(), any())).thenReturn(null);
-      TierSortingRegistry.getSortedTiers();
-    }
+  /** Creates the registry-aware buffer required by 1.21 payload and component codecs. */
+  protected static RegistryFriendlyByteBuf createRegistryBuffer() {
+    RegistryAccess access = new RegistryAccess.ImmutableRegistryAccess(BuiltInRegistries.REGISTRY.stream().toList());
+    return new RegistryFriendlyByteBuf(Unpooled.buffer(), access);
   }
 
   /** No need to set it up multiple times */
@@ -42,12 +22,6 @@ public class BaseMcTest {
       return;
     }
     setupTiers = true;
-    try {
-      Method method = TierSortingRegistry.class.getDeclaredMethod("recalculateItemTiers");
-      method.setAccessible(true);
-      method.invoke(TierSortingRegistry.class);
-    } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-      e.printStackTrace();
-    }
+    // Mining tiers are tag-based in 1.21.1 and no longer require a global recalculation.
   }
 }

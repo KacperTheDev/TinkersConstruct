@@ -7,10 +7,15 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.LootingLevelEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import slimeknights.tconstruct.common.TinkerDamageTypes;
 import slimeknights.tconstruct.common.TinkerEffect;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -24,6 +29,7 @@ import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ModifierNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.mantle.util.RegistryHelper;
 import slimeknights.tconstruct.shared.TinkerEffects;
 
 import javax.annotation.Nullable;
@@ -31,30 +37,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Logic to handle the looting event for all main tinker tools
- */
+/** Integrates Tinkers looting hooks with the native 1.21 enchantment-driven loot pipeline. */
 public class ModifierLootingHandler {
-  /** If contained in the set, they should use the offhand for looting */
   private static final Map<UUID,EquipmentSlot> LOOTING_OFFHAND = new HashMap<>();
+  private static final Map<UUID,RestoredStack> RESTORE_STACKS = new HashMap<>();
   private static boolean init = false;
 
-  /** Initializies this listener */
   public static void init() {
     if (init) {
       return;
     }
     init = true;
-    // we overwrite looting values from vanilla in a couple cases, but mod effects that globally boost looting should still boost us
-    MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, ModifierLootingHandler::onLooting);
-    MinecraftForge.EVENT_BUS.addListener(ModifierLootingHandler::onLeaveServer);
+    NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, false, LivingDeathEvent.class, ModifierLootingHandler::beforeLoot);
+    NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, false, LivingDropsEvent.class, ModifierLootingHandler::afterLoot);
+    NeoForge.EVENT_BUS.addListener(ModifierLootingHandler::onLeaveServer);
   }
 
-  /**
-   * Sets the hand used for looting, so the tool is fetched from the proper context
-   * @param entity    Player to set
-   * @param slotType  Slot type
-   */
   public static void setLootingSlot(LivingEntity entity, EquipmentSlot slotType) {
     if (slotType == EquipmentSlot.MAINHAND) {
       LOOTING_OFFHAND.remove(entity.getUUID());
@@ -63,69 +61,84 @@ public class ModifierLootingHandler {
     }
   }
 
-  /** Gets the slot to use for looting */
   public static EquipmentSlot getLootingSlot(@Nullable LivingEntity entity) {
     return entity != null ? LOOTING_OFFHAND.getOrDefault(entity.getUUID(), EquipmentSlot.MAINHAND) : EquipmentSlot.MAINHAND;
   }
 
-  /** Applies the looting bonus for modifiers */
-  private static void onLooting(LootingLevelEvent event) {
-    // must be an attacker with our tool
-    DamageSource damageSource = event.getDamageSource();
-    if (damageSource == null) {
+  /** Gets the effective vanilla looting level represented by an entity loot context. */
+  public static int getLootingLevel(LootContext context) {
+    Entity attacker = context.getParamOrNull(LootContextParams.ATTACKING_ENTITY);
+    if (attacker instanceof LivingEntity living) {
+      return EnchantmentHelper.getEnchantmentLevel(RegistryHelper.getHolder(living.registryAccess(), Enchantments.LOOTING), living);
+    }
+    return 0;
+  }
+
+  private static void beforeLoot(LivingDeathEvent event) {
+    if (event.isCanceled()) {
       return;
     }
     LivingEntity target = event.getEntity();
-
-    // bleeding kills use the level of the effect for looting
-    if (damageSource.is(TinkerDamageTypes.BLEEDING)) {
-      event.setLootingLevel(Math.max(0, TinkerEffect.getAmplifier(target, TinkerEffects.bleeding.get())));
-      return;
-    }
-
-    // otherwise, use the proper tool
-    Entity source = damageSource.getEntity();
-    if (source instanceof LivingEntity holder) {
-      Entity direct = damageSource.getDirectEntity();
-      int level = event.getLootingLevel();
-
-      // determine who is in charge of the looting
-      LootingContext context;
-      IToolStackView tool = null;
-      if (direct instanceof Projectile) {
-        // need to build a context from the relevant capabilities to use the modifier
-        ModifierNBT modifiers = EntityModifierCapability.getOrEmpty(direct);
-        context = new LootingContext(holder, target, damageSource, null);
-        // no modifiers means its not a projectile we fired, so just defer to dumb vanilla behavior of whatever looting
-        // since we don't set the enchantment on our tools, our looting modifiers won't set anything here anyways
-        if (!modifiers.isEmpty()) {
-          ModDataNBT persistentData = direct.getCapability(PersistentDataCapability.CAPABILITY).orElseGet(ModDataNBT::new);
-          level = LootingModifierHook.getLooting(new DummyToolStack(Items.AIR, modifiers, persistentData), context, 0);
+    DamageSource damageSource = event.getSource();
+    if (damageSource.getEntity() instanceof LivingEntity holder) {
+      var looting = RegistryHelper.getHolder(holder.registryAccess(), Enchantments.LOOTING);
+      int vanillaLevel = EnchantmentHelper.getEnchantmentLevel(looting, holder);
+      int level = getLootingLevel(target, damageSource, holder, vanillaLevel);
+      if (level != vanillaLevel) {
+        ItemStack original = holder.getMainHandItem();
+        ItemStack replacement = original.copy();
+        if (replacement.isEmpty()) {
+          replacement = new ItemStack(Items.WOODEN_SWORD);
         }
-      } else {
-        // not an arrow? means the held tool is to blame
-        EquipmentSlot slotType = getLootingSlot(holder);
-        context = new LootingContext(holder, target, damageSource, slotType);
-        ItemStack held = holder.getItemBySlot(slotType);
-
-        // if its modifiable, let it increase the level
-        if (held.is(TinkerTags.Items.MODIFIABLE)) {
-          tool = ToolStack.from(held);
-          level = LootingModifierHook.getLooting(tool, context, level);
-        } else if (slotType != EquipmentSlot.MAINHAND) {
-          // if it's not modifiable, yet we have a lot marked to blame for looting, ignore the event value
-          level = 0;
-        }
+        replacement.enchant(looting, level);
+        RESTORE_STACKS.put(target.getUUID(), new RestoredStack(holder, original));
+        holder.setItemSlot(EquipmentSlot.MAINHAND, replacement);
       }
-      // boost looting with armor regardless, hopefully you did not switch your pants mid arrow firing
-      level = ArmorLootingModifierHook.getLooting(tool, context, level);
-      // we allow the hook to return negatives to cancel out looting, so ensure its at least 0
-      event.setLootingLevel(Math.max(level, 0));
     }
   }
 
-  /** Called when a player leaves the server to clear the face */
+  private static void afterLoot(LivingDropsEvent event) {
+    RestoredStack restore = RESTORE_STACKS.remove(event.getEntity().getUUID());
+    if (restore != null) {
+      restore.holder.setItemSlot(EquipmentSlot.MAINHAND, restore.stack);
+    }
+  }
+
+  /** Computes the effective level using the same weapon, projectile and armor hooks as 1.20.1. */
+  public static int getLootingLevel(LivingEntity target, DamageSource damageSource, LivingEntity holder, int vanillaLevel) {
+    if (damageSource.is(TinkerDamageTypes.BLEEDING)) {
+      return Math.max(0, TinkerEffect.getAmplifier(target, TinkerEffects.bleeding.get()));
+    }
+
+    Entity direct = damageSource.getDirectEntity();
+    int level = vanillaLevel;
+    LootingContext context;
+    IToolStackView tool = null;
+    if (direct instanceof Projectile) {
+      ModifierNBT modifiers = EntityModifierCapability.getOrEmpty(direct);
+      context = new LootingContext(holder, target, damageSource, null);
+      if (!modifiers.isEmpty()) {
+        ModDataNBT persistentData = PersistentDataCapability.getOrWarn(direct);
+        level = LootingModifierHook.getLooting(new DummyToolStack(Items.AIR, modifiers, persistentData), context, 0);
+      }
+    } else {
+      EquipmentSlot slotType = getLootingSlot(holder);
+      context = new LootingContext(holder, target, damageSource, slotType);
+      ItemStack held = holder.getItemBySlot(slotType);
+      if (held.is(TinkerTags.Items.MODIFIABLE)) {
+        tool = ToolStack.from(held);
+        level = LootingModifierHook.getLooting(tool, context, level);
+      } else if (slotType != EquipmentSlot.MAINHAND) {
+        level = 0;
+      }
+    }
+    level = ArmorLootingModifierHook.getLooting(tool, context, level);
+    return Math.max(level, 0);
+  }
+
   private static void onLeaveServer(PlayerLoggedOutEvent event) {
     LOOTING_OFFHAND.remove(event.getEntity().getUUID());
   }
+
+  private record RestoredStack(LivingEntity holder, ItemStack stack) {}
 }

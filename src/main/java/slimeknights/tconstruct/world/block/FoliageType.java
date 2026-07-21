@@ -44,6 +44,13 @@ public enum FoliageType implements StringRepresentable {
   /** Tag for grass blocks with this foliage type */
   private final TagKey<Block> grassBlockTag;
 
+  public int getColor() { return color; }
+  public Tiers getHarvestTier() { return harvestTier; }
+  public MapColor getMapColor() { return mapColor; }
+  public boolean isNether() { return nether; }
+  @Override public String getSerializedName() { return serializedName; }
+  public TagKey<Block> getGrassBlockTag() { return grassBlockTag; }
+
   FoliageType(int color, Tiers harvestTier, MapColor mapColor, boolean nether) {
     this.color = color;
     this.harvestTier = harvestTier;

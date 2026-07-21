@@ -24,8 +24,8 @@ public class EnderferenceModifier extends Modifier implements ProjectileLaunchMo
   @Override
   protected void registerHooks(Builder hookBuilder) {
     hookBuilder.addHook(this, ModifierHooks.PROJECTILE_LAUNCH, ModifierHooks.PROJECTILE_SHOT, ModifierHooks.PROJECTILE_THROWN);
-    hookBuilder.addModule(MobEffectModule.builder(TinkerEffects.enderference).applyBeforeMelee(true).time(RandomLevelingValue.flat(100)).buildWeapon());
-    hookBuilder.addModule(MobEffectModule.builder(TinkerEffects.enderference).time(RandomLevelingValue.flat(100)).toolTag(TinkerTags.Items.ARMOR).chance(LevelingValue.eachLevel(0.25f)).buildCounter());
+    hookBuilder.addModule(MobEffectModule.builder(TinkerEffects.enderference.getDelegate()).applyBeforeMelee(true).time(RandomLevelingValue.flat(100)).buildWeapon());
+    hookBuilder.addModule(MobEffectModule.builder(TinkerEffects.enderference.getDelegate()).time(RandomLevelingValue.flat(100)).toolTag(TinkerTags.Items.ARMOR).chance(LevelingValue.eachLevel(0.25f)).buildCounter());
   }
 
   @Override

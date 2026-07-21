@@ -3,15 +3,15 @@ package slimeknights.tconstruct.smeltery.block.entity.tank;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import slimeknights.tconstruct.smeltery.block.entity.CastingBlockEntity;
 
 import javax.annotation.Nonnull;
@@ -24,6 +24,12 @@ public class CastingFluidHandler implements IFluidHandler {
   @Setter
   private int capacity = 0;
   private Fluid filter = Fluids.EMPTY;
+
+  public FluidStack getFluid() { return fluid; }
+
+  public void setFluid(FluidStack fluid) {
+    this.fluid = fluid;
+  }
 
   /** Checks if the given fluid is valid */
   public boolean isFluidValid(FluidStack stack) {
@@ -74,7 +80,7 @@ public class CastingFluidHandler implements IFluidHandler {
     if (fluid.isEmpty()) {
       int amount = Math.min(capacity, resource.getAmount());
       if (action.execute()) {
-        fluid = new FluidStack(resource, amount);
+        fluid = resource.copyWithAmount(amount);
         tile.onContentsChanged();
       }
       return amount;
@@ -125,7 +131,7 @@ public class CastingFluidHandler implements IFluidHandler {
       return FluidStack.EMPTY;
     }
 
-    FluidStack stack = new FluidStack(fluid, drained);
+    FluidStack stack = fluid.copyWithAmount(drained);
     if (action.execute()) {
       fluid.shrink(drained);
       if (fluid.isEmpty()) {
@@ -172,29 +178,42 @@ public class CastingFluidHandler implements IFluidHandler {
   private static final String TAG_CAPACITY = "capacity";
 
   /** Reads the tank from Tag */
-  public void readFromTag(CompoundTag nbt) {
+  public void readFromTag(CompoundTag nbt, HolderLookup.Provider provider) {
     capacity = nbt.getInt(TAG_CAPACITY);
     if (nbt.contains(TAG_FLUID, Tag.TAG_COMPOUND)) {
-      setFluid(FluidStack.loadFluidStackFromNBT(nbt.getCompound(TAG_FLUID)));
+      setFluid(FluidStack.parseOptional(provider, nbt.getCompound(TAG_FLUID)));
+    } else {
+      setFluid(FluidStack.EMPTY);
     }
+    filter = Fluids.EMPTY;
     if (nbt.contains(TAG_FILTER, Tag.TAG_STRING)) {
-      Fluid fluid = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(nbt.getString(TAG_FILTER)));
+      Fluid fluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(nbt.getString(TAG_FILTER)));
       if (fluid != null) {
         filter = fluid;
       }
     }
   }
 
+  public void readFromTag(CompoundTag nbt) {
+    if (tile.getLevel() != null) {
+      readFromTag(nbt, tile.getLevel().registryAccess());
+    }
+  }
+
   /** Write the tank from NBT */
   @SuppressWarnings("deprecation")
-  public CompoundTag writeToTag(CompoundTag nbt) {
+  public CompoundTag writeToTag(CompoundTag nbt, HolderLookup.Provider provider) {
     nbt.putInt(TAG_CAPACITY, capacity);
     if (!fluid.isEmpty()) {
-      nbt.put(TAG_FLUID, fluid.writeToNBT(new CompoundTag()));
+      nbt.put(TAG_FLUID, fluid.save(provider));
     }
     if (filter != Fluids.EMPTY) {
       nbt.putString(TAG_FILTER, BuiltInRegistries.FLUID.getKey(filter).toString());
     }
     return nbt;
+  }
+
+  public CompoundTag writeToTag(CompoundTag nbt) {
+    return tile.getLevel() == null ? nbt : writeToTag(nbt, tile.getLevel().registryAccess());
   }
 }

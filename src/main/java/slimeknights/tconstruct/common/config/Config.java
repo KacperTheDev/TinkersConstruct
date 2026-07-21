@@ -2,15 +2,22 @@ package slimeknights.tconstruct.common.config;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
-import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
-import net.minecraftforge.common.ForgeConfigSpec.DoubleValue;
-import net.minecraftforge.common.ForgeConfigSpec.EnumValue;
-import net.minecraftforge.common.ForgeConfigSpec.IntValue;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec.BooleanValue;
+import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
+import net.neoforged.neoforge.common.ModConfigSpec.DoubleValue;
+import net.neoforged.neoforge.common.ModConfigSpec.EnumValue;
+import net.neoforged.neoforge.common.ModConfigSpec.IntValue;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.tuple.Pair;
 import slimeknights.tconstruct.library.recipe.melting.IMeltingContainer.IOreRate;
 import slimeknights.tconstruct.library.recipe.melting.IMeltingContainer.OreRateType;
@@ -22,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 
 public class Config {
+  private static boolean extendFireProtectionSlots;
+  private static boolean extendBlastProtectionSlots;
   /**
    * Common specific configuration
    */
@@ -61,7 +70,7 @@ public class Config {
     public final EnumValue<LogInvalidToolStack> logInvalidToolStack;
     public enum LogInvalidToolStack { STACKTRACE, WARNING, IGNORED }
 
-    Common(ForgeConfigSpec.Builder builder) {
+    Common(ModConfigSpec.Builder builder) {
       builder.comment("Everything to do with gameplay").push("gameplay");
 
       this.shouldSpawnWithTinkersBook = builder
@@ -73,10 +82,10 @@ public class Config {
       ImmutableList.Builder<ConfigurableAction> actions = ImmutableList.builder();
       actions.add(new ConfigurableAction(builder, "extendFireProtectionSlots", true,
                                          "If true, extends the applicable slots for the fire protection enchantment to work better with shields. Will not impact gameplay with the vanilla enchantment.\nIf false, fire protection on a shield will not reduce fire tick time.",
-                                         () -> Enchantments.FIRE_PROTECTION.slots = EquipmentSlot.values()));
+                                         () -> extendFireProtectionSlots = true));
       actions.add(new ConfigurableAction(builder, "extendBlastProtectionSlots", true,
                                          "If true, extends the applicable slots for the blast protection enchantment to work better with shields. Will not impact gameplay with the vanilla enchantment.\nIf false, blast protection on a shield will not reduce explosion knockback.",
-                                         () -> Enchantments.BLAST_PROTECTION.slots = EquipmentSlot.values()));
+                                         () -> extendBlastProtectionSlots = true));
       toolTweaks = actions.build();
 
       this.syncKnockbackResistance = builder
@@ -221,14 +230,14 @@ public class Config {
    * Client specific configuration - only loaded clientside from tconstruct-client.toml
    */
   public static class Client {
-    //public final ForgeConfigSpec.BooleanValue temperatureInCelsius;
-    public final ForgeConfigSpec.BooleanValue tankFluidModel;
-    public final ForgeConfigSpec.BooleanValue logMissingMaterialTextures;
-    public final ForgeConfigSpec.BooleanValue logMissingModifierTextures;
-    public final ForgeConfigSpec.BooleanValue renderShieldSlotItem;
-    public final ForgeConfigSpec.BooleanValue renderSleevesItem;
-    public final ForgeConfigSpec.BooleanValue modifiersIDsInAdvancedTooltips;
-    public final ForgeConfigSpec.IntValue maxSmelteryItemQuads;
+    //public final ModConfigSpec.BooleanValue temperatureInCelsius;
+    public final ModConfigSpec.BooleanValue tankFluidModel;
+    public final ModConfigSpec.BooleanValue logMissingMaterialTextures;
+    public final ModConfigSpec.BooleanValue logMissingModifierTextures;
+    public final ModConfigSpec.BooleanValue renderShieldSlotItem;
+    public final ModConfigSpec.BooleanValue renderSleevesItem;
+    public final ModConfigSpec.BooleanValue modifiersIDsInAdvancedTooltips;
+    public final ModConfigSpec.IntValue maxSmelteryItemQuads;
 
     // JEI
     public final BooleanValue showModifiersInJEI;
@@ -241,19 +250,19 @@ public class Config {
     public final BooleanValue showPotionFluidInJEI;
 
     // framed modifier
-    public final ForgeConfigSpec.BooleanValue renderItemFrame;
-    public final ForgeConfigSpec.IntValue itemFrameXOffset;
-    public final ForgeConfigSpec.IntValue itemFrameYOffset;
-    public final ForgeConfigSpec.EnumValue<Orientation2D> itemFrameLocation;
-    public final ForgeConfigSpec.IntValue itemsPerRow;
+    public final ModConfigSpec.BooleanValue renderItemFrame;
+    public final ModConfigSpec.IntValue itemFrameXOffset;
+    public final ModConfigSpec.IntValue itemFrameYOffset;
+    public final ModConfigSpec.EnumValue<Orientation2D> itemFrameLocation;
+    public final ModConfigSpec.IntValue itemsPerRow;
 
     // map modifier
-    public final ForgeConfigSpec.IntValue mapXOffset;
-    public final ForgeConfigSpec.IntValue mapYOffset;
-    public final ForgeConfigSpec.DoubleValue mapScale;
-    public final ForgeConfigSpec.EnumValue<Orientation2D> mapLocation;
+    public final ModConfigSpec.IntValue mapXOffset;
+    public final ModConfigSpec.IntValue mapYOffset;
+    public final ModConfigSpec.DoubleValue mapScale;
+    public final ModConfigSpec.EnumValue<Orientation2D> mapLocation;
 
-    Client(ForgeConfigSpec.Builder builder) {
+    Client(ModConfigSpec.Builder builder) {
       builder.comment("Client only settings").push("client");
 
 //      this.temperatureInCelsius = builder
@@ -389,28 +398,47 @@ public class Config {
     }
   }
 
-  public static final ForgeConfigSpec clientSpec;
+  public static final ModConfigSpec clientSpec;
   public static final Client CLIENT;
 
   static {
-    final Pair<Client, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Client::new);
+    final Pair<Client, ModConfigSpec> specPair = new ModConfigSpec.Builder().configure(Client::new);
     clientSpec = specPair.getRight();
     CLIENT = specPair.getLeft();
   }
 
-  public static final ForgeConfigSpec commonSpec;
+  public static final ModConfigSpec commonSpec;
   public static final Common COMMON;
 
   static {
-    final Pair<Common, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Common::new);
+    final Pair<Common, ModConfigSpec> specPair = new ModConfigSpec.Builder().configure(Common::new);
     commonSpec = specPair.getRight();
     COMMON = specPair.getLeft();
   }
 
   /** Registers any relevant listeners for config */
-  public static void init() {
-    ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.commonSpec);
-    ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.clientSpec);
+  public static void init(ModContainer container) {
+    container.registerConfig(ModConfig.Type.COMMON, Config.commonSpec);
+    container.registerConfig(ModConfig.Type.CLIENT, Config.clientSpec);
+    NeoForge.EVENT_BUS.addListener(Config::addShieldProtectionAttributes);
+  }
+
+  private static void addShieldProtectionAttributes(ItemAttributeModifierEvent event) {
+    if (!event.getItemStack().canPerformAction(net.neoforged.neoforge.common.ItemAbilities.SHIELD_BLOCK)) {
+      return;
+    }
+    event.getItemStack().getEnchantments().entrySet().forEach(entry -> entry.getKey().unwrapKey().ifPresent(key -> {
+      int level = entry.getIntValue();
+      if (extendFireProtectionSlots && key == Enchantments.FIRE_PROTECTION) {
+        event.addModifier(Attributes.BURNING_TIME,
+          new AttributeModifier(ResourceLocation.withDefaultNamespace("enchantment.fire_protection"), -0.15F * level, AttributeModifier.Operation.ADD_MULTIPLIED_BASE),
+          EquipmentSlotGroup.HAND);
+      } else if (extendBlastProtectionSlots && key == Enchantments.BLAST_PROTECTION) {
+        event.addModifier(Attributes.EXPLOSION_KNOCKBACK_RESISTANCE,
+          new AttributeModifier(ResourceLocation.withDefaultNamespace("enchantment.blast_protection"), 0.15F * level, AttributeModifier.Operation.ADD_VALUE),
+          EquipmentSlotGroup.HAND);
+      }
+    }));
   }
 
   /** Method of syncing the tool inventory on open to prevent desyncs down the line. */
@@ -425,7 +453,7 @@ public class Config {
     private final ConfigValue<Integer> nuggetsPerMetal;
     private final ConfigValue<Integer> shardsPerGem;
 
-    public OreRate(ForgeConfigSpec.Builder builder, int defaultNuggets, int defaultQuarters) {
+    public OreRate(ModConfigSpec.Builder builder, int defaultNuggets, int defaultQuarters) {
       nuggetsPerMetal = builder
         .comment("Number of nuggets produced per metal ore unit melted. 9 nuggets would give 1 ingot")
         .defineInRange("nuggetsPerMetal", defaultNuggets, 1, 45);

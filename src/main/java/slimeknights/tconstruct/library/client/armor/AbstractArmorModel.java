@@ -13,9 +13,9 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.EventPriority;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.bus.api.EventPriority;
 import slimeknights.tconstruct.library.client.armor.texture.ArmorTextureSupplier.ArmorTexture;
 import slimeknights.tconstruct.library.client.armor.texture.ArmorTextureSupplier.TextureType;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
@@ -64,7 +64,16 @@ public abstract class AbstractArmorModel extends Model {
       green *= (float)(color >> 8 & 255) / 255.0F;
       blue *= (float)(color & 255) / 255.0F;
     }
-    model.renderToBuffer(matrices, buffer, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+    model.renderToBuffer(matrices, buffer, packedLightIn, packedOverlayIn, packColor(red, green, blue, alpha));
+  }
+
+  /** Packs normalized RGBA channels into the native 1.21 ARGB model color. */
+  public static int packColor(float red, float green, float blue, float alpha) {
+    int a = Math.max(0, Math.min(255, Math.round(alpha * 255.0F)));
+    int r = Math.max(0, Math.min(255, Math.round(red * 255.0F)));
+    int g = Math.max(0, Math.min(255, Math.round(green * 255.0F)));
+    int b = Math.max(0, Math.min(255, Math.round(blue * 255.0F)));
+    return a << 24 | r << 16 | g << 8 | b;
   }
 
   /** Renders the wings layer */
@@ -86,8 +95,8 @@ public abstract class AbstractArmorModel extends Model {
   /** Initializes the wrapper */
   public static void init() {
     // register listeners to set and clear the buffer
-    MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, false, RenderLivingEvent.Pre.class, event -> buffer = event.getMultiBufferSource());
-    MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, false, RenderLivingEvent.Post.class, event -> buffer = null);
+    NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, false, RenderLivingEvent.Pre.class, event -> buffer = event.getMultiBufferSource());
+    NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, false, RenderLivingEvent.Post.class, event -> buffer = null);
   }
 
   /** Wings model to render */

@@ -1,7 +1,9 @@
 package slimeknights.tconstruct.tools.menu;
 
 import lombok.Getter;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -14,11 +16,15 @@ import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.items.ItemStackHandler;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.items.ItemStackHandler;
 import slimeknights.mantle.fluid.FluidTransferHelper;
 import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferDirection;
 import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferResult;
@@ -39,6 +45,7 @@ import slimeknights.tconstruct.tools.network.ToolContainerFluidUpdatePacket;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 /** Container for a tool inventory */
 public class ToolContainerMenu extends AbstractContainerMenu {
@@ -90,13 +97,13 @@ public class ToolContainerMenu extends AbstractContainerMenu {
   }
 
   /** Creates a new instance of this container on the client side */
-  public static ToolContainerMenu forClient(int id, Inventory inventory, FriendlyByteBuf buffer) {
+  public static ToolContainerMenu forClient(int id, Inventory inventory, RegistryFriendlyByteBuf buffer) {
     int slotIndex = buffer.readVarInt();
     ToolSyncType syncType = buffer.readEnum(ToolSyncType.class);
     // when syncing the full stack, overwrite the spot in the inventory
     ItemStack stack;
     if (syncType == ToolSyncType.FULL_STACK) {
-      stack = buffer.readItem();
+      stack = ItemStack.OPTIONAL_STREAM_CODEC.decode(buffer);
       inventory.setItem(slotIndex, stack);
     } else {
       stack = inventory.getItem(slotIndex);
@@ -117,8 +124,9 @@ public class ToolContainerMenu extends AbstractContainerMenu {
     }
     // if the stack looks like it could be our tool, fetch the handler from it
     IItemHandler handler;
-    if (stack.hasTag() && stack.is(TinkerTags.Items.MODIFIABLE)) {
-      handler = stack.getCapability(ForgeCapabilities.ITEM_HANDLER).filter(cap -> cap instanceof IItemHandlerModifiable).orElse(EmptyItemHandler.INSTANCE);
+    if (!stack.getComponentsPatch().isEmpty() && stack.is(TinkerTags.Items.MODIFIABLE)) {
+      IItemHandler capability = stack.getCapability(Capabilities.ItemHandler.ITEM);
+      handler = capability instanceof IItemHandlerModifiable ? capability : EmptyItemHandler.INSTANCE;
       // wrong number of slots means something went wrong, use a dummy
       if (handler.getSlots() != size) {
         handler = new ItemStackHandler(size);
@@ -272,7 +280,29 @@ public class ToolContainerMenu extends AbstractContainerMenu {
   public void slotsChanged(Container pContainer) {
     super.slotsChanged(pContainer);
     if (craftingContainer != null && resultContainer != null) {
-      CraftingMenu.slotChangedCraftingGrid(this, player.level(), player, craftingContainer, resultContainer);
+      updateCraftingResult();
+    }
+  }
+
+  private void updateCraftingResult() {
+    if (!player.level().isClientSide) {
+      CraftingInput input = craftingContainer.asCraftInput();
+      ServerPlayer serverPlayer = (ServerPlayer)player;
+      ItemStack result = ItemStack.EMPTY;
+      Optional<RecipeHolder<CraftingRecipe>> match = player.level().getServer().getRecipeManager()
+        .getRecipeFor(RecipeType.CRAFTING, input, player.level(), (RecipeHolder<CraftingRecipe>)null);
+      if (match.isPresent()) {
+        RecipeHolder<CraftingRecipe> holder = match.get();
+        if (resultContainer.setRecipeUsed(player.level(), serverPlayer, holder)) {
+          ItemStack assembled = holder.value().assemble(input, player.level().registryAccess());
+          if (assembled.isItemEnabled(player.level().enabledFeatures())) {
+            result = assembled;
+          }
+        }
+      }
+      resultContainer.setItem(0, result);
+      setRemoteSlot(0, result);
+      serverPlayer.connection.send(new ClientboundContainerSetSlotPacket(containerId, incrementStateId(), 0, result));
     }
   }
 

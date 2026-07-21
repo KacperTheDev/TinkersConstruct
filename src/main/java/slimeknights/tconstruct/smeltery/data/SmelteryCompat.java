@@ -5,7 +5,7 @@ import net.minecraft.core.HolderSet.Named;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.neoforged.neoforge.fluids.BaseFlowingFluid;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jetbrains.annotations.Nullable;
 import slimeknights.mantle.registration.object.FluidObject;
@@ -64,26 +64,28 @@ public enum SmelteryCompat {
 
   @Getter
   private final String name = this.name().toLowerCase(Locale.US);
-  private final FluidObject<? extends ForgeFlowingFluid> fluid;
+  private final FluidObject<? extends BaseFlowingFluid> fluid;
   @Getter
   private final CompatType type;
   /** @deprecated use {@link #isPresent()}. No longer does anything. */
   @Deprecated(forRemoval = true)
   @Getter
   private final String[] tags = new String[0];
+
+  public CompatType getType() { return type; }
   /** Material that must be present to show this compat. */
   @Nullable
   private final MaterialId material;
 
   /** Creates a compat using a material for the JEI condition. Will show fluids if the material is present. */
-  SmelteryCompat(FluidObject<? extends ForgeFlowingFluid> fluid, CompatType type, @Nullable MaterialId material) {
+  SmelteryCompat(FluidObject<? extends BaseFlowingFluid> fluid, CompatType type, @Nullable MaterialId material) {
     this.fluid = fluid;
     this.type = type;
     this.material = material;
   }
 
   /** Creates compat using just the local name as JEI condition. */
-  SmelteryCompat(FluidObject<? extends ForgeFlowingFluid> fluid, CompatType type) {
+  SmelteryCompat(FluidObject<? extends BaseFlowingFluid> fluid, CompatType type) {
     this(fluid, type, null);
   }
 

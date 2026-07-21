@@ -5,11 +5,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:amethyst_bronze"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -19,11 +15,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:bamboo"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -33,11 +25,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:blazewood"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -47,11 +35,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:blazing_bone"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -61,11 +45,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:bone"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -75,11 +55,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:chorus"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -89,11 +65,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:cinderslime"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -103,11 +75,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:cobalt"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -117,11 +85,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:copper"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -131,11 +95,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:darkthread"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -145,11 +105,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:enderslime_vine"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -159,11 +115,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:flint"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -173,11 +125,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:hepatizon"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -187,11 +135,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:ichorskin"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -201,11 +145,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:iron"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -215,11 +155,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:jeweled_hide"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -229,11 +165,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:knightmetal"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -243,11 +175,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:knightslime"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -257,11 +185,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:leather"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -271,11 +195,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:manyullyn"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -285,11 +205,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:nahuatl"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -299,11 +215,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:necrotic_bone"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -313,11 +225,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:pig_iron"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -327,11 +235,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:queens_slime"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -341,11 +245,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:rock"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -355,11 +255,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:rose_gold"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -369,11 +265,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:scorched_stone"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -383,11 +275,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:seared_stone"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -397,11 +285,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:skyslime_vine"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -411,11 +295,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:slimeskin"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -425,11 +305,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:slimesteel"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -439,11 +315,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:slimewood"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -453,11 +325,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:string"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -467,11 +335,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:twisting_vine"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -481,11 +345,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:vine"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -495,11 +355,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:weeping_vine"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -509,11 +365,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:whitestone"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -523,11 +375,7 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "tconstruct:has_material",
-              "material": "tconstruct:wood"
-            }
+            "items": "#tconstruct:modifiable"
           }
         ]
       },
@@ -535,16 +383,14 @@
     }
   },
   "display": {
-    "announce_to_chat": true,
     "description": {
       "translate": "advancements.tconstruct.tools.material_master.description"
     },
     "frame": "challenge",
-    "hidden": false,
     "icon": {
-      "item": "tconstruct:manyullyn_ingot"
+      "count": 1,
+      "id": "tconstruct:manyullyn_ingot"
     },
-    "show_toast": true,
     "title": {
       "translate": "advancements.tconstruct.tools.material_master.title"
     }

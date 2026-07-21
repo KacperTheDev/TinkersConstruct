@@ -1,13 +1,15 @@
 package slimeknights.tconstruct.library.recipe.melting;
 
+import slimeknights.tconstruct.library.data.recipe.LoadableRecipeOutput;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import slimeknights.mantle.recipe.helper.FluidOutput;
 import slimeknights.mantle.registration.object.FluidObject;
@@ -176,12 +178,12 @@ public class MeltingRecipeBuilder extends AbstractRecipeBuilder<MeltingRecipeBui
 
   @SuppressWarnings("deprecation")
   @Override
-  public void save(Consumer<FinishedRecipe> consumer) {
+  public void save(RecipeOutput consumer) {
     save(consumer, BuiltInRegistries.FLUID.getKey(output.get().getFluid()));
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
+  public void save(RecipeOutput consumer, ResourceLocation id) {
     if (oreRate != null && unitSizes != null) {
       throw new IllegalStateException("Builder cannot be both ore and damagable");
     }
@@ -189,17 +191,11 @@ public class MeltingRecipeBuilder extends AbstractRecipeBuilder<MeltingRecipeBui
     ResourceLocation advancementId = this.buildOptionalAdvancement(id, "melting");
     // based on properties, choose which recipe to build
     if (oreRate != null) {
-      consumer.accept(new LoadableFinishedRecipe<>(
-        new OreMeltingRecipe(id, group, input, output, temperature, time, byproducts, oreRate, byproductRates),
-        OreMeltingRecipe.LOADER, advancementId));
+      saveRecipe(consumer, id, new OreMeltingRecipe(id, group, input, output, temperature, time, byproducts, oreRate, byproductRates), advancementId);
     } else if (unitSizes != null) {
-      consumer.accept(new LoadableFinishedRecipe<>(
-        new DamageableMeltingRecipe(id, group, input, output, temperature, time, byproducts, unitSizes[0], List.of(Arrays.stream(unitSizes, 1, unitSizes.length).boxed().toArray(Integer[]::new))),
-        DamageableMeltingRecipe.LOADER, advancementId));
+      saveRecipe(consumer, id, new DamageableMeltingRecipe(id, group, input, output, temperature, time, byproducts, unitSizes[0], List.of(Arrays.stream(unitSizes, 1, unitSizes.length).boxed().toArray(Integer[]::new))), advancementId);
     } else {
-      consumer.accept(new LoadableFinishedRecipe<>(
-        new MeltingRecipe(id, group, input, output, temperature, time, byproducts),
-        MeltingRecipe.LOADER, advancementId));
+      saveRecipe(consumer, id, new MeltingRecipe(id, group, input, output, temperature, time, byproducts), advancementId);
     }
   }
 }

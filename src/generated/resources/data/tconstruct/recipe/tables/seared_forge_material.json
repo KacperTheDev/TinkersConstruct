@@ -1,0 +1,34 @@
+{
+  "type": "tconstruct:crafting_shaped_materials",
+  "key": {
+    "A": {
+      "tag": "tconstruct:seared_blocks"
+    },
+    "B": {
+      "type": "tconstruct:material",
+      "match": {
+        "item": "tconstruct:fake_storage_block"
+      },
+      "material": {
+        "type": "mantle:tag",
+        "tag": "tconstruct:compatibility_metals/alloys"
+      }
+    },
+    "C": {
+      "item": "tconstruct:tinker_station"
+    }
+  },
+  "parts": "B",
+  "pattern": [
+    "AAA",
+    "BCB",
+    "B B"
+  ],
+  "result": {
+    "components": {
+      "minecraft:custom_name": "{\"translate\":\"block.tconstruct.tool_forge\"}"
+    },
+    "count": 1,
+    "id": "tconstruct:tinkers_anvil"
+  }
+}

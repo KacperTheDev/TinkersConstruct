@@ -470,6 +470,12 @@ public class TinkerStationScreen extends ToolTableScreen<TinkerStationBlockEntit
   }
 
   @Override
+  public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    return mouseScrolled(mouseX, mouseY, scrollY);
+  }
+
+  /** @deprecated use the native four-axis scroll callback */
+  @Deprecated
   public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
     if (this.tinkerInfo.handleMouseScrolled(mouseX, mouseY, delta)) {
       return false;
@@ -479,7 +485,7 @@ public class TinkerStationScreen extends ToolTableScreen<TinkerStationBlockEntit
       return false;
     }
 
-    return super.mouseScrolled(mouseX, mouseY, delta);
+    return super.mouseScrolled(mouseX, mouseY, 0, delta);
   }
 
   @Override
@@ -630,12 +636,6 @@ public class TinkerStationScreen extends ToolTableScreen<TinkerStationBlockEntit
       this.tile.setItemName(name);
       TinkerNetwork.getInstance().sendToServer(new TinkerStationRenamePacket(name));
     }
-  }
-
-  @Override
-  public void containerTick() {
-    super.containerTick();
-    this.textField.tick();
   }
 
   @Override

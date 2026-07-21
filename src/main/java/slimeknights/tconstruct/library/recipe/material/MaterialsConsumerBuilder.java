@@ -1,88 +1,90 @@
 package slimeknights.tconstruct.library.recipe.material;
 
-import com.google.gson.JsonObject;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import slimeknights.mantle.recipe.data.ConsumerWrapperBuilder;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.common.crafting.CompoundIngredient;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
-import slimeknights.tconstruct.tables.TinkerTables;
+import slimeknights.tconstruct.library.recipe.ingredient.MaterialIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.MaterialValueIngredient;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
-/** Special variant of {@link ConsumerWrapperBuilder} for {@link ShapedMaterialsRecipe} and {@link ShapelessMaterialsRecipe} */
+/** Converts vanilla crafting builder results into material-aware recipes. */
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class MaterialsConsumerBuilder {
-  private final String parts;
-  private final int partCount;
+  private final int shapedPartCount;
+  private final int shapelessPartCount;
   private final List<MaterialVariantId> materials = new ArrayList<>();
 
-  /** Creates a new shaped recipe with the given ingredients as parts */
   public static MaterialsConsumerBuilder shaped(String parts) {
     if (parts.isEmpty()) {
       throw new IllegalArgumentException("Parts may not be empty");
     }
-    return new MaterialsConsumerBuilder(parts, 0);
+    return new MaterialsConsumerBuilder(parts.length(), 0);
   }
 
-  /** Creates a new shapeless recipe with the first ingredients as parts */
   public static MaterialsConsumerBuilder shapeless(int parts) {
     if (parts <= 0) {
       throw new IllegalArgumentException("Parts must be greater than 0");
     }
-    return new MaterialsConsumerBuilder("", parts);
+    return new MaterialsConsumerBuilder(0, parts);
   }
 
-  /** Adds a material to the builder */
   public MaterialsConsumerBuilder material(MaterialVariantId material) {
     materials.add(material);
     return this;
   }
 
-  /** Builds the wrapped consumer */
-  public Consumer<FinishedRecipe> build(Consumer<FinishedRecipe> consumer) {
-    return (recipe) -> consumer.accept(new Wrapped(recipe, materials, parts, partCount));
+  public RecipeOutput build(RecipeOutput output) {
+    List<MaterialVariantId> extraMaterials = List.copyOf(materials);
+    return new RecipeOutput() {
+      @Override
+      public Advancement.Builder advancement() {
+        return output.advancement();
+      }
+
+      @Override
+      public void accept(ResourceLocation id, Recipe<?> recipe, @Nullable AdvancementHolder advancement, ICondition... conditions) {
+        Recipe<?> converted;
+        if (shapelessPartCount > 0) {
+          if (!(recipe instanceof ShapelessRecipe shapeless)) {
+            throw new IllegalArgumentException("Material recipe requires a shapeless recipe, got " + recipe.getClass().getName());
+          }
+          converted = new ShapelessMaterialsRecipe(shapeless, shapelessPartCount, extraMaterials);
+        } else {
+          if (!(recipe instanceof ShapedRecipe shaped)) {
+            throw new IllegalArgumentException("Material recipe requires a shaped recipe, got " + recipe.getClass().getName());
+          }
+          List<Ingredient> parts = shaped.getIngredients().stream().filter(MaterialsConsumerBuilder::containsMaterialIngredient).distinct().toList();
+          if (parts.size() != shapedPartCount) {
+            throw new IllegalStateException("Expected " + shapedPartCount + " material part ingredients in " + id + ", found " + parts.size());
+          }
+          converted = new ShapedMaterialsRecipe(shaped, parts, extraMaterials);
+        }
+        output.accept(id, converted, advancement, conditions);
+      }
+    };
   }
 
-  private record Wrapped(FinishedRecipe original, List<MaterialVariantId> materials, String parts, int partCount) implements FinishedRecipe {
-    @Override
-    public ResourceLocation getId() {
-      return original.getId();
+  private static boolean containsMaterialIngredient(Ingredient ingredient) {
+    if (!ingredient.isCustom()) {
+      return false;
     }
-
-    @Override
-    public RecipeSerializer<?> getType() {
-      return partCount > 0 ? TinkerTables.shapelessMaterialsRecipeSerializer.get() : TinkerTables.shapedMaterialsRecipeSerializer.get();
+    Object custom = ingredient.getCustomIngredient();
+    if (custom instanceof MaterialIngredient || custom instanceof MaterialValueIngredient) {
+      return true;
     }
-
-    @Override
-    public void serializeRecipeData(JsonObject json) {
-      original.serializeRecipeData(json);
-      if (!materials.isEmpty()) {
-        json.add(ShapedMaterialsRecipe.Serializer.MATERIAL_FIELD.key(), ShapedMaterialsRecipe.Serializer.EXTRA_MATERIALS.serialize(materials));
-      }
-      if (!parts.isEmpty()) {
-        json.addProperty("parts", parts);
-      } else {
-        json.addProperty("parts", partCount);
-      }
-    }
-
-    @Nullable
-    @Override
-    public JsonObject serializeAdvancement() {
-      return original.serializeAdvancement();
-    }
-
-    @Nullable
-    @Override
-    public ResourceLocation getAdvancementId() {
-      return original.getAdvancementId();
-    }
+    return custom instanceof CompoundIngredient compound && compound.children().stream().anyMatch(MaterialsConsumerBuilder::containsMaterialIngredient);
   }
 }

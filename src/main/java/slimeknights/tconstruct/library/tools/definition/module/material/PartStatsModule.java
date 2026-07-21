@@ -70,6 +70,11 @@ public class PartStatsModule extends MaterialStatsModule implements ToolPartsHoo
     @Setter @Accessors(fluent = true)
     private int primaryPart = 0;
 
+    public Builder primaryPart(int primaryPart) {
+      this.primaryPart = primaryPart;
+      return this;
+    }
+
     /** Adds a part to the builder */
     public Builder part(IToolPart part, float scale) {
       parts.add(part);

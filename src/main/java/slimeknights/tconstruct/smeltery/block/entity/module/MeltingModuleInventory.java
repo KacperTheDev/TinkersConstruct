@@ -1,15 +1,16 @@
 package slimeknights.tconstruct.smeltery.block.entity.module;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
-import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.tconstruct.library.recipe.melting.IMeltingContainer.IOreRate;
 import slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe;
@@ -224,9 +225,9 @@ public class MeltingModuleInventory implements IItemHandlerModifiable {
     MeltingModule module = getModule(slot);
     boolean canInsert = module.getStack().isEmpty();
     if (!simulate && canInsert) {
-      setStackInSlot(slot, ItemHandlerHelper.copyStackWithSize(stack, 1));
+      setStackInSlot(slot, slimeknights.tconstruct.library.utils.ItemStackDataUtil.copyStackWithSize(stack, 1));
     }
-    return canInsert ? ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - 1) : stack;
+    return canInsert ? slimeknights.tconstruct.library.utils.ItemStackDataUtil.copyStackWithSize(stack, stack.getCount() - 1) : stack;
   }
 
   @Nonnull
@@ -311,12 +312,12 @@ public class MeltingModuleInventory implements IItemHandlerModifiable {
    * Writes this module to Tag
    * @return  Module in Tag
    */
-  public CompoundTag writeToTag() {
+  public CompoundTag writeToTag(HolderLookup.Provider provider) {
     CompoundTag nbt = new CompoundTag();
     ListTag list = new ListTag();
     for (int i = 0; i < modules.length; i++) {
       if (modules[i] != null && !modules[i].getStack().isEmpty()) {
-        CompoundTag moduleTag = modules[i].writeToTag();
+        CompoundTag moduleTag = modules[i].writeToTag(provider);
         moduleTag.putByte(TAG_SLOT, (byte)i);
         list.add(moduleTag);
       }
@@ -328,11 +329,15 @@ public class MeltingModuleInventory implements IItemHandlerModifiable {
     return nbt;
   }
 
+  public CompoundTag writeToTag() {
+    return parent.getLevel() == null ? new CompoundTag() : writeToTag(parent.getLevel().registryAccess());
+  }
+
   /**
    * Reads this inventory from Tag
    * @param nbt  Tag compound
    */
-  public void readFromTag(CompoundTag nbt) {
+  public void readFromTag(CompoundTag nbt, HolderLookup.Provider provider) {
     if (!strictSize) {
       int newSize = nbt.getByte(TAG_SIZE) & 255;
       if (newSize != modules.length) {
@@ -352,9 +357,15 @@ public class MeltingModuleInventory implements IItemHandlerModifiable {
       if (item.contains(TAG_SLOT, Tag.TAG_BYTE)) {
         int slot = item.getByte(TAG_SLOT) & 255;
         if (validSlot(slot)) {
-          getModule(slot).readFromTag(item);
+          getModule(slot).readFromTag(item, provider);
         }
       }
+    }
+  }
+
+  public void readFromTag(CompoundTag nbt) {
+    if (parent.getLevel() != null) {
+      readFromTag(nbt, parent.getLevel().registryAccess());
     }
   }
 

@@ -1,9 +1,11 @@
 package slimeknights.tconstruct.library.recipe.partbuilder.recycle;
 
+import slimeknights.tconstruct.library.data.recipe.LoadableRecipeOutput;
+
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -23,13 +25,21 @@ import java.util.function.Consumer;
  * Builder for custom part builder tool recycling recipes for general damageable items.
  * Note {@link PartBuilderToolRecycleBuilder} is generally better for tools with parts, this is for tools that recycle into standard items.
  */
-@RequiredArgsConstructor(staticName = "tool")
 @Accessors(fluent = true)
 public class PartBuilderRecycleBuilder extends AbstractRecipeBuilder<PartBuilderRecycleBuilder> {
   private final Ingredient tool;
   @Setter
   private Ingredient pattern = Ingredient.of(TinkerFluids.venomBottle);
   private final Map<Pattern, ItemOutput> results = new HashMap<>();
+
+  private PartBuilderRecycleBuilder(Ingredient tool) {
+    this.tool = tool;
+  }
+
+  /** Creates a builder from a custom ingredient such as an optional compat item name. */
+  public static PartBuilderRecycleBuilder tool(Ingredient tool) {
+    return new PartBuilderRecycleBuilder(tool);
+  }
 
   /** Creates a builder for the given tool */
   public static PartBuilderRecycleBuilder tool(ItemLike... tools) {
@@ -56,13 +66,13 @@ public class PartBuilderRecycleBuilder extends AbstractRecipeBuilder<PartBuilder
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer) {
+  public void save(RecipeOutput consumer) {
     save(consumer, Loadables.ITEM.getKey(tool.getItems()[0].getItem()));
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
+  public void save(RecipeOutput consumer, ResourceLocation id) {
     ResourceLocation advancementId = buildOptionalAdvancement(id, "parts");
-    consumer.accept(new LoadableFinishedRecipe<>(new PartBuilderRecycle(id, tool, pattern, results), PartBuilderRecycle.LOADER, advancementId));
+    saveRecipe(consumer, id, new PartBuilderRecycle(id, tool, pattern, results), advancementId);
   }
 }

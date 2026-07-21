@@ -50,7 +50,7 @@ public record RarityModule(Rarity rarity) implements VolatileDataModifierHook, M
   public static Rarity getRarity(ItemStack stack) {
     int rarity = ModifierUtil.getVolatileInt(stack, RARITY);
     Rarity[] values = Rarity.values();
-    return values[Mth.clamp(rarity, 0, values.length)];
+    return values[Mth.clamp(rarity, 0, values.length - 1)];
   }
 
   /**

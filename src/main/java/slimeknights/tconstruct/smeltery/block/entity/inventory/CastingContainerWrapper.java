@@ -3,9 +3,11 @@ package slimeknights.tconstruct.smeltery.block.entity.inventory;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.tconstruct.library.recipe.casting.ICastingContainer;
 import slimeknights.tconstruct.smeltery.block.entity.CastingBlockEntity;
 
@@ -21,6 +23,11 @@ public class CastingContainerWrapper implements ICastingContainer {
   private FluidStack fluid;
   private boolean switchSlots = false;
 
+  public CastingContainerWrapper(CastingBlockEntity tile, FluidStack fluid) {
+    this.tile = tile;
+    this.fluid = fluid;
+  }
+
   @Override
   public ItemStack getStack() {
     ItemStack stack = tile.getItem(switchSlots ? CastingBlockEntity.OUTPUT : CastingBlockEntity.INPUT);
@@ -30,15 +37,25 @@ public class CastingContainerWrapper implements ICastingContainer {
     return stack;
   }
 
+  /**
+   * Minecraft 1.21 skips recipe lookup when {@link net.minecraft.world.item.crafting.RecipeInput#isEmpty()}
+   * returns true. Casting inputs may legitimately contain only fluid (basin recipes and cast-less table
+   * recipes), so the inherited single-item implementation is not sufficient here.
+   */
   @Override
-  public Fluid getFluid() {
-    return fluid.getFluid();
+  public boolean isEmpty() {
+    return getStack().isEmpty() && (fluid == null || fluid.isEmpty());
+  }
+
+  @Override
+  public FluidStack getFluidStack() {
+    return fluid;
   }
 
   @Nullable
   @Override
   public CompoundTag getFluidTag() {
-    return fluid.getTag();
+    return fluid.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
   }
 
   /** Uses the input for input (default) */

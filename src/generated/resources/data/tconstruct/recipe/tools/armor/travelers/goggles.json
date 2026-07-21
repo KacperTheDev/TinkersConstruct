@@ -1,0 +1,57 @@
+{
+  "type": "tconstruct:crafting_shaped_materials",
+  "category": "equipment",
+  "extra_materials": [
+    "tconstruct:leather"
+  ],
+  "key": {
+    "A": {
+      "tag": "c:leathers"
+    },
+    "B": {
+      "tag": "c:glass_panes/colorless"
+    },
+    "C": [
+      {
+        "type": "tconstruct:material_value",
+        "material": {
+          "type": "mantle:and",
+          "predicates": [
+            {
+              "type": "mantle:or",
+              "predicates": [
+                "tconstruct:castable",
+                "tconstruct:composite"
+              ]
+            },
+            {
+              "type": "tconstruct:stat_type",
+              "stat_type": "tconstruct:plating_helmet"
+            }
+          ]
+        },
+        "value": 1
+      },
+      {
+        "type": "tconstruct:material",
+        "match": {
+          "item": "tconstruct:fake_ingot"
+        },
+        "material": {
+          "type": "tconstruct:stat_type",
+          "stat_type": "tconstruct:plating_helmet"
+        }
+      }
+    ]
+  },
+  "parts": "C",
+  "pattern": [
+    "A A",
+    "BAB",
+    "C C"
+  ],
+  "result": {
+    "count": 1,
+    "id": "tconstruct:travelers_helmet"
+  }
+}

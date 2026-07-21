@@ -39,10 +39,12 @@
     }}},
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:small_axe_head",
-        "nbt": { "Material": "tconstruct:seared_stone" }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:small_axe_head",
+                "custom_data": {
+                  "Material": "tconstruct:seared_stone"
+                }
+              }
     }
   },
   {
@@ -51,10 +53,12 @@
     "extraData": { "tconstruct:material_tier": { "type": "tconstruct:ranged", "tier": 2, "predicate": { "type": "mantle:inverted", "inverted_type": "mantle:tag", "tag": "tconstruct:book/distant" }}},
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:bow_grip",
-        "nbt": { "Material": "tconstruct:slimewood" }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:bow_grip",
+                "custom_data": {
+                  "Material": "tconstruct:slimewood"
+                }
+              }
     }
   },
   {
@@ -63,27 +67,29 @@
     "extraData": { "tconstruct:material_tier": { "type": "tconstruct:armor", "tier": { "min": 0, "max": 2 }, "predicate":  { "type": "mantle:inverted", "inverted_type": "mantle:tag", "tag": "tconstruct:book/distant" } } },
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:leggings_plating",
-        "nbt": { "Material": "tconstruct:gold" }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:leggings_plating",
+                "custom_data": {
+                  "Material": "tconstruct:gold"
+                }
+              }
     }
   },
   {
     "name": "armor",
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:travelers_chestplate",
-        "nbt": {
-          "tic_broken": false,
-          "tic_display": true,
-          "tic_materials": [
-            "tconstruct:ui_render#extra_large",
-            "tconstruct:ui_render#handle"
-          ]
-        }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:travelers_chestplate",
+                "custom_data": {
+                  "tic_broken": false,
+                  "tic_display": true,
+                  "tic_materials": [
+                    "tconstruct:ui_render#extra_large",
+                    "tconstruct:ui_render#handle"
+                  ]
+                }
+              }
     },
     "condition": {
       "type": "tconstruct:tag_not_empty",
@@ -100,12 +106,12 @@
     "data": "sections/upgrades.json",
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:creative_slot",
-        "nbt": {
-          "slot": "upgrades"
-        }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:creative_slot",
+                "custom_data": {
+                  "slot": "upgrades"
+                }
+              }
     }
   },
   {
@@ -113,12 +119,12 @@
     "data": "sections/slotless.json",
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:creative_slot",
-        "nbt": {
-          "slot": "slotless"
-        }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:creative_slot",
+                "custom_data": {
+                  "slot": "slotless"
+                }
+              }
     }
   },
   {

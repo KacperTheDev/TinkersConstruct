@@ -136,6 +136,10 @@ public record ReduceToolDamageModule(IJsonPredicate<LivingEntity> holder, IJsonP
     private IJsonPredicate<ModifierId> cause = ModifierPredicate.ANY;
     private boolean reinforcedTooltip = false;
 
+    public Builder holder(IJsonPredicate<LivingEntity> holder) { this.holder = holder; return this; }
+    public Builder cause(IJsonPredicate<ModifierId> cause) { this.cause = cause; return this; }
+    public Builder reinforcedTooltip(boolean reinforcedTooltip) { this.reinforcedTooltip = reinforcedTooltip; return this; }
+
     private Builder() {
       super(ConditionalStatFormula.VARIABLES);
     }

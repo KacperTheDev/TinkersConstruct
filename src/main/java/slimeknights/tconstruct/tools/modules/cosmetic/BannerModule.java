@@ -2,8 +2,9 @@ package slimeknights.tconstruct.tools.modules.cosmetic;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -12,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.block.entity.BannerPattern;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import net.minecraft.world.level.block.entity.BannerPatterns;
 import slimeknights.mantle.client.TooltipKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
@@ -32,6 +34,7 @@ import slimeknights.tconstruct.library.utils.Util;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Map;
 
 /** Module for banner pattern tooltips */
 public enum BannerModule implements ModifierModule, DisplayNameModifierHook, TooltipModifierHook {
@@ -43,7 +46,7 @@ public enum BannerModule implements ModifierModule, DisplayNameModifierHook, Too
   public static final String KEY_DYE = "dye";
   /** Key for a pattern color, as a 24 bit integer */
   public static final String KEY_COLOR = "color";
-  /** Key for a pattern hash, from {@link BannerPattern#getHashname()} */
+  /** Key for a pattern asset ID. Legacy short vanilla hashes are also accepted when reading. */
   public static final String KEY_PATTERN = "pattern";
   /** Tooltip key saying hold shift for patterns */
   private static final Component HOLD_SHIFT = TConstruct.makeTranslation("modifier", "banner.hold_shift").withStyle(ChatFormatting.GRAY);
@@ -77,7 +80,7 @@ public enum BannerModule implements ModifierModule, DisplayNameModifierHook, Too
         for (int i = 0; i < patterns.size(); i++) {
           CompoundTag tag = patterns.getCompound(i);
           DyeColor dye = DyeColor.byId(tag.getInt(KEY_DYE));
-          Holder<BannerPattern> holder = BannerPattern.byHash(tag.getString(KEY_PATTERN));
+          Holder<BannerPattern> holder = findPattern(player.registryAccess(), tag.getString(KEY_PATTERN));
           if (holder != null) {
             // note that Forge is dumb in BannerItem with their patch - mojang already adds the mod ID to the tooltip key
             holder.unwrapKey().ifPresent(key ->
@@ -102,32 +105,27 @@ public enum BannerModule implements ModifierModule, DisplayNameModifierHook, Too
   }
 
   /** Copies the given list of patterns from banner format to the tool's NBT */
-  public static void copyPatterns(ModDataNBT data, ModifierId id, DyeColor dye, ListTag banner) {
+  public static void copyPatterns(ModDataNBT data, ModifierId id, DyeColor dye, BannerPatternLayers banner) {
     int baseColor = Util.getColor(dye);
     ListTag patterns = new ListTag();
 
     // add in the base pattern, it only exists on shields and we copy from banners
-    BannerPattern base = BuiltInRegistries.BANNER_PATTERN.get(BannerPatterns.BASE);
-    if (base != null) {
-      CompoundTag basePattern = new CompoundTag();
-      basePattern.putString(KEY_PATTERN, base.getHashname());
-      basePattern.putInt(KEY_DYE, dye.getId());
-      basePattern.putInt(KEY_COLOR, baseColor);
-      patterns.add(basePattern);
-    }
+    CompoundTag basePattern = new CompoundTag();
+    basePattern.putString(KEY_PATTERN, BannerPatterns.BASE.location().toString());
+    basePattern.putInt(KEY_DYE, dye.getId());
+    basePattern.putInt(KEY_COLOR, baseColor);
+    patterns.add(basePattern);
 
     // need a cache key, but it's just going to get hashed anyway, so store its hash
     int hashCode = baseColor;
 
     // add in all other patterns
-    for (int i = 0; i < banner.size(); i++) {
-      CompoundTag original = banner.getCompound(i);
+    for (BannerPatternLayers.Layer layer : banner.layers()) {
       CompoundTag copy = new CompoundTag();
-      // copy the pattern as is
-      String pattern = original.getString("Pattern");
+      String pattern = layer.pattern().value().assetId().toString();
       copy.putString(KEY_PATTERN, pattern);
       // convert the color from a dye color to an integer
-      dye = DyeColor.byId(original.getInt("Color"));
+      dye = layer.color();
       int color = Util.getColor(dye);
       copy.putInt(KEY_DYE, dye.getId()); // dye for the tooltip
       copy.putInt(KEY_COLOR, color); // color for the model
@@ -140,5 +138,43 @@ public enum BannerModule implements ModifierModule, DisplayNameModifierHook, Too
     // add to tool NBT
     data.put(patternKey(id), patterns);
     data.putInt(cacheKey(id), hashCode);
+  }
+
+  private static final Map<String,String> LEGACY_PATTERNS = Map.ofEntries(
+    Map.entry("b", "base"), Map.entry("bl", "square_bottom_left"), Map.entry("br", "square_bottom_right"),
+    Map.entry("tl", "square_top_left"), Map.entry("tr", "square_top_right"), Map.entry("bs", "stripe_bottom"),
+    Map.entry("ts", "stripe_top"), Map.entry("ls", "stripe_left"), Map.entry("rs", "stripe_right"),
+    Map.entry("cs", "stripe_center"), Map.entry("ms", "stripe_middle"), Map.entry("drs", "stripe_downright"),
+    Map.entry("dls", "stripe_downleft"), Map.entry("ss", "small_stripes"), Map.entry("cr", "cross"),
+    Map.entry("sc", "straight_cross"), Map.entry("bt", "triangle_bottom"), Map.entry("tt", "triangle_top"),
+    Map.entry("bts", "triangles_bottom"), Map.entry("tts", "triangles_top"), Map.entry("ld", "diagonal_left"),
+    Map.entry("rd", "diagonal_right"), Map.entry("lud", "diagonal_up_left"), Map.entry("rud", "diagonal_up_right"),
+    Map.entry("mc", "circle"), Map.entry("mr", "rhombus"), Map.entry("vh", "half_vertical"),
+    Map.entry("hh", "half_horizontal"), Map.entry("vhr", "half_vertical_right"), Map.entry("hhb", "half_horizontal_bottom"),
+    Map.entry("bo", "border"), Map.entry("cbo", "curly_border"), Map.entry("gra", "gradient"),
+    Map.entry("gru", "gradient_up"), Map.entry("bri", "bricks"), Map.entry("glb", "globe"),
+    Map.entry("cre", "creeper"), Map.entry("sku", "skull"), Map.entry("flo", "flower"),
+    Map.entry("moj", "mojang"), Map.entry("pig", "piglin")
+  );
+
+  @Nullable
+  public static ResourceLocation getAssetId(String storedId) {
+    ResourceLocation assetId = ResourceLocation.tryParse(storedId);
+    if (assetId == null || storedId.indexOf(':') < 0) {
+      String path = LEGACY_PATTERNS.get(storedId);
+      assetId = path == null ? null : ResourceLocation.withDefaultNamespace(path);
+    }
+    return assetId;
+  }
+
+  @Nullable
+  public static Holder<BannerPattern> findPattern(HolderLookup.Provider access, String storedId) {
+    ResourceLocation assetId = getAssetId(storedId);
+    if (assetId == null) {
+      return null;
+    }
+    ResourceLocation target = assetId;
+    return access.lookupOrThrow(Registries.BANNER_PATTERN).listElements()
+      .filter(holder -> holder.value().assetId().equals(target)).findFirst().orElse(null);
   }
 }

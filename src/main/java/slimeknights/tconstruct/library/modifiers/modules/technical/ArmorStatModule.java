@@ -149,7 +149,7 @@ public record ArmorStatModule(TinkerDataKey<Float> key, LevelingValue amount, bo
    * @return  Level from the key
    */
   public static float getStat(Entity living, TinkerDataKey<Float> key) {
-    return living.getCapability(TinkerDataCapability.CAPABILITY).resolve().map(data -> data.get(key)).orElse(0f);
+    return TinkerDataCapability.getDataOptional(living).map(data -> data.get(key)).orElse(0f);
   }
 
 
@@ -168,6 +168,21 @@ public record ArmorStatModule(TinkerDataKey<Float> key, LevelingValue amount, bo
     @Nullable
     private TagKey<Item> heldTag;
     private TooltipStyle tooltipStyle = TooltipStyle.NONE;
+
+    public Builder allowBroken(boolean allowBroken) {
+      this.allowBroken = allowBroken;
+      return this;
+    }
+
+    public Builder heldTag(@Nullable TagKey<Item> heldTag) {
+      this.heldTag = heldTag;
+      return this;
+    }
+
+    public Builder tooltipStyle(TooltipStyle tooltipStyle) {
+      this.tooltipStyle = tooltipStyle;
+      return this;
+    }
 
     public Builder allowBroken() {
       this.allowBroken = true;

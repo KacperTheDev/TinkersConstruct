@@ -115,6 +115,11 @@ public record ProtectionModule(IJsonPredicate<DamageSource> source, IJsonPredica
     private IJsonPredicate<LivingEntity> entity = LivingEntityPredicate.ANY;
     private IJsonPredicate<LivingEntity> attacker = LivingEntityPredicate.ANY;
 
+    public Builder entity(IJsonPredicate<LivingEntity> entity) {
+      this.entity = entity;
+      return this;
+    }
+
     private Builder() {
       super(ProtectionFormula.VARIABLES);
     }

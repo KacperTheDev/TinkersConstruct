@@ -7,23 +7,12 @@
           "type": "minecraft:item",
           "functions": [
             {
-              "function": "tconstruct:add_tool_data",
-              "materials": [
-                {
-                  "type": "tconstruct:ancient"
-                },
-                {
-                  "type": "tconstruct:ancient"
-                },
-                {
-                  "type": "tconstruct:ancient"
-                }
-              ]
+              "function": "tconstruct:add_tool_data"
             },
             {
               "fluid": {
                 "amount": 1000,
-                "fluid": "minecraft:lava"
+                "id": "minecraft:lava"
               },
               "function": "mantle:set_fluid"
             }

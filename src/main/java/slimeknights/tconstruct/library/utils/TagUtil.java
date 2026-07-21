@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 
 import javax.annotation.Nullable;
@@ -23,10 +23,32 @@ public final class TagUtil {
    */
   @Nullable
   public static BlockPos readOptionalPos(CompoundTag parent, String key, BlockPos offset) {
-    if (parent.contains(key, Tag.TAG_COMPOUND)) {
-      return NbtUtils.readBlockPos(parent.getCompound(key)).offset(offset);
+    BlockPos pos = readBlockPos(parent.get(key));
+    if (pos != null) {
+      return pos.offset(offset);
     }
     return null;
+  }
+
+  /** Reads both the legacy Tinkers compound format and the native 1.21 codec format. */
+  @Nullable
+  public static BlockPos readBlockPos(@Nullable Tag tag) {
+    if (tag instanceof CompoundTag compound
+        && compound.contains("X", Tag.TAG_ANY_NUMERIC)
+        && compound.contains("Y", Tag.TAG_ANY_NUMERIC)
+        && compound.contains("Z", Tag.TAG_ANY_NUMERIC)) {
+      return new BlockPos(compound.getInt("X"), compound.getInt("Y"), compound.getInt("Z"));
+    }
+    return tag == null ? null : BlockPos.CODEC.parse(NbtOps.INSTANCE, tag).result().orElse(null);
+  }
+
+  /** Writes the established Tinkers compound format to preserve existing save data. */
+  public static CompoundTag writeBlockPos(BlockPos pos) {
+    CompoundTag tag = new CompoundTag();
+    tag.putInt("X", pos.getX());
+    tag.putInt("Y", pos.getY());
+    tag.putInt("Z", pos.getZ());
+    return tag;
   }
 
   /**

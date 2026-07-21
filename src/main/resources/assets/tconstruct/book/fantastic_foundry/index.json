@@ -33,10 +33,12 @@
     "extraData": { "tconstruct:material_tier": { "type": "tconstruct:melee_harvest", "tag": "tconstruct:book/blazing_blood" } },
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:large_plate",
-        "nbt": { "Material": "tconstruct:manyullyn" }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:large_plate",
+                "custom_data": {
+                  "Material": "tconstruct:manyullyn"
+                }
+              }
     }
   },
   {
@@ -45,10 +47,12 @@
     "extraData": { "tconstruct:material_tier": { "type": "tconstruct:ranged", "tag": "tconstruct:book/blazing_blood" } },
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:bow_grip",
-        "nbt": { "Material": "tconstruct:hepatizon" }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:bow_grip",
+                "custom_data": {
+                  "Material": "tconstruct:hepatizon"
+                }
+              }
     }
   },
   {
@@ -57,28 +61,30 @@
     "extraData": { "tconstruct:material_tier": { "type": "tconstruct:armor", "tag": "tconstruct:book/blazing_blood" } },
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:shield_core",
-        "nbt": { "Material": "tconstruct:blazewood" }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:shield_core",
+                "custom_data": {
+                  "Material": "tconstruct:blazewood"
+                }
+              }
     }
   },
   {
     "name": "armor",
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:plate_chestplate",
-        "nbt": {
-          "tic_broken": false,
-          "tic_display": true,
-          "Damage": 0,
-          "tic_materials": [
-            "tconstruct:ui_render#extra",
-            "tconstruct:ui_render#head"
-          ]
-        }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:plate_chestplate",
+                "custom_data": {
+                  "tic_broken": false,
+                  "tic_display": true,
+                  "Damage": 0,
+                  "tic_materials": [
+                    "tconstruct:ui_render#extra",
+                    "tconstruct:ui_render#head"
+                  ]
+                }
+              }
     },
     "condition": {
       "type": "tconstruct:tag_not_empty",

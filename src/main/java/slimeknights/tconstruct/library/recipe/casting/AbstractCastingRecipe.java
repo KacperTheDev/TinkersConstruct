@@ -23,6 +23,7 @@ public abstract class AbstractCastingRecipe implements ICastingRecipe {
   private final RecipeType<?> type;
   @Getter
   private final ResourceLocation id;
+
   @Getter
   private final String group;
   /** 'cast' item for recipe (doesn't have to be an actual 'cast') */

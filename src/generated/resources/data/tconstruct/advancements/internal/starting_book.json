@@ -1,31 +1,31 @@
 {
-  "advancements": [
+  "conditions": [
     {
-      "advancement": {
-        "criteria": {
-          "tick": {
-            "conditions": {},
-            "trigger": "minecraft:tick"
-          }
-        },
-        "requirements": [
-          [
-            "tick"
-          ]
-        ],
-        "rewards": {
-          "loot": [
-            "tconstruct:gameplay/starting_book"
-          ]
-        },
-        "sends_telemetry_event": true
-      },
-      "conditions": [
-        {
-          "type": "tconstruct:config",
-          "prop": "spawn_with_book"
-        }
-      ]
+      "type": "tconstruct:config",
+      "prop": "spawn_with_book"
     }
-  ]
+  ],
+  "criteria": {
+    "tick": {
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:air"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "tick"
+    ]
+  ],
+  "rewards": {
+    "loot": [
+      "tconstruct:gameplay/starting_book"
+    ]
+  },
+  "sends_telemetry_event": true
 }

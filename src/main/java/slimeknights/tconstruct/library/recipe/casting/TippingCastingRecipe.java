@@ -1,17 +1,15 @@
 package slimeknights.tconstruct.library.recipe.casting;
 
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.common.IngredientLoadable;
 import slimeknights.mantle.data.loadable.field.ContextKey;
@@ -52,20 +50,20 @@ public class TippingCastingRecipe extends PotionCastingRecipe {
     if (super.matches(inv, level) && ModifierUtil.getModifierLevel(stack, modifier) > 0) {
       // must also have a specific potion, it's what we are going to copy
       // but it can't match what is already on the stack
-      CompoundTag fluidTag = inv.getFluidTag();
-      return fluidTag != null && fluidTag.contains(PotionUtils.TAG_POTION, Tag.TAG_STRING)
-        && !ModifierUtil.getPersistentString(stack, modifier).equals(fluidTag.getString(PotionUtils.TAG_POTION));
+      return inv.getFluidStack().getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion()
+        .flatMap(potion -> potion.unwrapKey())
+        .map(key -> !ModifierUtil.getPersistentString(stack, modifier.location()).equals(key.location().toString()))
+        .orElse(false);
     }
     return false;
   }
 
   @Override
-  public ItemStack assemble(ICastingContainer inv, RegistryAccess access) {
+  public ItemStack assemble(ICastingContainer inv, HolderLookup.Provider access) {
     ItemStack result = inv.getStack().copy();
-    CompoundTag tag = inv.getFluidTag();
-    if (tag != null) {
-      ToolStack.from(result).getPersistentData().putString(modifier, tag.getString(PotionUtils.TAG_POTION));
-    }
+    inv.getFluidStack().getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion()
+      .flatMap(potion -> potion.unwrapKey())
+      .ifPresent(key -> ToolStack.from(result).getPersistentData().putString(modifier, key.location().toString()));
     return result;
   }
 
@@ -73,28 +71,25 @@ public class TippingCastingRecipe extends PotionCastingRecipe {
   /* JEI */
 
   @Override
-  public List<DisplayCastingRecipe> getRecipes(RegistryAccess access) {
+  public List<DisplayCastingRecipe> getRecipes(HolderLookup.Provider access) {
     if (displayRecipes == null) {
       // create a list of tools with the modifier
       List<ItemStack> tools = Arrays.stream(bottle.getItems())
         .map(stack -> IDisplayModifierRecipe.withModifiers(IModifiableDisplay.getDisplayStack(stack), List.of(new ModifierEntry(modifier, 1))))
         .toList();
-      displayRecipes = ForgeRegistries.POTIONS.getValues().stream()
-        .filter(potion -> potion != Potions.EMPTY)
+      displayRecipes = BuiltInRegistries.POTION.stream().map(BuiltInRegistries.POTION::wrapAsHolder)
         .map(potion -> {
           // add the potion to the tool list
-          String id = Loadables.POTION.getString(potion);
+          String id = Loadables.POTION.getString(potion.value());
           List<ItemStack> results = tools.stream().map(stack -> {
             ToolStack tool = ToolStack.copyFrom(stack);
             tool.getPersistentData().putString(modifier, id);
             return tool.copyStack(stack);
           }).toList();
           // add the potion to the fluid
-          CompoundTag fluidNBT = new CompoundTag();
-          fluidNBT.putString(PotionUtils.TAG_POTION, id);
           // create the recipe
           return new DisplayCastingRecipe(getId(), getType(), tools, fluid.getFluids().stream()
-            .map(fluid -> new FluidStack(fluid.getFluid(), fluid.getAmount(), fluidNBT))
+            .map(fluid -> slimeknights.tconstruct.library.utils.FluidStackDataUtil.createPotion(fluid.getFluid(), fluid.getAmount(), potion))
             .toList(),
             results, coolingTime, true);
         }).toList();

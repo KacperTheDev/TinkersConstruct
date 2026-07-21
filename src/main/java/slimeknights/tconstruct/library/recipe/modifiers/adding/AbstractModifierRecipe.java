@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.library.recipe.modifiers.adding;
 
 import lombok.Getter;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -69,6 +69,10 @@ public abstract class AbstractModifierRecipe implements ITinkerStationRecipe, ID
 
   @Getter
   private final ResourceLocation id;
+
+  public ResourceLocation getId() {
+    return id;
+  }
   /** Ingredient representing the required tool, typically a tag */
   protected final Ingredient toolRequirement;
   /** Max size of the tool for this modifier. If the tool size is smaller, the stack will reduce by less */
@@ -101,7 +105,7 @@ public abstract class AbstractModifierRecipe implements ITinkerStationRecipe, ID
   }
 
   @Override
-  public abstract RecipeResult<LazyToolStack> getValidatedResult(ITinkerStationContainer inv, RegistryAccess access);
+  public abstract RecipeResult<LazyToolStack> getValidatedResult(ITinkerStationContainer inv, HolderLookup.Provider access);
 
   @Override
   public int shrinkToolSlotBy() {

@@ -83,7 +83,7 @@ public class MaterialsCraftingExtension<T extends CraftingRecipe & MaterialsCraf
 
   @Override
   public ResourceLocation getRegistryName() {
-    return recipe.getId();
+    return null;
   }
 
   /** Sets the recipe in the builder */
@@ -102,7 +102,7 @@ public class MaterialsCraftingExtension<T extends CraftingRecipe & MaterialsCraf
     List<IRecipeSlotBuilder> inputs = craftingGridHelper.createAndSetInputs(builder, VanillaTypes.ITEM_STACK, inputStacks, width, height);
     IRecipeSlotBuilder output = craftingGridHelper.createAndSetOutputs(builder, result);
     if (inputs.size() != 9) {
-      Mantle.logger.error("Failed to create focus link for {} as the layout {} is not 3x3", recipe.getId(), builder.getClass().getName());
+      Mantle.logger.error("Failed to create focus link for {} as the layout {} is not 3x3", recipe.getClass().getName(), builder.getClass().getName());
     } else if (materialSlots != null) {
       // apply focus links
       int finalWidth = width;

@@ -6,8 +6,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -46,18 +48,29 @@ public abstract class AbstractCastingBlock extends TableBlock {
     return null;
   }
 
-  @Deprecated
   @Override
-  public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
+  protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    return interact(world, pos, player, hand) ? ItemInteractionResult.SUCCESS : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+  }
+
+  @Override
+  protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+    if (interact(world, pos, player, InteractionHand.MAIN_HAND)) {
+      return InteractionResult.SUCCESS;
+    }
+    return super.useWithoutItem(state, world, pos, player, hit);
+  }
+
+  private static boolean interact(Level world, BlockPos pos, Player player, InteractionHand hand) {
     if (player.isShiftKeyDown()) {
-      return InteractionResult.PASS;
+      return false;
     }
     BlockEntity te = world.getBlockEntity(pos);
     if (te instanceof CastingBlockEntity) {
       ((CastingBlockEntity) te).interact(player, hand);
-      return InteractionResult.SUCCESS;
+      return true;
     }
-    return super.use(state, world, pos, player, hand, rayTraceResult);
+    return false;
   }
 
   @SuppressWarnings("deprecation")

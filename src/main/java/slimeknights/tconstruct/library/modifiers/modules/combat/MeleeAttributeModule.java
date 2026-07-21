@@ -73,11 +73,11 @@ public record MeleeAttributeModule(String unique, Attribute attribute, UUID uuid
     if (condition.matches(tool, modifier)) {
       LivingEntity target = context.getLivingTarget();
       if (target != null) {
-        AttributeInstance instance = target.getAttribute(attribute);
+        AttributeInstance instance = target.getAttribute(net.minecraft.core.registries.BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute));
         if (instance != null) {
           // ensure we don't already have the modifier from someone misusing melee hooks or simultaneous attacks
-          instance.removeModifier(uuid);
-          instance.addTransientModifier(new AttributeModifier(uuid, unique, amount.compute(modifier.getEffectiveLevel()), operation));
+          instance.removeModifier(slimeknights.tconstruct.library.utils.AttributeIdUtil.fromLegacyUuid(uuid));
+          instance.addTransientModifier(new AttributeModifier(slimeknights.tconstruct.library.utils.AttributeIdUtil.fromLegacyUuid(uuid), amount.compute(modifier.getEffectiveLevel()), operation));
         }
       }
     }
@@ -86,9 +86,9 @@ public record MeleeAttributeModule(String unique, Attribute attribute, UUID uuid
 
   private void removeAttribute(@Nullable LivingEntity target) {
     if (target != null) {
-      AttributeInstance instance = target.getAttribute(attribute);
+      AttributeInstance instance = target.getAttribute(net.minecraft.core.registries.BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute));
       if (instance != null) {
-        instance.removeModifier(uuid);
+        instance.removeModifier(slimeknights.tconstruct.library.utils.AttributeIdUtil.fromLegacyUuid(uuid));
       }
     }
   }

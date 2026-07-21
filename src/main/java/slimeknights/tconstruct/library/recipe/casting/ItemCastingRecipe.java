@@ -1,12 +1,12 @@
 package slimeknights.tconstruct.library.recipe.casting;
 
 import lombok.Getter;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
@@ -36,6 +36,10 @@ public class ItemCastingRecipe extends AbstractCastingRecipe implements IDisplay
   protected final FluidIngredient fluid;
   protected final ItemOutput result;
   protected final int coolingTime;
+  public TypeAwareRecipeSerializer<?> getSerializer() { return serializer; }
+  public FluidIngredient getFluid() { return fluid; }
+  public ItemOutput getResult() { return result; }
+  public int getCoolingTime() { return coolingTime; }
   public ItemCastingRecipe(TypeAwareRecipeSerializer<?> serializer, ResourceLocation id, String group, Ingredient cast, FluidIngredient fluid, ItemOutput result, int coolingTime, boolean consumed, boolean switchSlots) {
     super(serializer.getType(), id, group, cast, consumed, switchSlots);
     this.serializer = serializer;
@@ -56,7 +60,7 @@ public class ItemCastingRecipe extends AbstractCastingRecipe implements IDisplay
   }
 
   @Override
-  public ItemStack getResultItem(RegistryAccess access) {
+  public ItemStack getResultItem(HolderLookup.Provider access) {
     return this.result.get();
   }
 

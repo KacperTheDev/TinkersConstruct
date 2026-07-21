@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.smeltery.block.entity.module.alloying;
 
 import net.minecraft.world.level.Level;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.library.recipe.alloying.AlloyRecipe;
@@ -21,7 +22,7 @@ public class MultiAlloyingModule implements IAlloyingModule {
 
   /** List of recipes that succeeded last time in {@link #doAlloy()}, only these will be used for the next iteration */
   @Nullable
-  private List<AlloyRecipe> lastRecipes;
+  private List<RecipeHolder<AlloyRecipe>> lastRecipes;
 
   /** Predicates for common behaviors */
   private final Predicate<AlloyRecipe> canPerform, performRecipe;
@@ -45,7 +46,7 @@ public class MultiAlloyingModule implements IAlloyingModule {
    * Gets a list of recipes that currently match the tank
    * @return  List of recipes that match the tank
    */
-  private List<AlloyRecipe> getRecipes() {
+  private List<RecipeHolder<AlloyRecipe>> getRecipes() {
     if (lastRecipes == null) {
       lastRecipes = getLevel().getRecipeManager().getRecipesFor(TinkerRecipeTypes.ALLOYING.get(), alloyTank, getLevel());
     }
@@ -58,17 +59,17 @@ public class MultiAlloyingModule implements IAlloyingModule {
    * @return  True if any recipe returned true
    */
   private boolean iterateRecipes(Predicate<AlloyRecipe> predicate) {
-    List<AlloyRecipe> recipes = getRecipes();
+    List<RecipeHolder<AlloyRecipe>> recipes = getRecipes();
     if (recipes.isEmpty()) {
       return false;
     }
 
     Level world = getLevel();
-    Iterator<AlloyRecipe> iterator = recipes.iterator();
+    Iterator<RecipeHolder<AlloyRecipe>> iterator = recipes.iterator();
     while (iterator.hasNext()) {
       // if the recipe no longer matches, remove
       // if it matches, run their function and stop if requested
-      AlloyRecipe recipe = iterator.next();
+      AlloyRecipe recipe = iterator.next().value();
       if (recipe.matches(alloyTank, world)) {
         if (predicate.test(recipe)) {
           return true;
@@ -87,7 +88,7 @@ public class MultiAlloyingModule implements IAlloyingModule {
 
   @Override
   public void doAlloy() {
-    List<AlloyRecipe> recipes = getRecipes();
+    List<RecipeHolder<AlloyRecipe>> recipes = getRecipes();
     if (recipes.isEmpty()) return;
     // shuffle the recipe list, in case we have mutually exclusive recipes it makes them less dependant on name order
     Collections.shuffle(recipes);

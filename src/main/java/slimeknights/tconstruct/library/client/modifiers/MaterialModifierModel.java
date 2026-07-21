@@ -70,6 +70,9 @@ public class MaterialModifierModel implements SimpleModifierModel {
   @Nullable
   private final Material large;
 
+  public Material small() { return small; }
+  public Material large() { return large; }
+
   @Override
   public RecordLoadable<? extends ModifierModel> getLoader() {
     return LOADER;

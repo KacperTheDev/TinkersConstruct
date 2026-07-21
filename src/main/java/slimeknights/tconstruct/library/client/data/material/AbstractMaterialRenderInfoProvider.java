@@ -9,7 +9,7 @@ import net.minecraft.data.CachedOutput;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.tconstruct.library.client.data.material.AbstractMaterialSpriteProvider.MaterialSpriteInfo;
 import slimeknights.tconstruct.library.client.materials.MaterialGeneratorInfo;
@@ -115,6 +115,10 @@ public abstract class AbstractMaterialRenderInfoProvider extends GenericDataProv
     private int luminosity = 0;
     @Setter
     private MaterialGeneratorInfo generator = null;
+
+    public RenderInfoBuilder texture(@Nullable ResourceLocation texture) { this.texture = texture; return this; }
+    public RenderInfoBuilder parent(@Nullable ResourceLocation parent) { this.parent = parent; return this; }
+    public RenderInfoBuilder generator(MaterialGeneratorInfo generator) { this.generator = generator; return this; }
 
     /** Sets the parent to the given material ID */
     public RenderInfoBuilder parentMaterial(MaterialVariantId material) {

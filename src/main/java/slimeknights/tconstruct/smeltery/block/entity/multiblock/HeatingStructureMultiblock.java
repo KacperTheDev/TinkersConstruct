@@ -5,7 +5,6 @@ import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -13,6 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.tconstruct.common.multiblock.IMasterLogic;
 import slimeknights.tconstruct.common.multiblock.IServantLogic;
+import slimeknights.tconstruct.library.utils.TagUtil;
 import slimeknights.tconstruct.smeltery.block.component.SearedBlock;
 import slimeknights.tconstruct.smeltery.block.entity.multiblock.HeatingStructureMultiblock.StructureData;
 
@@ -276,7 +276,7 @@ public abstract class HeatingStructureMultiblock<T extends MantleBlockEntity & I
     public CompoundTag writeToTag(BlockPos controllerPos) {
       CompoundTag nbt = super.writeToTag(controllerPos);
       if (insideCheck != null) {
-        nbt.put(TAG_INSIDE_CHECK, NbtUtils.writeBlockPos(insideCheck.subtract(controllerPos)));
+        nbt.put(TAG_INSIDE_CHECK, TagUtil.writeBlockPos(insideCheck.subtract(controllerPos)));
       }
       return nbt;
     }

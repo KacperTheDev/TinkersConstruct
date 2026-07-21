@@ -1,6 +1,5 @@
 package slimeknights.tconstruct.library.events;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -11,28 +10,42 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.bus.api.Event;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.InteractionSource;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 
 import javax.annotation.Nullable;
 
-@AllArgsConstructor
 @Getter
 public abstract class TinkerToolEvent extends Event {
+  public enum Result {
+    DEFAULT,
+    ALLOW,
+    DENY
+  }
+
   private final ItemStack stack;
   private final IToolStackView tool;
-  public TinkerToolEvent(ItemStack stack) {
+  private Result result = Result.DEFAULT;
+
+  public TinkerToolEvent(ItemStack stack, IToolStackView tool) {
     this.stack = stack;
-    this.tool = ToolStack.from(stack);
+    this.tool = tool;
+  }
+
+  public TinkerToolEvent(ItemStack stack) {
+    this(stack, ToolStack.from(stack));
+  }
+
+  public void setResult(Result result) {
+    this.result = result;
   }
 
   /**
    * Event fired when a kama tries to harvest a crop. Set result to {@link Result#ALLOW} if you handled the harvest yourself. Set the result to {@link Result#DENY} if the block cannot be harvested.
    */
-  @HasResult
   @Getter
   public static class ToolHarvestEvent extends TinkerToolEvent {
     /** Item context, note this is the original context, so some information (such as position) may not be accurate */
@@ -76,7 +89,7 @@ public abstract class TinkerToolEvent extends Event {
 
     /** Fires this event and posts the result */
     public Result fire() {
-      MinecraftForge.EVENT_BUS.post(this);
+      NeoForge.EVENT_BUS.post(this);
       return this.getResult();
     }
   }
@@ -84,7 +97,6 @@ public abstract class TinkerToolEvent extends Event {
   /**
    * Event fired when a kama or scythe tries to shear an entity
    */
-  @HasResult
   @Getter
   public static class ToolShearEvent extends TinkerToolEvent {
     private final Level world;
@@ -101,7 +113,7 @@ public abstract class TinkerToolEvent extends Event {
 
     /** Fires this event and posts the result */
     public Result fire() {
-      MinecraftForge.EVENT_BUS.post(this);
+      NeoForge.EVENT_BUS.post(this);
       return this.getResult();
     }
   }

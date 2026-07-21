@@ -19,7 +19,7 @@ public class MagneticModifier extends Modifier {
   @Override
   protected void registerHooks(Builder hookBuilder) {
     super.registerHooks(hookBuilder);
-    hookBuilder.addModule(MobEffectModule.builder(TinkerEffects.magnetic).time(RandomLevelingValue.flat(40)).buildToolUsage());
+    hookBuilder.addModule(MobEffectModule.builder(TinkerEffects.magnetic.getDelegate()).time(RandomLevelingValue.flat(40)).buildToolUsage());
     hookBuilder.addModule(new ArmorLevelModule(TinkerDataKeys.MAGNET, false, null));
   }
 

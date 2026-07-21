@@ -4,24 +4,29 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
-import net.minecraftforge.common.crafting.conditions.OrCondition;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.common.crafting.CraftingHelper;
+import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
+import net.neoforged.neoforge.common.conditions.OrCondition;
+import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.mantle.data.predicate.entity.LivingEntityPredicate;
@@ -58,10 +63,17 @@ import static slimeknights.mantle.Mantle.commonResource;
 public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
   private final String modId;
   private final Map<ResourceLocation,Builder> entries = new HashMap<>();
+  private final CompletableFuture<HolderLookup.Provider> lookupProvider;
 
-  public AbstractFluidEffectProvider(PackOutput packOutput, String modId) {
+  public AbstractFluidEffectProvider(PackOutput packOutput, String modId, CompletableFuture<HolderLookup.Provider> lookupProvider) {
     super(packOutput, Target.DATA_PACK, FluidEffectManager.FOLDER);
     this.modId = modId;
+    this.lookupProvider = lookupProvider;
+  }
+
+  /** Resolves a dynamic enchantment registry key for generated fluid effects. */
+  protected Holder.Reference<Enchantment> enchantment(ResourceKey<Enchantment> key) {
+    return lookupProvider.join().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(key);
   }
 
   /** Adds the fluids to the map */
@@ -88,7 +100,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
   /** Creates a new fluid builder for the given mod ID */
   @SuppressWarnings("removal")
   protected Builder addFluid(String name, FluidIngredient fluid) {
-    return addFluid(new ResourceLocation(modId, name), fluid);
+    return addFluid(ResourceLocation.fromNamespaceAndPath(modId, name), fluid);
   }
 
   /** Creates a builder for a fluid stack */
@@ -226,7 +238,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
       for (int i = 0; i < names.length; i++) {
         conditions[i+1] = new TagFilledCondition<>(ItemTags.create(commonResource("ingots/" + names[i])));
       }
-      return addCondition(new OrCondition(conditions));
+      return addCondition(new OrCondition(List.of(conditions)));
     }
 
     /** Adds an effect to the given fluid */
@@ -336,7 +348,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
     private JsonObject build(ResourceLocation id) {
       JsonObject json = new JsonObject();
       if (!conditions.isEmpty()) {
-        json.add("conditions", CraftingHelper.serialize(conditions.toArray(new ICondition[0])));
+          json.add("conditions", slimeknights.tconstruct.library.json.condition.ConditionUtil.serialize(conditions));
       }
       if (blockEffects.isEmpty() && entityEffects.isEmpty()) {
         throw new IllegalStateException("Must have at least 1 effect");

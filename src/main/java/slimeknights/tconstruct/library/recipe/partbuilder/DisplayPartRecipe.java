@@ -2,7 +2,7 @@ package slimeknights.tconstruct.library.recipe.partbuilder;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -31,6 +31,14 @@ public class DisplayPartRecipe implements IDisplayPartBuilderRecipe {
   /** List of items to display for the result */
   private final List<ItemStack> resultItems;
 
+  public ResourceLocation getId() { return id; }
+  public MaterialVariant getMaterial() { return material; }
+  public Pattern getPattern() { return pattern; }
+  public List<ItemStack> getPatternItems() { return patternItems; }
+  public int getCost() { return cost; }
+  public List<ItemStack> getMaterialItems() { return materialItems; }
+  public List<ItemStack> getResultItems() { return resultItems; }
+
 
   /* Required part builder methods */
 
@@ -48,7 +56,7 @@ public class DisplayPartRecipe implements IDisplayPartBuilderRecipe {
   }
 
   @Override
-  public ItemStack getResultItem(RegistryAccess pRegistryAccess) {
+  public ItemStack getResultItem(HolderLookup.Provider registries) {
     throw new UnsupportedOperationException();
   }
 

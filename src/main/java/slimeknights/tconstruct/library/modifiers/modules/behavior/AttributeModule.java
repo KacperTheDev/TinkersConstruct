@@ -2,6 +2,7 @@ package slimeknights.tconstruct.library.modifiers.modules.behavior;
 
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -77,7 +78,7 @@ public record AttributeModule(String unique, Attribute attribute, Operation oper
 
   /** Converts a list of slots to an array of UUIDs at each index */
   public static UUID[] slotsToUUIDs(String name, Collection<EquipmentSlot> slots) {
-    UUID[] slotUUIDs = new UUID[6];
+    UUID[] slotUUIDs = new UUID[EquipmentSlot.values().length];
     for (EquipmentSlot slot : slots) {
       slotUUIDs[slot.getFilterFlag()] = getUUID(name, slot);
     }
@@ -88,7 +89,7 @@ public record AttributeModule(String unique, Attribute attribute, Operation oper
   public static Set<EquipmentSlot> uuidsToSlots(UUID[] uuids) {
     Set<EquipmentSlot> set = EnumSet.noneOf(EquipmentSlot.class);
     for (EquipmentSlot slot : EquipmentSlot.values()) {
-      if (uuids[slot.getFilterFlag()] != null) {
+      if (slot.getFilterFlag() < uuids.length && uuids[slot.getFilterFlag()] != null) {
         set.add(slot);
       }
     }
@@ -110,7 +111,7 @@ public record AttributeModule(String unique, Attribute attribute, Operation oper
   private AttributeModifier createModifier(IToolStackView tool, ModifierEntry modifier, EquipmentSlot slot) {
     UUID uuid = getUUID(slot);
     if (uuid != null) {
-      return new AttributeModifier(uuid, unique + "." + slot.getName(), formula.apply(tool, modifier), operation);
+      return new AttributeModifier(slimeknights.tconstruct.library.utils.AttributeIdUtil.fromLegacyUuid(uuid), formula.apply(tool, modifier), operation);
     }
     return null;
   }
@@ -130,12 +131,12 @@ public record AttributeModule(String unique, Attribute attribute, Operation oper
   @Override
   public void onEquip(IToolStackView tool, ModifierEntry modifier, EquipmentChangeContext context) {
     if (condition.matches(tool, modifier)) {
-      AttributeInstance instance = context.getEntity().getAttribute(attribute);
+      AttributeInstance instance = context.getEntity().getAttribute(net.minecraft.core.registries.BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute));
       if (instance != null) {
         AttributeModifier attributeModifier = createModifier(tool, modifier, context.getChangedSlot());
         if (attributeModifier != null) {
           // for safety, remove it already there
-          instance.removeModifier(attributeModifier.getId());
+          instance.removeModifier(attributeModifier.id());
           instance.addTransientModifier(attributeModifier);
         }
       }
@@ -147,9 +148,9 @@ public record AttributeModule(String unique, Attribute attribute, Operation oper
     if (condition.matches(tool, modifier)) {
       UUID uuid = getUUID(context.getChangedSlot());
       if (uuid != null) {
-        AttributeInstance instance = context.getEntity().getAttribute(attribute);
+        AttributeInstance instance = context.getEntity().getAttribute(net.minecraft.core.registries.BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute));
         if (instance != null) {
-          instance.removeModifier(uuid);
+          instance.removeModifier(slimeknights.tconstruct.library.utils.AttributeIdUtil.fromLegacyUuid(uuid));
         }
       }
     }
@@ -207,6 +208,10 @@ public record AttributeModule(String unique, Attribute attribute, Operation oper
     return new Builder(attribute.get(), operation);
   }
 
+  public static Builder builder(Holder<? extends Attribute> attribute, Operation operation) {
+    return new Builder(attribute.value(), operation);
+  }
+
   @Accessors(fluent = true)
   public static class Builder extends VariableFormula.Builder<Builder,AttributeModule,ToolVariable> {
     protected final Attribute attribute;
@@ -222,6 +227,16 @@ public record AttributeModule(String unique, Attribute attribute, Operation oper
       super(VARIABLES);
       this.attribute = attribute;
       this.operation = operation;
+    }
+
+    public Builder unique(String unique) {
+      this.unique = unique;
+      return this;
+    }
+
+    public Builder tooltipStyle(TooltipStyle tooltipStyle) {
+      this.tooltipStyle = tooltipStyle;
+      return this;
     }
 
     /** Adds the given slots to this builder */

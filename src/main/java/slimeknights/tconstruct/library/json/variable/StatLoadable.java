@@ -9,6 +9,7 @@ import net.minecraft.Util;
 import net.minecraft.core.IdMap;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -104,6 +105,15 @@ public enum StatLoadable implements Loadable<Stat<?>> {
     throw new DecoderException("Unknown " + registry.key().location() + " id " + id);
   }
 
+  /** Writes a registered value as its numeric registry ID, failing fast for unregistered values. */
+  private static <T> void encodeRegistry(FriendlyByteBuf buffer, Registry<T> registry, T value) {
+    int id = registry.getId(value);
+    if (id < 0) {
+      throw new IllegalArgumentException("Registry " + registry.key().location() + " does not contain object " + value);
+    }
+    buffer.writeVarInt(id);
+  }
+
   @Override
   public Stat<?> decode(FriendlyByteBuf buffer, TypedMap context) {
     return decodeValue(buffer, decodeRegistry(buffer, BuiltInRegistries.STAT_TYPE));
@@ -122,8 +132,8 @@ public enum StatLoadable implements Loadable<Stat<?>> {
   /** Encodes the value to the registry using the type generics */
   private <T> void encodeGeneric(FriendlyByteBuf buffer, Stat<T> value) {
     StatType<T> type = value.getType();
-    buffer.writeId(BuiltInRegistries.STAT_TYPE, type);
-    buffer.writeId(type.getRegistry(), value.getValue());
+    encodeRegistry(buffer, BuiltInRegistries.STAT_TYPE, type);
+    encodeRegistry(buffer, type.getRegistry(), value.getValue());
   }
 
 
@@ -166,8 +176,8 @@ public enum StatLoadable implements Loadable<Stat<?>> {
       name = ((Fluid) value).getFluidType().getDescription();
     } else if (registry == BuiltInRegistries.MOB_EFFECT) {
       name = ((MobEffect) value).getDisplayName();
-    } else if (registry == BuiltInRegistries.ENCHANTMENT) {
-      name = Component.translatable(((Enchantment) value).getDescriptionId());
+    } else if (registry.key().equals(Registries.ENCHANTMENT)) {
+      name = ((Enchantment) value).description();
     } else {
       // if it's not one of the above types we do not know how to translate it, so use the raw key
       name = Component.literal(getKey(stat));

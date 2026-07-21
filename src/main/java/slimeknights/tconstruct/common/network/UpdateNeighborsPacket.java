@@ -3,12 +3,12 @@ package slimeknights.tconstruct.common.network;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.network.NetworkEvent.Context;
-import net.minecraftforge.registries.GameData;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.registries.GameData;
 import slimeknights.mantle.network.packet.IThreadsafePacket;
 
 /**
@@ -19,19 +19,19 @@ public class UpdateNeighborsPacket implements IThreadsafePacket {
   private final BlockState state;
   private final BlockPos pos;
 
-  public UpdateNeighborsPacket(FriendlyByteBuf buffer) {
+  public UpdateNeighborsPacket(RegistryFriendlyByteBuf buffer) {
     this.state = GameData.getBlockStateIDMap().byId(buffer.readVarInt());
     this.pos = buffer.readBlockPos();
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer) {
+  public void encode(RegistryFriendlyByteBuf buffer) {
     buffer.writeVarInt(Block.getId(state));
     buffer.writeBlockPos(pos);
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
+  public void handleThreadsafe(IPayloadContext context) {
     HandleClient.handle(this);
   }
 

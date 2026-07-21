@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.items.IItemHandler;
 import slimeknights.mantle.block.entity.InventoryBlockEntity;
 import slimeknights.tconstruct.common.SoundUtils;
 import slimeknights.tconstruct.common.Sounds;
@@ -37,6 +38,10 @@ public abstract class TableBlockEntity extends InventoryBlockEntity {
     super(tileEntityTypeIn, pos, state, name, false, inventorySize, maxStackSize);
   }
 
+  public IItemHandler getItemCapability() {
+    return itemHandler;
+  }
+
   /* Syncing */
 
   @Override
@@ -54,10 +59,10 @@ public abstract class TableBlockEntity extends InventoryBlockEntity {
   }
 
   @Override
-  public CompoundTag getUpdateTag() {
-    CompoundTag nbt = super.getUpdateTag();
+  public CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider provider) {
+    CompoundTag nbt = super.getUpdateTag(provider);
     // inventory is already in main NBT, include it in update tag
-    writeInventoryToNBT(nbt);
+    writeInventoryToNBT(nbt, provider);
     return nbt;
   }
 

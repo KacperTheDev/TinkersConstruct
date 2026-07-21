@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.library.recipe.worktable;
 
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -104,13 +105,13 @@ public interface IModifierWorktableRecipe extends ICommonRecipe<ITinkerableConta
 
   @Override
   @Deprecated
-  default ItemStack getResultItem(RegistryAccess access) {
+  default ItemStack getResultItem(HolderLookup.Provider registries) {
     return ItemStack.EMPTY;
   }
 
   @Deprecated
   @Override
-  default ItemStack assemble(ITinkerableContainer inv, RegistryAccess access) {
+  default ItemStack assemble(ITinkerableContainer inv, HolderLookup.Provider access) {
     return ItemStack.EMPTY;
   }
 }

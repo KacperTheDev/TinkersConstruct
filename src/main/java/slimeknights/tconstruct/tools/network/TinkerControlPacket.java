@@ -1,10 +1,10 @@
 package slimeknights.tconstruct.tools.network;
 
 import lombok.RequiredArgsConstructor;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraftforge.network.NetworkEvent.Context;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import slimeknights.mantle.client.TooltipKey;
 import slimeknights.mantle.network.packet.IThreadsafePacket;
 import slimeknights.tconstruct.shared.TinkerEffects;
@@ -57,19 +57,18 @@ public enum TinkerControlPacket implements IThreadsafePacket {
     };
   }
 
-  public static TinkerControlPacket read(FriendlyByteBuf buffer) {
+  public static TinkerControlPacket read(RegistryFriendlyByteBuf buffer) {
     return buffer.readEnum(TinkerControlPacket.class);
   }
 
   @Override
-  public void encode(FriendlyByteBuf packetBuffer) {
+  public void encode(RegistryFriendlyByteBuf packetBuffer) {
     packetBuffer.writeEnum(this);
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    ServerPlayer player = context.getSender();
-    if (player != null) {
+  public void handleThreadsafe(IPayloadContext context) {
+    if (context.player() instanceof ServerPlayer player) {
       switch (this) {
         case DOUBLE_JUMP -> DoubleJumpHandler.extraJump(player);
         case ANTIGRAVITY_JUMP -> TinkerEffects.antigravity.get().antigravityJump(player);

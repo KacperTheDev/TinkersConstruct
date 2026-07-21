@@ -3,8 +3,8 @@ package slimeknights.tconstruct.smeltery.network;
 import lombok.AllArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent.Context;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import slimeknights.mantle.network.packet.IThreadsafePacket;
 import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.tconstruct.smeltery.block.entity.controller.HeatingStructureBlockEntity;
@@ -22,7 +22,7 @@ public class StructureUpdatePacket implements IThreadsafePacket {
   private final BlockPos maxPos;
   private final List<BlockPos> tanks;
 
-  public StructureUpdatePacket(FriendlyByteBuf buffer) {
+  public StructureUpdatePacket(RegistryFriendlyByteBuf buffer) {
     pos = buffer.readBlockPos();
     minPos = buffer.readBlockPos();
     maxPos = buffer.readBlockPos();
@@ -34,7 +34,7 @@ public class StructureUpdatePacket implements IThreadsafePacket {
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer) {
+  public void encode(RegistryFriendlyByteBuf buffer) {
     buffer.writeBlockPos(pos);
     buffer.writeBlockPos(minPos);
     buffer.writeBlockPos(maxPos);
@@ -45,7 +45,7 @@ public class StructureUpdatePacket implements IThreadsafePacket {
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
+  public void handleThreadsafe(IPayloadContext context) {
     HandleClient.handle(this);
   }
 

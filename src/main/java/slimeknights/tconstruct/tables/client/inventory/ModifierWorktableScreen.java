@@ -321,12 +321,18 @@ public class ModifierWorktableScreen extends ToolTableScreen<ModifierWorktableBl
   }
 
   @Override
+  public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    return mouseScrolled(mouseX, mouseY, scrollY);
+  }
+
+  /** @deprecated use the native four-axis scroll callback */
+  @Deprecated
   public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
     if (this.tinkerInfo.handleMouseScrolled(mouseX, mouseY, delta)
         || this.modifierInfo.handleMouseScrolled(mouseX, mouseY, delta)) {
       return false;
     }
-    if (super.mouseScrolled(mouseX, mouseY, delta)) {
+    if (super.mouseScrolled(mouseX, mouseY, 0, delta)) {
       return true;
     }
 

@@ -1,13 +1,13 @@
 package slimeknights.tconstruct.tools.network;
 
 import lombok.RequiredArgsConstructor;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent.Context;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import slimeknights.mantle.network.packet.IThreadsafePacket;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.tools.logic.InteractionHandler;
@@ -30,19 +30,18 @@ public enum InteractWithAirPacket implements IThreadsafePacket {
   }
 
   /** Gets the packet from the packet buffer */
-  public static InteractWithAirPacket read(FriendlyByteBuf buffer) {
+  public static InteractWithAirPacket read(RegistryFriendlyByteBuf buffer) {
     return buffer.readEnum(InteractWithAirPacket.class);
   }
 
   @Override
-  public void encode(FriendlyByteBuf buffer) {
+  public void encode(RegistryFriendlyByteBuf buffer) {
     buffer.writeEnum(this);
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    ServerPlayer player = context.getSender();
-    if (player != null && !player.isSpectator()) {
+  public void handleThreadsafe(IPayloadContext context) {
+    if (context.player() instanceof ServerPlayer player && !player.isSpectator()) {
       if (this == LEFT_CLICK) {
         ItemStack held = player.getItemInHand(hand);
         if (held.is(TinkerTags.Items.INTERACTABLE_LEFT)) {

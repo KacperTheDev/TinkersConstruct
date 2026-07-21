@@ -7,10 +7,10 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.event.EventHooks;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.recipe.RecipeResult;
@@ -46,12 +46,11 @@ public class ModifierWorktableBlockEntity extends RetexturedTableBlockEntity imp
   /** Crafting inventory for the recipe calls */
   @Getter
   private final ModifierWorktableContainerWrapper inventoryWrapper;
-
   /** If true, the last recipe is the current recipe. If false, no recipe was found. If null, have not tried recipe lookup */
   private Boolean recipeValid;
   /** Cache of the last recipe, may not be the current one */
   @Nullable
-  private IModifierWorktableRecipe lastRecipe;
+  private RecipeHolder<IModifierWorktableRecipe> lastRecipe;
   /* Current buttons to display */
   @Nonnull
   private List<ModifierEntry> buttons = Collections.emptyList();
@@ -64,11 +63,11 @@ public class ModifierWorktableBlockEntity extends RetexturedTableBlockEntity imp
   /** Current message displayed on the screen */
   @Getter
   private Component currentMessage = Component.empty();
-
+  @Nullable
+  public LazyToolStack getResult() { return result; }
   public ModifierWorktableBlockEntity(BlockPos pos, BlockState state) {
     super(TinkerTables.modifierWorktableTile.get(), pos, state, NAME, 3);
     this.itemHandler = new ConfigurableInvWrapperCapability(this, false, false);
-    this.itemHandlerCap = LazyOptional.of(() -> this.itemHandler);
     this.inventoryWrapper = new ModifierWorktableContainerWrapper(this);
     this.craftingResult = new LazyResultContainer(this);
   }
@@ -88,14 +87,14 @@ public class ModifierWorktableBlockEntity extends RetexturedTableBlockEntity imp
 
         // last recipe must be nonnull for list to be non-empty
         assert lastRecipe != null;
-        RecipeResult<LazyToolStack> recipeResult = lastRecipe.getResult(inventoryWrapper, entry);
+        RecipeResult<LazyToolStack> recipeResult = lastRecipe.value().getResult(inventoryWrapper, entry);
         if (recipeResult.isSuccess()) {
           result = recipeResult.getResult();
           currentMessage = Component.empty();
         } else if (recipeResult.hasError()) {
           currentMessage = recipeResult.getMessage();
         } else {
-          currentMessage = lastRecipe.getDescription(inventoryWrapper);
+          currentMessage = lastRecipe.value().getDescription(inventoryWrapper);
         }
         return;
       }
@@ -103,7 +102,7 @@ public class ModifierWorktableBlockEntity extends RetexturedTableBlockEntity imp
     // index is either not valid or the list is empty, so just clear
     selectedModifierIndex = -1;
     currentMessage = recipeValid == Boolean.TRUE && lastRecipe != null
-                     ? lastRecipe.getDescription(inventoryWrapper)
+                     ? lastRecipe.value().getDescription(inventoryWrapper)
                      : Component.empty();
   }
 
@@ -113,33 +112,33 @@ public class ModifierWorktableBlockEntity extends RetexturedTableBlockEntity imp
   }
 
   /** Updates the current recipe */
-  public IModifierWorktableRecipe updateRecipe(IModifierWorktableRecipe recipe) {
+  public IModifierWorktableRecipe updateRecipe(RecipeHolder<IModifierWorktableRecipe> recipe) {
     lastRecipe = recipe;
     recipeValid = true;
-    currentMessage = lastRecipe.getDescription(inventoryWrapper);
-    buttons = recipe.getModifierOptions(inventoryWrapper);
+    currentMessage = lastRecipe.value().getDescription(inventoryWrapper);
+    buttons = recipe.value().getModifierOptions(inventoryWrapper);
     //        if (!level.isClientSide) {
     //          syncToRelevantPlayers(this::syncScreen);
     //        }
 
     // clear the active modifier
     selectModifier(-1);
-    return recipe;
+    return recipe.value();
   }
 
   /** Gets the currently active recipe */
   @Nullable
   public IModifierWorktableRecipe getCurrentRecipe() {
     if (recipeValid == Boolean.TRUE) {
-      return lastRecipe;
+      return lastRecipe.value();
     }
     if (recipeValid == null && level != null) {
       // if the previous recipe matches, flip state to use that again
-      if (lastRecipe != null && lastRecipe.matches(inventoryWrapper, level)) {
+      if (lastRecipe != null && lastRecipe.value().matches(inventoryWrapper, level)) {
         return updateRecipe(lastRecipe);
       }
       // look for a new recipe, if it matches cache it
-      Optional<IModifierWorktableRecipe> recipe = level.getRecipeManager().getRecipeFor(TinkerRecipeTypes.MODIFIER_WORKTABLE.get(), inventoryWrapper, level);
+      Optional<RecipeHolder<IModifierWorktableRecipe>> recipe = level.getRecipeManager().getRecipeFor(TinkerRecipeTypes.MODIFIER_WORKTABLE.get(), inventoryWrapper, level);
       if (recipe.isPresent()) {
         return updateRecipe(recipe.get());
       }
@@ -178,7 +177,7 @@ public class ModifierWorktableBlockEntity extends RetexturedTableBlockEntity imp
     ItemStack original = getItem(slot);
     super.setItem(slot, stack);
     // if the stack changed, clear everything
-    if (original.getCount() != stack.getCount() || !ItemStack.isSameItemSameTags(original, stack)) {
+    if (original.getCount() != stack.getCount() || !ItemStack.isSameItemSameComponents(original, stack)) {
       onSlotChanged(slot);
     }
   }
@@ -210,22 +209,22 @@ public class ModifierWorktableBlockEntity extends RetexturedTableBlockEntity imp
 
     // we are definitely crafting at this point
     resultItem.onCraftedBy(this.level, player, amount);
-    ForgeEventFactory.firePlayerCraftingEvent(player, resultItem, this.inventoryWrapper);
+    EventHooks.firePlayerCraftingEvent(player, resultItem, this.inventoryWrapper);
     this.playCraftSound(player);
 
     // run the recipe, will shrink inputs
     // run both sides for the sake of shift clicking
     this.inventoryWrapper.setPlayer(player);
-    this.lastRecipe.updateInputs(result, inventoryWrapper, getCurrentButtons().get(selectedModifierIndex), !level.isClientSide);
+    this.lastRecipe.value().updateInputs(result, inventoryWrapper, getCurrentButtons().get(selectedModifierIndex), !level.isClientSide);
     this.inventoryWrapper.setPlayer(null);
 
     ItemStack tinkerable = this.getItem(TINKER_SLOT);
     if (!tinkerable.isEmpty()) {
-      int shrinkToolSlot = lastRecipe.shrinkToolSlotBy(result);
+      int shrinkToolSlot = lastRecipe.value().shrinkToolSlotBy(result);
       if (tinkerable.getCount() <= shrinkToolSlot) {
         this.setItem(TINKER_SLOT, ItemStack.EMPTY);
       } else {
-        this.setItem(TINKER_SLOT, ItemHandlerHelper.copyStackWithSize(tinkerable, tinkerable.getCount() - shrinkToolSlot));
+        this.setItem(TINKER_SLOT, slimeknights.tconstruct.library.utils.ItemStackDataUtil.copyStackWithSize(tinkerable, tinkerable.getCount() - shrinkToolSlot));
       }
     }
     // screen should reset back to empty now that we crafted

@@ -78,7 +78,7 @@ public abstract class AbstractMaterialSpriteProvider {
 
   /** Adds a new material to the data generator */
   protected MaterialSpriteInfoBuilder buildMaterial(MaterialId name) {
-    return buildMaterial((ResourceLocation)name);
+    return buildMaterial(name.location());
   }
 
   /** Adds a new material variant to the data generator */
@@ -136,6 +136,16 @@ public abstract class AbstractMaterialSpriteProvider {
     private ISpriteTransformer transformer;
     @Setter
     private boolean variant = false;
+
+    public MaterialSpriteInfoBuilder transformer(@Nullable ISpriteTransformer transformer) {
+      this.transformer = transformer;
+      return this;
+    }
+
+    public MaterialSpriteInfoBuilder variant(boolean variant) {
+      this.variant = variant;
+      return this;
+    }
 
     /** Sets the fallbacks */
     public MaterialSpriteInfoBuilder fallbacks(String... fallbacks) {

@@ -22,6 +22,14 @@ public enum Orientation2D {
   private final Orientation1D x;
   private final Orientation1D y;
 
+  public Orientation1D getX() {
+    return x;
+  }
+
+  public Orientation1D getY() {
+    return y;
+  }
+
   public enum Orientation1D {
     START, MIDDLE, END;
 

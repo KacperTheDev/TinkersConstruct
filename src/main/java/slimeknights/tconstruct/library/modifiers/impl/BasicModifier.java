@@ -75,6 +75,10 @@ public class BasicModifier extends Modifier {
     /** Priority level for this modifier */
     private int priority = DEFAULT_PRIORITY;
 
+    public Builder levelDisplay(ModifierLevelDisplay levelDisplay) { this.levelDisplay = levelDisplay; return this; }
+    public Builder tooltipDisplay(TooltipDisplay tooltipDisplay) { this.tooltipDisplay = tooltipDisplay; return this; }
+    public Builder priority(int priority) { this.priority = priority; return this; }
+
     /** Builds the final modifier */
     public BasicModifier build() {
       return new BasicModifier(hookMap, levelDisplay, tooltipDisplay, priority);

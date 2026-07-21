@@ -14,8 +14,8 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Explosion.BlockInteraction;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.mantle.data.loadable.primitive.BooleanLoadable;
 import slimeknights.mantle.data.loadable.primitive.EnumLoadable;
@@ -105,6 +105,26 @@ public record ExplosionFluidEffect(LevelingValue radius, LevelingValue damage, L
     private boolean placeFire = false;
     /** Behavior of explosion against blocks */
     private BlockInteraction blockInteraction = BlockInteraction.DESTROY_WITH_DECAY;
+
+    public Builder damage(LevelingValue damage) {
+      this.damage = damage;
+      return this;
+    }
+
+    public Builder knockback(LevelingValue knockback) {
+      this.knockback = knockback;
+      return this;
+    }
+
+    public Builder placeFire(boolean placeFire) {
+      this.placeFire = placeFire;
+      return this;
+    }
+
+    public Builder blockInteraction(BlockInteraction blockInteraction) {
+      this.blockInteraction = blockInteraction;
+      return this;
+    }
 
     /** Sets the explosion not damage blocks */
     public Builder ignoreBlocks() {

@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.library.tools.layout;
 
 import io.netty.buffer.Unpooled;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
@@ -25,9 +25,9 @@ class UpdateTinkerSlotLayoutsPacketTest extends BaseMcTest {
       .addInputSlot(null, 3, 4)
       .addInputSlot(null, 5, 6)
       .build();
-    layout.setName(new ResourceLocation("test:main_layout"));
+    layout.setName(ResourceLocation.parse("test:main_layout"));
     UpdateTinkerSlotLayoutsPacket packetToEncode = new UpdateTinkerSlotLayoutsPacket(Arrays.asList(StationSlotLayout.EMPTY, layout));
-    FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+    RegistryFriendlyByteBuf buffer = createRegistryBuffer();
     packetToEncode.encode(buffer);
 
     UpdateTinkerSlotLayoutsPacket decoded = new UpdateTinkerSlotLayoutsPacket(buffer);

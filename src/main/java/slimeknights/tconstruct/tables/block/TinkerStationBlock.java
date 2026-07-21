@@ -5,7 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -24,6 +24,10 @@ public class TinkerStationBlock extends RetexturedTableBlock {
   @Getter
   private final int slotCount;
 
+  public int getSlotCount() {
+    return slotCount;
+  }
+
   public TinkerStationBlock(Properties builder, int slotCount) {
     super(builder);
     this.slotCount = slotCount;
@@ -41,7 +45,7 @@ public class TinkerStationBlock extends RetexturedTableBlock {
   @Override
   public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
     super.setPlacedBy(level, pos, state, placer, stack);
-    if (stack.hasTag() && level.getBlockEntity(pos) instanceof TinkerStationBlockEntity be) {
+    if (!stack.getComponentsPatch().isEmpty() && level.getBlockEntity(pos) instanceof TinkerStationBlockEntity be) {
       // try block first
       String block = RetexturedHelper.getTextureName(stack);
       if (!block.isEmpty()) {
@@ -57,7 +61,7 @@ public class TinkerStationBlock extends RetexturedTableBlock {
   }
 
   @Override
-  public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
+  public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
     ItemStack stack = new ItemStack(state.getBlock());
     if (level.getBlockEntity(pos) instanceof TinkerStationBlockEntity be) {
       Block block = be.getTexture();

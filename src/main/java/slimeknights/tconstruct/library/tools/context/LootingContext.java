@@ -27,6 +27,12 @@ public class LootingContext {
   @Nullable
   private final EquipmentSlot lootingSlot;
 
+  public LivingEntity getHolder() { return holder; }
+  public Entity getTarget() { return target; }
+  @Nullable public LivingEntity getLivingTarget() { return livingTarget; }
+  @Nullable public DamageSource getDamageSource() { return damageSource; }
+  @Nullable public EquipmentSlot getLootingSlot() { return lootingSlot; }
+
   public LootingContext(LivingEntity holder, Entity target, @Nullable DamageSource damageSource, @Nullable EquipmentSlot lootingSlot) {
     this.holder = holder;
     this.target = target;

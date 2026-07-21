@@ -7,6 +7,7 @@ import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.IMaterial;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
+import slimeknights.tconstruct.library.utils.ItemStackDataUtil;
 
 import java.util.function.Consumer;
 
@@ -35,7 +36,7 @@ public interface IMaterialItem extends ItemLike {
   /** Sets the material on the existing stack, bypassing the valid material check. */
   default ItemStack setMaterialForced(ItemStack stack, MaterialVariantId material) {
     // FIXME: it is odd that we assume the NBT format in this method but not in getMaterial, should be consistent in the implementation location
-    stack.getOrCreateTag().putString(MATERIAL_TAG, material.toString());
+    ItemStackDataUtil.updateTag(stack, tag -> tag.putString(MATERIAL_TAG, material.toString()));
     return stack;
   }
 

@@ -11,8 +11,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Plane;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.client.render.ChannelFluids;
 import slimeknights.mantle.client.render.FluidCuboid;
 import slimeknights.mantle.client.render.FluidRenderer;
@@ -24,6 +24,11 @@ import slimeknights.tconstruct.smeltery.block.entity.ChannelBlockEntity;
 
 public class ChannelBlockEntityRenderer implements BlockEntityRenderer<ChannelBlockEntity> {
   public ChannelBlockEntityRenderer(Context context) {}
+
+  @Override
+  public net.minecraft.world.phys.AABB getRenderBoundingBox(ChannelBlockEntity blockEntity) {
+    return blockEntity.getRenderBoundingBox();
+  }
 
 	@Override
 	public void render(ChannelBlockEntity te, float partialTicks, PoseStack matrices, MultiBufferSource buffer, int light, int combinedOverlayIn)  {

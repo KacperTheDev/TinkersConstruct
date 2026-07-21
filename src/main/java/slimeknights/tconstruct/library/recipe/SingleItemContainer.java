@@ -9,4 +9,5 @@ import slimeknights.mantle.recipe.container.ISingleStackContainer;
 public class SingleItemContainer implements ISingleStackContainer {
   @Getter @Setter
   private ItemStack stack = ItemStack.EMPTY;
+
 }

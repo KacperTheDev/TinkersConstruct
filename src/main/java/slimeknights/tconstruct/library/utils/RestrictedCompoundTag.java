@@ -1,6 +1,5 @@
 package slimeknights.tconstruct.library.utils;
 
-import lombok.RequiredArgsConstructor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -12,12 +11,22 @@ import java.util.function.BiFunction;
 /**
  * Wrapper around a compound tag to restrict access
  */
-@RequiredArgsConstructor
 public class RestrictedCompoundTag {
   /** Base NBT compound */
   private final CompoundTag tag;
   /** List of tags with restricted access */
   private final Set<String> restrictedKeys;
+  private final Runnable onChanged;
+
+  public RestrictedCompoundTag(CompoundTag tag, Set<String> restrictedKeys) {
+    this(tag, restrictedKeys, () -> {});
+  }
+
+  public RestrictedCompoundTag(CompoundTag tag, Set<String> restrictedKeys, Runnable onChanged) {
+    this.tag = tag;
+    this.restrictedKeys = restrictedKeys;
+    this.onChanged = onChanged;
+  }
 
   /**
    * Checks if the data contains the given tag
@@ -129,6 +138,7 @@ public class RestrictedCompoundTag {
   public void put(String name, Tag nbt) {
     if (!restrictedKeys.contains(name)) {
       tag.put(name, nbt);
+      onChanged.run();
     }
   }
 
@@ -140,6 +150,7 @@ public class RestrictedCompoundTag {
   public void putInt(String name, int value) {
     if (!restrictedKeys.contains(name)) {
       tag.putInt(name, value);
+      onChanged.run();
     }
   }
 
@@ -151,6 +162,7 @@ public class RestrictedCompoundTag {
   public void putBoolean(String name, boolean value) {
     if (!restrictedKeys.contains(name)) {
       tag.putBoolean(name, value);
+      onChanged.run();
     }
   }
 
@@ -162,6 +174,7 @@ public class RestrictedCompoundTag {
   public void putFloat(String name, float value) {
     if (!restrictedKeys.contains(name)) {
       tag.putFloat(name, value);
+      onChanged.run();
     }
   }
 
@@ -173,6 +186,7 @@ public class RestrictedCompoundTag {
   public void putString(String name, String value) {
     if (!restrictedKeys.contains(name)) {
       tag.putString(name, value);
+      onChanged.run();
     }
   }
 
@@ -183,6 +197,7 @@ public class RestrictedCompoundTag {
   public void remove(String name) {
     if (!restrictedKeys.contains(name)) {
       tag.remove(name);
+      onChanged.run();
     }
   }
 }

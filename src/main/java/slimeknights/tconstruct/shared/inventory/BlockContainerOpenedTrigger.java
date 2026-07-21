@@ -1,42 +1,26 @@
 package slimeknights.tconstruct.shared.inventory;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.advancements.critereon.ContextAwarePredicate;
-import net.minecraft.advancements.critereon.DeserializationContext;
-import net.minecraft.advancements.critereon.SerializationContext;
+import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import slimeknights.tconstruct.TConstruct;
 
 import javax.annotation.Nullable;
-import java.util.Objects;
+import java.util.Optional;
 
 /** Criteria that triggers when a container is opened */
 public class BlockContainerOpenedTrigger extends SimpleCriterionTrigger<BlockContainerOpenedTrigger.Instance> {
-  private static final ResourceLocation ID = TConstruct.getResource("block_container_opened");
-
   @Override
-  public ResourceLocation getId() {
-    return ID;
-  }
-
-  @Override
-  protected Instance createInstance(JsonObject json, ContextAwarePredicate predicate, DeserializationContext pDeserializationContext) {
-    ResourceLocation id = new ResourceLocation(GsonHelper.getAsString(json, "type"));
-    BlockEntityType<?> type = ForgeRegistries.BLOCK_ENTITY_TYPES.getValue(id);
-    if (type == null) {
-      throw new JsonSyntaxException("Unknown tile entity '" + id + "'");
-    }
-    return new Instance(predicate, type);
+  public Codec<Instance> codec() {
+    return Instance.CODEC;
   }
 
   /** Triggers this criteria */
@@ -46,15 +30,35 @@ public class BlockContainerOpenedTrigger extends SimpleCriterionTrigger<BlockCon
     }
   }
 
-  public static class Instance extends AbstractCriterionTriggerInstance {
+  public static class Instance implements SimpleCriterionTrigger.SimpleInstance {
+    public static final Codec<Instance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+      EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(Instance::player),
+      BuiltInRegistries.BLOCK_ENTITY_TYPE.byNameCodec().fieldOf("type").forGetter(Instance::type)
+    ).apply(instance, Instance::new));
+
+    private final Optional<ContextAwarePredicate> player;
     private final BlockEntityType<?> type;
+
     public Instance(ContextAwarePredicate predicate, BlockEntityType<?> type) {
-      super(ID, predicate);
+      this(Optional.of(predicate), type);
+    }
+
+    public Instance(Optional<ContextAwarePredicate> player, BlockEntityType<?> type) {
+      this.player = player;
       this.type = type;
     }
 
     public static Instance container(BlockEntityType<?> type) {
-      return new Instance(ContextAwarePredicate.ANY, type);
+      return new Instance(Optional.empty(), type);
+    }
+
+    @Override
+    public Optional<ContextAwarePredicate> player() {
+      return player;
+    }
+
+    public BlockEntityType<?> type() {
+      return type;
     }
 
     /** Tests if this instance matches */
@@ -62,12 +66,5 @@ public class BlockContainerOpenedTrigger extends SimpleCriterionTrigger<BlockCon
       return this.type == type;
     }
 
-    @SuppressWarnings("deprecation")  // no forge, your registries are deprecated, you just don't realize it yet
-    @Override
-    public JsonObject serializeToJson(SerializationContext conditions) {
-      JsonObject json = super.serializeToJson(conditions);
-      json.addProperty("type", Objects.requireNonNull(BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(type)).toString());
-      return json;
-    }
   }
 }

@@ -2,6 +2,7 @@ package slimeknights.tconstruct.smeltery.block.entity;
 
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -11,18 +12,19 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.common.util.NonNullConsumer;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
-import net.minecraftforge.fluids.capability.templates.EmptyFluidHandler;
+import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import javax.annotation.Nullable;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
-import slimeknights.mantle.util.WeakConsumerWrapper;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.library.recipe.FluidValues;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
+import slimeknights.tconstruct.smeltery.block.entity.component.SmelteryInputOutputBlockEntity.SmelteryFluidIO;
+import slimeknights.tconstruct.smeltery.block.entity.tank.ISmelteryTankHandler;
 import slimeknights.tconstruct.smeltery.network.FaucetActivationPacket;
 
 import static slimeknights.tconstruct.smeltery.block.FaucetBlock.FACING;
@@ -54,13 +56,9 @@ public class FaucetBlockEntity extends MantleBlockEntity {
   private boolean lastRedstoneState = false;
 
   /** Fluid handler of the input to the faucet */
-  private LazyOptional<IFluidHandler> inputHandler;
+  private FluidCache inputHandler;
   /** Fluid handler of the output from the faucet */
-  private LazyOptional<IFluidHandler> outputHandler;
-  /** Listener for when the input handler is invalidated */
-  private final NonNullConsumer<LazyOptional<IFluidHandler>> inputListener = new WeakConsumerWrapper<>(this, (self, handler) -> self.inputHandler = null);
-  /** Listener for when the output handler is invalidated */
-  private final NonNullConsumer<LazyOptional<IFluidHandler>> outputListener = new WeakConsumerWrapper<>(this, (self, handler) -> self.outputHandler = null);
+  private FluidCache outputHandler;
 
   public FaucetBlockEntity(BlockPos pos, BlockState state) {
     this(TinkerSmeltery.faucet.get(), pos, state);
@@ -79,44 +77,95 @@ public class FaucetBlockEntity extends MantleBlockEntity {
    * @param side  Side to check
    * @return  Fluid handler
    */
-  private LazyOptional<IFluidHandler> findFluidHandler(Direction side) {
-    assert level != null;
-    BlockEntity te = level.getBlockEntity(worldPosition.relative(side));
-    if (te != null) {
-      LazyOptional<IFluidHandler> handler = te.getCapability(ForgeCapabilities.FLUID_HANDLER, side.getOpposite());
-      if (handler.isPresent()) {
-        return handler;
-      }
+  private final class FluidCache {
+    private final boolean input;
+    private final BlockPos target;
+    private final Direction context;
+    private final BlockCapabilityCache<IFluidHandler,Direction> cache;
+
+    private FluidCache(ServerLevel serverLevel, Direction side, boolean input) {
+      this.input = input;
+      this.target = worldPosition.relative(side);
+      this.context = side.getOpposite();
+      cache = BlockCapabilityCache.create(
+        Capabilities.FluidHandler.BLOCK, serverLevel, target, context,
+        () -> !isRemoved() && (input ? inputHandler : outputHandler) == this,
+        () -> {
+          if (input) inputHandler = null;
+          else outputHandler = null;
+        });
     }
-    return LazyOptional.empty();
+
+    @Nullable
+    private IFluidHandler get() {
+      IFluidHandler handler = cache.getCapability();
+      return handler != null ? handler : findDirectFluidHandler(target, context);
+    }
+  }
+
+  /**
+   * Compatibility fallback for Tinkers block entities whose handlers are intentionally internal or
+   * whose NeoForge capability has not been rebuilt yet. This follows the original direct block-entity
+   * path instead of silently making the faucet inert.
+   */
+  @Nullable
+  private IFluidHandler findDirectFluidHandler(BlockPos target, @Nullable Direction context) {
+    if (level == null) {
+      return null;
+    }
+    BlockEntity blockEntity = level.getBlockEntity(target);
+    if (blockEntity instanceof SmelteryFluidIO fluidIO) {
+      return fluidIO.getProxiedCapability(context);
+    }
+    if (blockEntity instanceof ISmelteryTankHandler tankHandler) {
+      return tankHandler.getFluidCapability();
+    }
+    if (blockEntity instanceof ITankBlockEntity tankBlockEntity) {
+      return tankBlockEntity.getTank();
+    }
+    if (blockEntity instanceof CastingBlockEntity castingBlockEntity) {
+      return castingBlockEntity.getTank();
+    }
+    return null;
+  }
+
+  @Nullable
+  private IFluidHandler findFluidHandler(Direction side, boolean input) {
+    assert level != null;
+    if (level instanceof ServerLevel serverLevel) {
+      FluidCache cache = new FluidCache(serverLevel, side, input);
+      if (input) inputHandler = cache;
+      else outputHandler = cache;
+      return cache.get();
+    }
+    BlockPos target = worldPosition.relative(side);
+    Direction context = side.getOpposite();
+    IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK, target, context);
+    return handler != null ? handler : findDirectFluidHandler(target, context);
   }
 
   /**
    * Gets the input fluid handler
    * @return  Input fluid handler
    */
-  private LazyOptional<IFluidHandler> getInputHandler() {
+  @Nullable
+  private IFluidHandler getInputHandler() {
     if (inputHandler == null) {
-      inputHandler = findFluidHandler(getBlockState().getValue(FACING).getOpposite());
-      if (inputHandler.isPresent()) {
-        inputHandler.addListener(inputListener);
-      }
+      return findFluidHandler(getBlockState().getValue(FACING).getOpposite(), true);
     }
-    return inputHandler;
+    return inputHandler.get();
   }
 
   /**
    * Gets the output fluid handler
    * @return  Output fluid handler
    */
-  private LazyOptional<IFluidHandler> getOutputHandler() {
+  @Nullable
+  private IFluidHandler getOutputHandler() {
     if (outputHandler == null) {
-      outputHandler = findFluidHandler(Direction.DOWN);
-      if (outputHandler.isPresent()) {
-        outputHandler.addListener(outputListener);
-      }
+      return findFluidHandler(Direction.DOWN, false);
     }
-    return outputHandler;
+    return outputHandler.get();
   }
 
   /**
@@ -220,16 +269,24 @@ public class FaucetBlockEntity extends MantleBlockEntity {
    */
   private boolean doTransfer(boolean execute) {
     // still got content left
-    LazyOptional<IFluidHandler> inputOptional = getInputHandler();
-    LazyOptional<IFluidHandler> outputOptional = getOutputHandler();
-    if (inputOptional.isPresent() && outputOptional.isPresent()) {
+    IFluidHandler input = getInputHandler();
+    IFluidHandler output = getOutputHandler();
+    if (execute && (input == null || output == null)) {
+      TConstruct.LOG.debug("Faucet at {} cannot start: input handler={}, output handler={}", worldPosition, input, output);
+    }
+    if (input != null && output != null) {
       // can we drain?
-      IFluidHandler input = inputOptional.orElse(EmptyFluidHandler.INSTANCE);
       FluidStack drained = input.drain(PACKET_SIZE, FluidAction.SIMULATE);
+      if (execute && drained.isEmpty()) {
+        TConstruct.LOG.debug("Faucet at {} found an input handler but no drainable fluid", worldPosition);
+      }
       if (!drained.isEmpty()) {
         // can we fill
-        IFluidHandler output = outputOptional.orElse(EmptyFluidHandler.INSTANCE);
         int filled = output.fill(drained, FluidAction.SIMULATE);
+        if (execute && filled <= 0) {
+          TConstruct.LOG.debug("Faucet at {} output {} rejected {} mB of {}", worldPosition,
+                               output.getClass().getName(), drained.getAmount(), drained.getFluid());
+        }
         if (filled > 0) {
           // ensure we can actually fill in our min increment, deals with handlers like copper cans
           // can skip this step if we already received a small enough number
@@ -279,13 +336,12 @@ public class FaucetBlockEntity extends MantleBlockEntity {
     }
 
     // ensure we have an output
-    LazyOptional<IFluidHandler> outputOptional = getOutputHandler();
-    if (outputOptional.isPresent()) {
+    IFluidHandler output = getOutputHandler();
+    if (output != null) {
       FluidStack fillStack = drained.copy();
       fillStack.setAmount(Math.min(drained.getAmount(), MB_PER_TICK));
 
       // can we fill?
-      IFluidHandler output = outputOptional.orElse(EmptyFluidHandler.INSTANCE);
       int filled = output.fill(fillStack, IFluidHandler.FluidAction.SIMULATE);
       if (filled > 0) {
         // update client if they do not think we have fluid
@@ -317,7 +373,6 @@ public class FaucetBlockEntity extends MantleBlockEntity {
     }
   }
 
-  @Override
   public AABB getRenderBoundingBox() {
     return new AABB(worldPosition.getX(), worldPosition.getY() - 1, worldPosition.getZ(), worldPosition.getX() + 1, worldPosition.getY() + 1, worldPosition.getZ() + 1);
   }
@@ -353,39 +408,39 @@ public class FaucetBlockEntity extends MantleBlockEntity {
   }
 
   @Override
-  protected void saveSynced(CompoundTag compound) {
-    super.saveSynced(compound);
+  protected void saveSynced(CompoundTag compound, HolderLookup.Provider provider) {
+    super.saveSynced(compound, provider);
     compound.putByte(TAG_STATE, (byte)faucetState.ordinal());
     if (!renderFluid.isEmpty()) {
-      compound.put(TAG_RENDER_FLUID, renderFluid.writeToNBT(new CompoundTag()));
+      compound.put(TAG_RENDER_FLUID, renderFluid.save(provider));
     }
   }
 
   @Override
-  public void saveAdditional(CompoundTag compound) {
-    super.saveAdditional(compound);
+  public void saveAdditional(CompoundTag compound, HolderLookup.Provider provider) {
+    super.saveAdditional(compound, provider);
     compound.putBoolean(TAG_STOP, stopPouring);
     compound.putBoolean(TAG_LAST_REDSTONE, lastRedstoneState);
     if (!drained.isEmpty()) {
-      compound.put(TAG_DRAINED, drained.writeToNBT(new CompoundTag()));
+      compound.put(TAG_DRAINED, drained.save(provider));
     }
   }
 
   @Override
-  public void load(CompoundTag compound) {
-    super.load(compound);
+  protected void loadAdditional(CompoundTag compound, HolderLookup.Provider provider) {
+    super.loadAdditional(compound, provider);
 
     faucetState = FaucetState.fromIndex(compound.getByte(TAG_STATE));
     stopPouring = compound.getBoolean(TAG_STOP);
     lastRedstoneState = compound.getBoolean(TAG_LAST_REDSTONE);
     // fluids
     if (compound.contains(TAG_DRAINED, Tag.TAG_COMPOUND)) {
-      drained = FluidStack.loadFluidStackFromNBT(compound.getCompound(TAG_DRAINED));
+      drained = FluidStack.parseOptional(provider, compound.getCompound(TAG_DRAINED));
     } else {
       drained = FluidStack.EMPTY;
     }
     if (compound.contains(TAG_RENDER_FLUID, Tag.TAG_COMPOUND)) {
-      renderFluid = FluidStack.loadFluidStackFromNBT(compound.getCompound(TAG_RENDER_FLUID));
+      renderFluid = FluidStack.parseOptional(provider, compound.getCompound(TAG_RENDER_FLUID));
     } else {
       renderFluid = FluidStack.EMPTY;
     }

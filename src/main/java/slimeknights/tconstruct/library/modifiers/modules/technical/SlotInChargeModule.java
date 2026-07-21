@@ -5,7 +5,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlot.Type;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.common.util.LazyOptional;
+import java.util.Optional;
 import slimeknights.mantle.util.LogicHelper;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -66,8 +66,8 @@ public record SlotInChargeModule(TinkerDataKey<SlotInCharge> key, @Nullable TagK
   }
 
   /** Checks if the given slot is in charge */
-  public static boolean isInCharge(LazyOptional<TinkerDataCapability.Holder> capability, TinkerDataKey<SlotInCharge> key, EquipmentSlot slot) {
-    TinkerDataCapability.Holder data = LogicHelper.orElseNull(capability);
+  public static boolean isInCharge(Optional<TinkerDataCapability.Holder> capability, TinkerDataKey<SlotInCharge> key, EquipmentSlot slot) {
+    TinkerDataCapability.Holder data = capability.orElse(null);
     if (data != null) {
       SlotInCharge inCharge = data.get(key);
       return inCharge != null && inCharge.inCharge == slot;
@@ -76,8 +76,8 @@ public record SlotInChargeModule(TinkerDataKey<SlotInCharge> key, @Nullable TagK
   }
 
   /** Gets the total level if the passed slot is in charge. */
-  public static int getLevel(LazyOptional<TinkerDataCapability.Holder> capability, TinkerDataKey<SlotInCharge> key, EquipmentSlot slot) {
-    TinkerDataCapability.Holder data = LogicHelper.orElseNull(capability);
+  public static int getLevel(Optional<TinkerDataCapability.Holder> capability, TinkerDataKey<SlotInCharge> key, EquipmentSlot slot) {
+    TinkerDataCapability.Holder data = capability.orElse(null);
     if (data != null) {
       SlotInCharge inCharge = data.get(key);
       return inCharge != null && inCharge.inCharge == slot ? inCharge.totalLevel : 0;

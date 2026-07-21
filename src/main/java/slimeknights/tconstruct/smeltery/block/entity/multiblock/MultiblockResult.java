@@ -25,6 +25,10 @@ public final class MultiblockResult {
   /** Message to display for errors */
   private final Component message;
 
+  public boolean isSuccess() { return success; }
+  public BlockPos getPos() { return pos; }
+  public Component getMessage() { return message; }
+
   /**
    * Creates an error for the given arguments
    * @param pos  Position that caused the issue, may be null if no position

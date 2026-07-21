@@ -5,10 +5,12 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -18,11 +20,11 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.Event.Result;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.common.util.TriState;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import slimeknights.mantle.data.loadable.record.SingletonLoader;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.fluid.EffectLevel;
@@ -44,14 +46,9 @@ public enum BlockInteractFluidEffect implements FluidEffect<FluidEffectContext.B
     // we expect modded items will have the same bug, so just go ahead and damage them. On the chance it works, they get 2 damage, no big deal
     // our tools we know work so ignore them
     if (!level.isClientSide && context.getPlayer() == null && stack.isDamageableItem() && !stack.is(TinkerTags.Items.MODIFIABLE)) {
-      // unable to call Forge damageItem as that needs entity access, but its just vanilla broken anyways, right?
-      stack.hurt(1, level.getRandom(), null);
-      // calling methods again instead of using return as return may be incorrect for custom broken stacks
-      if (stack.getDamageValue() >= stack.getMaxDamage()) {
-        // but that won't happen, right? will need to consider another workaround in that case.
-        stack.shrink(1);
-        stack.setDamageValue(0);
-        level.playSound(null, context.getClickedPos(), SoundEvents.ITEM_BREAK, SoundSource.BLOCKS, 1.0F, 1.0F);
+      if (level instanceof ServerLevel serverLevel) {
+        stack.hurtAndBreak(1, serverLevel, (LivingEntity)null,
+          broken -> level.playSound(null, context.getClickedPos(), SoundEvents.ITEM_BREAK, SoundSource.BLOCKS, 1.0F, 1.0F));
       }
     }
   }
@@ -100,10 +97,10 @@ public enum BlockInteractFluidEffect implements FluidEffect<FluidEffectContext.B
       }
 
       // try the event
-      Result useItem = Result.DEFAULT;
-      Result useBlock = Result.DEFAULT;
+      TriState useItem = TriState.DEFAULT;
+      TriState useBlock = TriState.DEFAULT;
       if (player != null) {
-        PlayerInteractEvent.RightClickBlock event = ForgeHooks.onRightClickBlock(player, hand, pos, hitResult);
+        PlayerInteractEvent.RightClickBlock event = CommonHooks.onRightClickBlock(player, hand, pos, hitResult);
         if (event.isCanceled()) {
           // if successful, swing hand
           if (event.getCancellationResult().consumesAction()) {
@@ -121,7 +118,7 @@ public enum BlockInteractFluidEffect implements FluidEffect<FluidEffectContext.B
 
       // use the item
       UseOnContext useContext = new UseOnContext(world, player, hand, heldItem, hitResult);
-      if (useItem != Result.DENY && !heldItem.isEmpty()) {
+      if (useItem != TriState.FALSE && !heldItem.isEmpty()) {
         InteractionResult result = heldItem.onItemUseFirst(useContext);
         if (result != InteractionResult.PASS) {
           if (result.consumesAction()) {
@@ -137,8 +134,11 @@ public enum BlockInteractFluidEffect implements FluidEffect<FluidEffectContext.B
 
       // click the block
       ItemStack original = heldItem.copy();
-      if (player != null && (useBlock == Result.ALLOW || (useItem == Result.DEFAULT && !skipBlock))) {
-        InteractionResult result = state.use(world, player, hand, hitResult);
+      if (player != null && (useBlock == TriState.TRUE || (useItem == TriState.DEFAULT && !skipBlock))) {
+        ItemInteractionResult itemResult = state.useItemOn(heldItem, world, player, hand, hitResult);
+        InteractionResult result = itemResult == ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
+                                   ? state.useWithoutItem(world, player, hitResult)
+                                   : itemResult.result();
         if (result.consumesAction()) {
           if (player instanceof ServerPlayer serverPlayer) {
             CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, pos, original);
@@ -149,7 +149,7 @@ public enum BlockInteractFluidEffect implements FluidEffect<FluidEffectContext.B
       }
 
       // post block item usage
-      if (useItem == Result.ALLOW || (useItem == Result.DEFAULT && !heldItem.isEmpty() && (player == null || !player.getCooldowns().isOnCooldown(heldItem.getItem())))) {
+      if (useItem == TriState.TRUE || (useItem == TriState.DEFAULT && !heldItem.isEmpty() && (player == null || !player.getCooldowns().isOnCooldown(heldItem.getItem())))) {
         InteractionResult result;
         if (player != null && player.isCreative()) {
           int oldCount = heldItem.getCount();

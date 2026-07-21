@@ -25,11 +25,18 @@ public class DragonSkullModel extends SkullModelBase {
   }
 
   @Override
-  public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int light, int overlay, float red, float green, float blue, float alpha) {
+  public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int light, int overlay, int packedColor) {
     poseStack.pushPose();
     poseStack.translate(0, -0.25f, 0.075f);
     poseStack.scale(0.5f, 0.5f, 0.49f);
-    this.root.render(poseStack, buffer, light, overlay, red, green, blue, alpha);
+    this.root.render(poseStack, buffer, light, overlay, packedColor);
     poseStack.popPose();
+  }
+
+  /** @deprecated use the native packed-color overload */
+  @Deprecated(forRemoval = false)
+  public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int light, int overlay, float red, float green, float blue, float alpha) {
+    renderToBuffer(poseStack, buffer, light, overlay,
+      slimeknights.tconstruct.library.client.armor.AbstractArmorModel.packColor(red, green, blue, alpha));
   }
 }

@@ -8,7 +8,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import slimeknights.mantle.data.loadable.common.IngredientLoadable;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 public class MaterialRecipe implements ICustomOutputRecipe<ISingleStackContainer>, IMaterialValue {
   /** Empty material instance for the cache */
   @SuppressWarnings("removal")
-  public static final MaterialRecipe EMPTY = new MaterialRecipe(new ResourceLocation("missingno"), "", Ingredient.EMPTY, 0, 0, IMaterial.UNKNOWN_ID, ItemOutput.EMPTY);
+  public static final MaterialRecipe EMPTY = new MaterialRecipe(ResourceLocation.parse("missingno"), "", Ingredient.EMPTY, 0, 0, IMaterial.UNKNOWN_ID, ItemOutput.EMPTY);
   public static final RecordLoadable<MaterialRecipe> LOADER = RecordLoadable.create(
     ContextKey.ID.requiredField(),
     LoadableRecipeSerializer.RECIPE_GROUP,
@@ -61,6 +61,9 @@ public class MaterialRecipe implements ICustomOutputRecipe<ISingleStackContainer
   /** Material ID for the recipe return */
   @Getter
   protected final MaterialVariant material;
+  public int getValue() { return value; }
+  public int getNeeded() { return needed; }
+  public MaterialVariant getMaterial() { return material; }
   /** Leftover stack of value 1, used if the value is more than 1 */
   protected final ItemOutput leftover;
 
@@ -129,7 +132,7 @@ public class MaterialRecipe implements ICustomOutputRecipe<ISingleStackContainer
     if (displayItems == null) {
       if (needed > 1) {
         displayItems = Arrays.stream(ingredient.getItems())
-                             .map(stack -> ItemHandlerHelper.copyStackWithSize(stack, needed))
+                             .map(stack -> slimeknights.tconstruct.library.utils.ItemStackDataUtil.copyStackWithSize(stack, needed))
                              .collect(Collectors.toList());
       } else {
         displayItems = Arrays.asList(ingredient.getItems());

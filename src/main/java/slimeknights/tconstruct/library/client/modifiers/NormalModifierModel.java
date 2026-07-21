@@ -48,6 +48,11 @@ public class NormalModifierModel implements SimpleModifierModel {
   /** Luminosity to apply to the texture */
   private final int luminosity;
 
+  public Material small() { return small; }
+  public Material large() { return large; }
+  public int color() { return color; }
+  public int luminosity() { return luminosity; }
+
   public NormalModifierModel(@Nullable Material smallTexture, @Nullable Material largeTexture) {
     this(smallTexture, largeTexture, -1, 0);
   }

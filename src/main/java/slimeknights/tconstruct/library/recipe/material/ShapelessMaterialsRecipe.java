@@ -2,13 +2,14 @@ package slimeknights.tconstruct.library.recipe.material;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.mojang.serialization.JsonOps;
 import lombok.Getter;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -36,13 +37,15 @@ public class ShapelessMaterialsRecipe extends ShapelessRecipe implements Materia
   private final List<MaterialVariantId> extraMaterials;
 
   public ShapelessMaterialsRecipe(ResourceLocation id, String group, CraftingBookCategory category, ItemStack result, NonNullList<Ingredient> ingredients, int partCount, List<MaterialVariantId> extraMaterials) {
-    super(id, group, category, result, ingredients);
+    super(group, category, result, ingredients);
     this.partCount = partCount;
     this.extraMaterials = extraMaterials;
   }
 
   public ShapelessMaterialsRecipe(ShapelessRecipe recipe, int partCount, List<MaterialVariantId> extraMaterials) {
-    this(recipe.getId(), recipe.getGroup(), recipe.category(), recipe.result, recipe.getIngredients(), partCount, extraMaterials);
+    super(recipe.getGroup(), recipe.category(), recipe.getResultItem((HolderLookup.Provider)null), recipe.getIngredients());
+    this.partCount = partCount;
+    this.extraMaterials = extraMaterials;
   }
 
   @Override
@@ -57,7 +60,7 @@ public class ShapelessMaterialsRecipe extends ShapelessRecipe implements Materia
   }
 
   @Override
-  public ItemStack assemble(CraftingContainer inventory, RegistryAccess registryAccess) {
+  public ItemStack assemble(CraftingInput inventory, HolderLookup.Provider registryAccess) {
     return ShapedMaterialsRecipe.assemble(super.assemble(inventory, registryAccess), inventory, getIngredients(), partCount, false, extraMaterials);
   }
 
@@ -72,7 +75,7 @@ public class ShapelessMaterialsRecipe extends ShapelessRecipe implements Materia
 
     @Override
     public ShapelessMaterialsRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
-      ShapelessRecipe vanilla = SHAPELESS_RECIPE.fromJson(recipeId, json);
+      ShapelessRecipe vanilla = SHAPELESS_RECIPE.codec().codec().parse(JsonOps.INSTANCE, json).getOrThrow();
       int parts = GsonHelper.getAsInt(json, "parts");
       if (parts < 1 || parts > vanilla.getIngredients().size()) {
         throw new JsonSyntaxException("Parts must be between 1 and the number of ingredients " + vanilla.getIngredients().size());
@@ -82,16 +85,24 @@ public class ShapelessMaterialsRecipe extends ShapelessRecipe implements Materia
 
     @Override
     @Nullable
-    public ShapelessMaterialsRecipe fromNetworkSafe(ResourceLocation recipeId, FriendlyByteBuf buffer) {
-      ShapelessRecipe recipe = SHAPELESS_RECIPE.fromNetwork(recipeId, buffer);
+    public ShapelessMaterialsRecipe fromNetworkSafe(ResourceLocation recipeId, RegistryFriendlyByteBuf buffer) {
+      ShapelessRecipe recipe = SHAPELESS_RECIPE.streamCodec().decode(buffer);
       return recipe == null ? null : new ShapelessMaterialsRecipe(recipe, buffer.readByte(), MATERIAL_FIELD.decode(buffer));
     }
 
     @Override
-    public void toNetworkSafe(FriendlyByteBuf buffer, ShapelessMaterialsRecipe recipe) {
-      SHAPELESS_RECIPE.toNetwork(buffer, recipe);
+    public void toNetworkSafe(RegistryFriendlyByteBuf buffer, ShapelessMaterialsRecipe recipe) {
+      SHAPELESS_RECIPE.streamCodec().encode(buffer, recipe);
       buffer.writeByte(recipe.partCount);
       MATERIAL_FIELD.encode(buffer, recipe);
+    }
+
+    @Override
+    public JsonObject toJson(ShapelessMaterialsRecipe recipe) {
+      JsonObject json = SHAPELESS_RECIPE.codec().codec().encodeStart(JsonOps.INSTANCE, recipe).getOrThrow().getAsJsonObject();
+      json.addProperty("parts", recipe.partCount);
+      MATERIAL_FIELD.serialize(recipe, json);
+      return json;
     }
   }
 }

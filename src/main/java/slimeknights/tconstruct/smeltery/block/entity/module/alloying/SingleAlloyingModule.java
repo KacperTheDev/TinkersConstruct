@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.smeltery.block.entity.module.alloying;
 
 import lombok.RequiredArgsConstructor;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
@@ -16,7 +17,7 @@ import java.util.Optional;
 public class SingleAlloyingModule implements IAlloyingModule {
   private final MantleBlockEntity parent;
   private final IMutableAlloyTank alloyTank;
-  private AlloyRecipe lastRecipe;
+  private RecipeHolder<AlloyRecipe> lastRecipe;
 
   /** Gets a nonnull world instance from the parent */
   private Level getLevel() {
@@ -27,22 +28,19 @@ public class SingleAlloyingModule implements IAlloyingModule {
   @Nullable
   private AlloyRecipe findRecipe() {
     Level world = getLevel();
-    if (lastRecipe != null && lastRecipe.canPerform(alloyTank)) {
-      return lastRecipe;
+    if (lastRecipe != null && lastRecipe.value().canPerform(alloyTank)) {
+      return lastRecipe.value();
     }
     // fetch the first recipe that matches the inputs and fits in the tank
     // means if for some reason two recipes both are vaiud, the tank contents can be used to choose
-    Optional<AlloyRecipe> recipe = world.getRecipeManager()
-                                        .byType(TinkerRecipeTypes.ALLOYING.get())
-                                        .values().stream()
-                                        .filter(r -> r instanceof AlloyRecipe)
-                                        .map(r -> (AlloyRecipe) r)
-                                        .filter(r -> alloyTank.canFit(r.getOutput(), 0) && r.canPerform(alloyTank))
-                                        .findAny();
+    Optional<RecipeHolder<AlloyRecipe>> recipe = world.getRecipeManager()
+      .getAllRecipesFor(TinkerRecipeTypes.ALLOYING.get()).stream()
+      .filter(holder -> alloyTank.canFit(holder.value().getOutput(), 0) && holder.value().canPerform(alloyTank))
+      .findAny();
     // if found, cache and return
     if (recipe.isPresent()) {
       lastRecipe = recipe.get();
-      return lastRecipe;
+      return lastRecipe.value();
     } else {
       return null;
     }

@@ -5,6 +5,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import slimeknights.tconstruct.library.tools.SlotType;
+import slimeknights.tconstruct.library.utils.ResourceId;
 
 import java.util.function.BiFunction;
 
@@ -39,6 +40,10 @@ public interface IModDataView {
    */
   <T> T get(ResourceLocation name, BiFunction<CompoundTag,String,T> function);
 
+  default <T> T get(ResourceId name, BiFunction<CompoundTag,String,T> function) {
+    return get(name.location(), function);
+  }
+
   /**
    * Checks if the data contains the given tag with any type.
    * Generally, its better to use {@link #contains(ResourceLocation, int)}, but there are rare benefits to this method.
@@ -47,6 +52,10 @@ public interface IModDataView {
    */
   boolean contains(ResourceLocation name);
 
+  default boolean contains(ResourceId name) {
+    return contains(name.location());
+  }
+
   /**
    * Checks if the data contains the given tag
    * @param name  Namespaced key
@@ -54,6 +63,10 @@ public interface IModDataView {
    * @return  True if the tag is contained
    */
   boolean contains(ResourceLocation name, int type);
+
+  default boolean contains(ResourceId name, int type) {
+    return contains(name.location(), type);
+  }
 
   /**
    * Gets the number of slots provided by this data. Will be 0 if this data does not support slots.
@@ -76,6 +89,10 @@ public interface IModDataView {
     return get(name, CompoundTag::get);
   }
 
+  default Tag get(ResourceId name) {
+    return get(name.location());
+  }
+
   /**
    * Reads an integer from the mod data
    * @param name  Name
@@ -83,6 +100,10 @@ public interface IModDataView {
    */
   default int getInt(ResourceLocation name) {
     return get(name, CompoundTag::getInt);
+  }
+
+  default int getInt(ResourceId name) {
+    return getInt(name.location());
   }
 
   /**
@@ -94,6 +115,10 @@ public interface IModDataView {
     return get(name, CompoundTag::getBoolean);
   }
 
+  default boolean getBoolean(ResourceId name) {
+    return getBoolean(name.location());
+  }
+
   /**
    * Reads an float from the mod data
    * @param name  Name
@@ -101,6 +126,10 @@ public interface IModDataView {
    */
   default float getFloat(ResourceLocation name) {
     return get(name, CompoundTag::getFloat);
+  }
+
+  default float getFloat(ResourceId name) {
+    return getFloat(name.location());
   }
 
   /**
@@ -112,6 +141,10 @@ public interface IModDataView {
     return get(name, CompoundTag::getString);
   }
 
+  default String getString(ResourceId name) {
+    return getString(name.location());
+  }
+
   /**
    * Reads a compound from the mod data
    * @param name  Name
@@ -119,6 +152,10 @@ public interface IModDataView {
    */
   default CompoundTag getCompound(ResourceLocation name) {
     return get(name, CompoundTag::getCompound);
+  }
+
+  default CompoundTag getCompound(ResourceId name) {
+    return getCompound(name.location());
   }
 
   /**
@@ -129,5 +166,9 @@ public interface IModDataView {
    */
   default ListTag getList(ResourceLocation name, int type) {
     return get(name, (tag, key) -> tag.getList(key, type));
+  }
+
+  default ListTag getList(ResourceId name, int type) {
+    return getList(name.location(), type);
   }
 }

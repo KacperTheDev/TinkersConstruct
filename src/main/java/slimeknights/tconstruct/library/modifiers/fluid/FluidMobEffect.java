@@ -2,13 +2,19 @@ package slimeknights.tconstruct.library.modifiers.fluid;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.common.EffectCure;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
@@ -19,6 +25,7 @@ import slimeknights.tconstruct.library.modifiers.fluid.entity.MobEffectFluidEffe
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -28,17 +35,73 @@ import java.util.stream.Collectors;
  * @param time    Potion time in ticks, scales with fluid amount. Set to {@link MobEffectInstance#INFINITE_DURATION} for infinite.
  * @param curativeItems  Items allowed to cure the effect
  */
-public record FluidMobEffect(MobEffect effect, int time, int level, @Nullable List<Item> curativeItems) {
+public final class FluidMobEffect {
   private static final String TRANSLATION_ROOT = TConstruct.makeTranslationKey("fluid_effect", "mob_effect.");
   public static final RecordLoadable<FluidMobEffect> LOADABLE = RecordLoadable.create(
-    Loadables.MOB_EFFECT.requiredField("effect", e -> e.effect),
+    Loadables.resourceKey(Registries.MOB_EFFECT).requiredField("effect", FluidMobEffect::effectKey),
     IntLoadable.FROM_ONE.defaultField("time", -1, false, e -> e.time),
     IntLoadable.FROM_ONE.defaultField("level", 1, true, e -> e.level),
     Loadables.ITEM.list(0).nullableField("curative_items", e -> e.curativeItems),
     FluidMobEffect::new);
 
+  private final ResourceKey<MobEffect> effectKey;
+  private final int time;
+  private final int level;
+  @Nullable
+  private final List<Item> curativeItems;
+
+  public FluidMobEffect(ResourceKey<MobEffect> effect, int time, int level, @Nullable List<Item> curativeItems) {
+    this.effectKey = effect;
+    this.time = time;
+    this.level = level;
+    this.curativeItems = curativeItems;
+  }
+
+  public FluidMobEffect(ResourceKey<MobEffect> effect, int time, int level) {
+    this(effect, time, level, null);
+  }
+
+  public FluidMobEffect(ResourceLocation effect, int time, int level) {
+    this(ResourceKey.create(Registries.MOB_EFFECT, effect), time, level);
+  }
+
+  public FluidMobEffect(MobEffect effect, int time, int level, @Nullable List<Item> curativeItems) {
+    this(BuiltInRegistries.MOB_EFFECT.getResourceKey(effect)
+      .orElseThrow(() -> new IllegalArgumentException("Unregistered mob effect")), time, level, curativeItems);
+  }
+
   public FluidMobEffect(MobEffect effect, int time, int level) {
     this(effect, time, level, null);
+  }
+
+  public FluidMobEffect(Holder<MobEffect> effect, int time, int level) {
+    this(effect.unwrapKey().orElseGet(() -> BuiltInRegistries.MOB_EFFECT.getResourceKey(effect.value())
+      .orElseThrow(() -> new IllegalArgumentException("Unregistered mob effect"))), time, level);
+  }
+
+  public ResourceKey<MobEffect> effectKey() {
+    return effectKey;
+  }
+
+  public MobEffect effect() {
+    return effectHolder().value();
+  }
+
+  public int time() {
+    return time;
+  }
+
+  public int level() {
+    return level;
+  }
+
+  @Nullable
+  public List<Item> curativeItems() {
+    return curativeItems;
+  }
+
+  private Holder<MobEffect> effectHolder() {
+    return BuiltInRegistries.MOB_EFFECT.getHolderOrThrow(effectKey);
   }
 
   /** Gets the amplifier for a mob effect */
@@ -53,9 +116,12 @@ public record FluidMobEffect(MobEffect effect, int time, int level, @Nullable Li
 
   /** Creates the final effect */
   public MobEffectInstance effectWithTime(int time) {
-    MobEffectInstance instance = new MobEffectInstance(effect, time, this.level - 1);
+    MobEffectInstance instance = new MobEffectInstance(effectHolder(), time, this.level - 1);
     if (curativeItems != null) {
-      instance.setCurativeItems(curativeItems.stream().map(ItemStack::new).collect(Collectors.toList()));
+      instance.getCures().clear();
+      instance.getCures().addAll(curativeItems.stream()
+        .map(item -> EffectCure.get(BuiltInRegistries.ITEM.getKey(item).toString()))
+        .collect(Collectors.toSet()));
     }
     return instance;
   }
@@ -84,7 +150,7 @@ public record FluidMobEffect(MobEffect effect, int time, int level, @Nullable Li
       used = 1;
     } else {
       // add and set both have distinct behavior under an existing effect, same otherwise
-      MobEffectInstance existingInstance = target.getEffect(effect);
+      MobEffectInstance existingInstance = target.getEffect(effectHolder());
       int amplifier = amplifier();
       if (existingInstance != null && existingInstance.getAmplifier() >= amplifier) {
         // if the existing level is larger, just skip, would be a cheese to increase said level
@@ -132,7 +198,7 @@ public record FluidMobEffect(MobEffect effect, int time, int level, @Nullable Li
   /** Gets the display name for this effect */
   public Component getDisplayName(TimeAction action) {
     // level display based on PotionUtils#addPotionTooltip
-    Component component = effect.getDisplayName();
+    Component component = effect().getDisplayName();
     // add level if above 1
     if (level > 1) {
       component = Component.translatable("potion.withAmplifier", component, Component.translatable("potion.potency." + (level - 1)));
@@ -141,6 +207,27 @@ public record FluidMobEffect(MobEffect effect, int time, int level, @Nullable Li
       return component;
     }
     return Component.translatable(TRANSLATION_ROOT + action.name().toLowerCase(Locale.ROOT), time / 20, component);
+  }
+
+  @Override
+  public boolean equals(Object object) {
+    if (this == object) {
+      return true;
+    }
+    if (!(object instanceof FluidMobEffect that)) {
+      return false;
+    }
+    return time == that.time && level == that.level && effectKey.equals(that.effectKey) && Objects.equals(curativeItems, that.curativeItems);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(effectKey, time, level, curativeItems);
+  }
+
+  @Override
+  public String toString() {
+    return "FluidMobEffect[effect=" + effectKey.location() + ", time=" + time + ", level=" + level + ", curativeItems=" + curativeItems + ']';
   }
 
   /** Creates a new builder instance */
@@ -165,8 +252,26 @@ public record FluidMobEffect(MobEffect effect, int time, int level, @Nullable Li
       return this;
     }
 
+    public Builder effect(Holder<MobEffect> effect, int time, int level) {
+      effects.add(new FluidMobEffect(effect, time, level));
+      return this;
+    }
+
+    public Builder effect(ResourceKey<MobEffect> effect, int time, int level) {
+      effects.add(new FluidMobEffect(effect, time, level));
+      return this;
+    }
+
     /** Adds an effect to the builder */
     public Builder effect(MobEffect effect, int time) {
+      return effect(effect, time, 1);
+    }
+
+    public Builder effect(Holder<MobEffect> effect, int time) {
+      return effect(effect, time, 1);
+    }
+
+    public Builder effect(ResourceKey<MobEffect> effect, int time) {
       return effect(effect, time, 1);
     }
 

@@ -131,6 +131,10 @@ public class Schedule {
     @Setter
     private int index;
 
+    public void setIndex(int index) {
+      this.index = index;
+    }
+
     @Override
     public Scheduler add(int task, int time) {
       return parent.add(task * size + index, time);

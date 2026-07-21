@@ -1,19 +1,19 @@
 package slimeknights.tconstruct.library.data.tinkering;
 
 import com.google.gson.JsonObject;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.enchantment.Enchantment;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /** Data generator for mappings from enchantments to modifiers */
@@ -38,18 +38,32 @@ public abstract class AbstractEnchantmentToModifierProvider extends GenericDataP
   /* Helpers */
 
   /** Helper to append the ? for optional modifiers */
-  private static String optionalId(ResourceLocation modifierId, boolean optional) {
-    return optional ? modifierId.toString() + '?' : modifierId.toString();
+  private static String optionalId(ModifierId modifierId, boolean optional) {
+    return optional ? modifierId.location() + "?" : modifierId.location().toString();
   }
 
   /** Adds the given enchantment */
-  protected void add(Enchantment enchantment, ModifierId modifierId) {
+  protected void add(Holder<Enchantment> enchantment, ModifierId modifierId) {
     add(enchantment, modifierId, false);
   }
 
+  /** Adds a dynamic-registry enchantment key, as used by vanilla in 1.21. */
+  protected void add(ResourceKey<Enchantment> enchantment, ModifierId modifierId) {
+    add(enchantment, modifierId, false);
+  }
+
+  /** Adds a dynamic-registry enchantment key with an optional modifier target. */
+  protected void add(ResourceKey<Enchantment> enchantment, ModifierId modifierId, boolean optionalModifier) {
+    String key = enchantment.location().toString();
+    if (enchantmentMap.has(key) || enchantmentMap.has(key + '?')) {
+      throw new IllegalArgumentException("Duplicate enchantment " + key);
+    }
+    enchantmentMap.addProperty(key, optionalId(modifierId, optionalModifier));
+  }
+
   /** Adds the given enchantment, allowing making the modifier optional */
-  protected void add(Enchantment enchantment, ModifierId modifierId, boolean optionalModifier) {
-    String key = Objects.requireNonNull(BuiltInRegistries.ENCHANTMENT.getKey(enchantment)).toString();
+  protected void add(Holder<Enchantment> enchantment, ModifierId modifierId, boolean optionalModifier) {
+    String key = enchantment.unwrapKey().orElseThrow(() -> new IllegalArgumentException("Unbound enchantment holder")).location().toString();
     if (enchantmentMap.has(key) || enchantmentMap.has(key + '?')) {
       throw new IllegalArgumentException("Duplicate enchantment " + key);
     }

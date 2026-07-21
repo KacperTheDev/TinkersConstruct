@@ -57,7 +57,7 @@ public final class MaterialId extends ResourceId implements MaterialVariantId {
 
   @Override
   public ResourceLocation getLocation(char separator) {
-    return this;
+    return location();
   }
 
   @Override

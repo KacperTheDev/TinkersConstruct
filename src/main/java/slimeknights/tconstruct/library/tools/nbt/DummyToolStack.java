@@ -14,6 +14,21 @@ public class DummyToolStack implements IToolStackView {
   private final ModDataNBT persistentData;
 
   @Override
+  public Item getItem() {
+    return item;
+  }
+
+  @Override
+  public ModifierNBT getModifiers() {
+    return modifiers;
+  }
+
+  @Override
+  public ModDataNBT getPersistentData() {
+    return persistentData;
+  }
+
+  @Override
   public ToolDefinition getDefinition() {
     return ToolDefinition.EMPTY;
   }

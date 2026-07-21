@@ -5,10 +5,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import slimeknights.tconstruct.library.data.recipe.AbstractRecipeOutput;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
+import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
 import slimeknights.tconstruct.library.recipe.modifiers.severing.SeveringRecipe;
 
 import javax.annotation.Nullable;
@@ -39,30 +41,18 @@ public class SpecialSeveringRecipeBuilder extends AbstractRecipeBuilder<SpecialS
 
   @SuppressWarnings("deprecation")
   @Override
-  public void save(Consumer<FinishedRecipe> consumer) {
+  public void save(RecipeOutput consumer) {
     save(consumer, Objects.requireNonNull(BuiltInRegistries.RECIPE_SERIALIZER.getKey(serializer)));
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
-    consumer.accept(new Finished(id, null));
-  }
-
-  /** Finished recipe instance */
-  private class Finished extends AbstractFinishedRecipe {
-    public Finished(ResourceLocation id, @Nullable ResourceLocation advancementId) {
-      super(id, advancementId);
+  public void save(RecipeOutput consumer, ResourceLocation id) {
+    if (!(serializer instanceof LoadableRecipeSerializer<?> loadable)) {
+      throw new IllegalStateException("Special severing serializer must be backed by a record loadable: " + serializer);
     }
-
-    @Override
-    public void serializeRecipeData(JsonObject json) {
-      json.addProperty("per_level_chance", baseChance);
-      json.addProperty("looting_bonus", lootingBonus);
-    }
-
-    @Override
-    public RecipeSerializer<?> getType() {
-      return serializer;
-    }
+    JsonObject json = new JsonObject();
+    json.addProperty("per_level_chance", baseChance);
+    json.addProperty("looting_bonus", lootingBonus);
+    saveRecipe(consumer, id, loadable.fromJson(id, json), null);
   }
 }

@@ -91,6 +91,10 @@ public class ModifierEntry implements Comparable<ModifierEntry> {
     return modifier;
   }
 
+  public ModifierEntry withLevel(int level) {
+    return new ModifierEntry(modifier, level);
+  }
+
   /** Gets the given hook from the modifier, returning default instance if not present */
   public final <T> T getHook(ModuleHook<T> hook) {
     return modifier.get().getHook(hook);

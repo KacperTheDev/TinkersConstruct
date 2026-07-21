@@ -94,11 +94,15 @@ public record PlatingMaterialStats(MaterialStatType<?> getType, int durability, 
     private float toughness = 0;
     private float knockbackResistance = 0;
 
+    public Builder shieldDurability(int shieldDurability) { this.shieldDurability = shieldDurability; return this; }
+    public Builder toughness(float toughness) { this.toughness = toughness; return this; }
+    public Builder knockbackResistance(float knockbackResistance) { this.knockbackResistance = knockbackResistance; return this; }
+
     private Builder() {}
 
     /** Sets the durability for the piece based on the given factor */
     public Builder durabilityFactor(float maxDamageFactor) {
-      for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+      for (ArmorItem.Type slotType : slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial.ARMOR_TYPES) {
         int index = slotType.ordinal();
         durability[index] = (int)(ArmorModuleBuilder.MAX_DAMAGE_ARRAY[index] * maxDamageFactor);
       }

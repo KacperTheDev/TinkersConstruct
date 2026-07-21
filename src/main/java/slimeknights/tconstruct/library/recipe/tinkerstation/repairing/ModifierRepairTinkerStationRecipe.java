@@ -1,8 +1,7 @@
 package slimeknights.tconstruct.library.recipe.tinkerstation.repairing;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -24,7 +23,6 @@ import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 
-@RequiredArgsConstructor
 public class ModifierRepairTinkerStationRecipe implements ITinkerStationRecipe, IModifierRepairRecipe {
   public static final RecordLoadable<ModifierRepairTinkerStationRecipe> LOADER = RecordLoadable.create(ContextKey.ID.requiredField(), MODIFIER_FIELD, INGREDIENT_FIELD, REPAIR_AMOUNT_FIELD, ModifierRepairTinkerStationRecipe::new);
 
@@ -36,6 +34,13 @@ public class ModifierRepairTinkerStationRecipe implements ITinkerStationRecipe, 
   private final Ingredient ingredient;
   @Getter
   private final int repairAmount;
+
+  public ModifierRepairTinkerStationRecipe(ResourceLocation id, ModifierId modifier, Ingredient ingredient, int repairAmount) {
+    this.id = id;
+    this.modifier = modifier;
+    this.ingredient = ingredient;
+    this.repairAmount = repairAmount;
+  }
 
   @Override
   public boolean matches(ITinkerStationContainer inv, Level world) {
@@ -51,7 +56,7 @@ public class ModifierRepairTinkerStationRecipe implements ITinkerStationRecipe, 
   }
 
   @Override
-  public RecipeResult<LazyToolStack> getValidatedResult(ITinkerStationContainer inv, RegistryAccess access) {
+  public RecipeResult<LazyToolStack> getValidatedResult(ITinkerStationContainer inv, HolderLookup.Provider access) {
     ToolStack tool = inv.getTinkerable();
     int amountPerItem = tool.getModifierLevel(modifier) * repairAmount;
     if (amountPerItem <= 0) {

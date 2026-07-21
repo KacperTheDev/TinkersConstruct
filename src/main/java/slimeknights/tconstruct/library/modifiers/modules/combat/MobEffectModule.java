@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
@@ -123,6 +125,11 @@ public interface MobEffectModule extends ModifierModule, ConditionalModule<ITool
     return new Builder(effect.get());
   }
 
+  /** Creates a builder from the holder-based vanilla registry API. */
+  static MobEffectModule.Builder builder(Holder<MobEffect> effect) {
+    return new Builder(effect.value());
+  }
+
   /** Builder for this modifier in datagen */
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Accessors(fluent = true)
@@ -167,6 +174,19 @@ public interface MobEffectModule extends ModifierModule, ConditionalModule<ITool
     private BooleanPredicate isAoe = BooleanPredicate.FALSE;
     /** Predicate for whether to apply the effect to usages from projectiles, such as throwing or arrow hit */
     private BooleanPredicate isProjectile = BooleanPredicate.FALSE;
+
+    public Builder target(IJsonPredicate<LivingEntity> target) { this.target = target; return this; }
+    public Builder holder(IJsonPredicate<LivingEntity> holder) { this.holder = holder; return this; }
+    public Builder level(RandomLevelingValue level) { this.level = level; return this; }
+    public Builder time(RandomLevelingValue time) { this.time = time; return this; }
+    public Builder chance(LevelingValue chance) { this.chance = chance; return this; }
+    public Builder applyBeforeMelee(boolean applyBeforeMelee) { this.applyBeforeMelee = applyBeforeMelee; return this; }
+    public Builder directDamage(BooleanPredicate directDamage) { this.directDamage = directDamage; return this; }
+    public Builder damageSource(IJsonPredicate<DamageSource> damageSource) { this.damageSource = damageSource; return this; }
+    public Builder counterDurabilityUsage(int counterDurabilityUsage) { this.counterDurabilityUsage = counterDurabilityUsage; return this; }
+    public Builder targetSelf(boolean targetSelf) { this.targetSelf = targetSelf; return this; }
+    public Builder isAoe(BooleanPredicate isAoe) { this.isAoe = isAoe; return this; }
+    public Builder isProjectile(BooleanPredicate isProjectile) { this.isProjectile = isProjectile; return this; }
 
     /** Sets curative items to the builder. May call with no arguments to force curative items to empty. */
     public Builder curativeItem(Item... items) {
@@ -232,11 +252,8 @@ public interface MobEffectModule extends ModifierModule, ConditionalModule<ITool
       }
       float duration = this.time.computeValue(scaledLevel);
       if (duration > 0) {
-        MobEffectInstance instance = new MobEffectInstance(effect, (int)duration, level);
-        if (curativeItems != null) {
-          instance.setCurativeItems(curativeItems.stream().map(ItemStack::new).collect(Collectors.toList()));
-        }
-        target.addEffect(new MobEffectInstance(effect, (int)duration, level), cause);
+        Holder<MobEffect> effectHolder = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect);
+        target.addEffect(new MobEffectInstance(effectHolder, (int)duration, level), cause);
       }
     }
 

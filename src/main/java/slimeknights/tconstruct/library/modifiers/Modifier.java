@@ -13,7 +13,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import slimeknights.mantle.client.ResourceColorManager;
-import slimeknights.mantle.registration.object.IdAwareObject;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.ModifierManager.ModifierRegistrationEvent;
 import slimeknights.tconstruct.library.modifiers.hook.mining.BreakSpeedContext;
@@ -38,7 +37,7 @@ import java.util.Random;
  * @see #registerHooks(Builder)
  */
 @SuppressWarnings("unused")
-public class Modifier implements IdAwareObject {
+public class Modifier {
   /** Modifier random instance, use for chance based effects */
   public static Random RANDOM = new Random();
 
@@ -63,7 +62,6 @@ public class Modifier implements IdAwareObject {
   /** Map of all modifier hooks registered to this modifier */
   @Getter
   private final ModuleHookMap hooks;
-
   /** Creates a new modifier using the given hook map */
   protected Modifier(ModuleHookMap hooks) {
     this.hooks = hooks;
@@ -105,7 +103,6 @@ public class Modifier implements IdAwareObject {
     this.id = name;
   }
 
-  @Override
   public ModifierId getId() {
     return Objects.requireNonNull(id, "Modifier has null registry name");
   }

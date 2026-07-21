@@ -1,9 +1,11 @@
 package slimeknights.tconstruct.tools.recipe;
 
+import slimeknights.tconstruct.library.data.recipe.LoadableRecipeOutput;
+
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.tconstruct.TConstruct;
@@ -14,7 +16,6 @@ import slimeknights.tconstruct.library.recipe.worktable.AbstractSizedIngredientR
 import java.util.function.Consumer;
 
 /** Builder for an enchantment converting recipe */
-@RequiredArgsConstructor(staticName = "converting")
 public class EnchantmentConvertingRecipeBuilder extends AbstractSizedIngredientRecipeBuilder<EnchantmentConvertingRecipeBuilder> {
   private final String name;
   private final boolean matchBook;
@@ -22,6 +23,15 @@ public class EnchantmentConvertingRecipeBuilder extends AbstractSizedIngredientR
   @Setter
   @Accessors(fluent = true)
   private IJsonPredicate<ModifierId> modifierPredicate = ModifierPredicate.ANY;
+
+  private EnchantmentConvertingRecipeBuilder(String name, boolean matchBook) {
+    this.name = name;
+    this.matchBook = matchBook;
+  }
+
+  public static EnchantmentConvertingRecipeBuilder converting(String name, boolean matchBook) {
+    return new EnchantmentConvertingRecipeBuilder(name, matchBook);
+  }
 
   /**
    * If true, returns the unenchanted form of the item as an extra result
@@ -32,16 +42,16 @@ public class EnchantmentConvertingRecipeBuilder extends AbstractSizedIngredientR
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer) {
+  public void save(RecipeOutput consumer) {
     save(consumer, TConstruct.getResource(name));
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
+  public void save(RecipeOutput consumer, ResourceLocation id) {
     if (inputs.isEmpty()) {
       throw new IllegalStateException("Must have at least one input");
     }
     ResourceLocation advancementId = buildOptionalAdvancement(id, "modifiers");
-    consumer.accept(new LoadableFinishedRecipe<>(new EnchantmentConvertingRecipe(id, name, inputs, matchBook, returnInput, modifierPredicate), EnchantmentConvertingRecipe.LOADER, advancementId));
+    saveRecipe(consumer, id, new EnchantmentConvertingRecipe(id, name, inputs, matchBook, returnInput, modifierPredicate), advancementId);
   }
 }

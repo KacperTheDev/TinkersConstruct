@@ -7,8 +7,8 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.neoforged.neoforge.common.crafting.CraftingHelper;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
 import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
@@ -71,7 +71,7 @@ public abstract class AbstractStationSlotLayoutProvider extends GenericDataProvi
 
   /** Defines the given ID as a general layout */
   protected StationSlotLayout.Builder definePattern(Pattern id) {
-    return define(id).icon(id);
+    return define(id.location()).icon(id);
   }
 
   /** Defines the given ID as a tool layout, sets icon and name */
@@ -102,7 +102,7 @@ public abstract class AbstractStationSlotLayoutProvider extends GenericDataProvi
     public JsonObject serialize() {
       JsonObject json = StationSlotLayoutLoader.GSON.toJsonTree(builder.build()).getAsJsonObject();
       if (!conditions.isEmpty()) {
-        json.add("conditions", CraftingHelper.serialize(conditions.toArray(ICondition[]::new)));
+        json.add("conditions", slimeknights.tconstruct.library.json.condition.ConditionUtil.serialize(conditions));
       }
       return json;
     }

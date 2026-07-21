@@ -8,7 +8,7 @@ import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.fluid.tooltip.FluidTooltipHandler;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
@@ -80,7 +80,7 @@ public class GuiSmelteryTank implements IScreenWithFluidTank {
     if (tank.getContained() > 0) {
       int[] heights = calcLiquidHeights(true);
 
-      int bottom = y + width;
+      int bottom = y + height;
       for (int i = 0; i < heights.length; i++) {
         int fluidH = heights[i];
         FluidStack liquid = tank.getFluids().get(i);

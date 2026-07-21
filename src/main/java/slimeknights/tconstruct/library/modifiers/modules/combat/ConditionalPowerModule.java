@@ -98,7 +98,7 @@ public record ConditionalPowerModule(IJsonPredicate<LivingEntity> target, IJsonP
 
   @Override
   public boolean onProjectileHitEntity(ModifierNBT modifiers, ModDataNBT persistentData, ModifierEntry modifier, Projectile projectile, EntityHitResult hit, @Nullable LivingEntity attacker, @Nullable LivingEntity target) {
-    ResourceLocation key = modifier.getId();
+    ResourceLocation key = modifier.getId().location();
     // if we already boosted power from an entity, don't boost again
     // minimizes issues with projectile bounces and piercing
     if (modifierLevel.test(modifier.getLevel()) && !persistentData.getBoolean(key)) {
@@ -165,6 +165,9 @@ public record ConditionalPowerModule(IJsonPredicate<LivingEntity> target, IJsonP
   public static class Builder extends VariableFormula.Builder<ConditionalPowerModule.Builder,ConditionalPowerModule, PowerVariable> {
     private IJsonPredicate<LivingEntity> target = LivingEntityPredicate.ANY;
     private IJsonPredicate<LivingEntity> holder = LivingEntityPredicate.ANY;
+
+    public Builder target(IJsonPredicate<LivingEntity> target) { this.target = target; return this; }
+    public Builder holder(IJsonPredicate<LivingEntity> holder) { this.holder = holder; return this; }
 
     private Builder() {
       super(PowerFormula.VARIABLES);

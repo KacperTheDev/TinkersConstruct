@@ -93,6 +93,21 @@ public record MaxArmorStatModule(TinkerDataKey<Float> statKey, LevelingValue amo
     private TagKey<Item> heldTag;
     private ArmorStatModule.TooltipStyle tooltipStyle = ArmorStatModule.TooltipStyle.NONE;
 
+    public Builder allowBroken(boolean allowBroken) {
+      this.allowBroken = allowBroken;
+      return this;
+    }
+
+    public Builder heldTag(@Nullable TagKey<Item> heldTag) {
+      this.heldTag = heldTag;
+      return this;
+    }
+
+    public Builder tooltipStyle(ArmorStatModule.TooltipStyle tooltipStyle) {
+      this.tooltipStyle = tooltipStyle;
+      return this;
+    }
+
     public MaxArmorStatModule.Builder allowBroken() {
       this.allowBroken = true;
       return this;

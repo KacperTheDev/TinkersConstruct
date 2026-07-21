@@ -2,11 +2,16 @@ package slimeknights.tconstruct.library.data.tinkering;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.neoforged.neoforge.common.crafting.CraftingHelper;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.tconstruct.library.json.JsonRedirect;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
@@ -23,9 +28,16 @@ import java.util.concurrent.CompletableFuture;
 @SuppressWarnings("SameParameterValue")
 public abstract class AbstractModifierProvider extends GenericDataProvider {
   private final Map<ModifierId,Composable> composableModifiers = new HashMap<>();
+  private final CompletableFuture<HolderLookup.Provider> lookupProvider;
 
-  public AbstractModifierProvider(PackOutput packOutput) {
+  public AbstractModifierProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> lookupProvider) {
     super(packOutput, Target.DATA_PACK, ModifierManager.FOLDER, ModifierManager.GSON);
+    this.lookupProvider = lookupProvider;
+  }
+
+  /** Resolves a dynamic enchantment registry key for generated modifier modules. */
+  protected Holder.Reference<Enchantment> enchantment(ResourceKey<Enchantment> key) {
+    return lookupProvider.join().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(key);
   }
 
   /**
@@ -80,7 +92,7 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
 
   /** Makes a conditional redirect to the given ID */
   protected JsonRedirect conditionalRedirect(ModifierId id, @Nullable ICondition condition) {
-    return new JsonRedirect(id, condition);
+    return new JsonRedirect(id.location(), condition);
   }
 
   /** Makes an unconditional redirect to the given ID */
@@ -91,7 +103,7 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
   @Override
   public CompletableFuture<?> run(CachedOutput cache) {
     addModifiers();
-    return allOf(composableModifiers.entrySet().stream().map(entry -> saveJson(cache, entry.getKey(), entry.getValue().serialize())));
+    return allOf(composableModifiers.entrySet().stream().map(entry -> saveJson(cache, entry.getKey().location(), entry.getValue().serialize())));
   }
 
   /** Result for composable too */
@@ -112,7 +124,7 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
         json.add("redirects", array);
       }
       if (condition != null) {
-        json.add("condition", CraftingHelper.serialize(condition));
+        json.add("condition", slimeknights.tconstruct.library.json.condition.ConditionUtil.serialize(condition));
       }
       return json;
     }

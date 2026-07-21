@@ -29,7 +29,7 @@ public class GenericTagUtil {
   }
 
   /** Creates a map of reverse tags for the given map of tags */
-  public static <T, I extends ResourceLocation> Map<I,Set<TagKey<T>>> reverseTags(Function<T,I> keyMapper, Map<TagKey<T>,? extends Collection<T>> tags) {
+  public static <T,I> Map<I,Set<TagKey<T>>> reverseTags(Function<T,I> keyMapper, Map<TagKey<T>,? extends Collection<T>> tags) {
     Map<I,ImmutableSet.Builder<TagKey<T>>> reverseTags = new HashMap<>();
     Function<I,Builder<TagKey<T>>> makeSet = id -> ImmutableSet.builder();
     for (Entry<TagKey<T>,? extends Collection<T>> entry : tags.entrySet()) {
@@ -60,13 +60,18 @@ public class GenericTagUtil {
 
   /** Writes a map of tags to a packet */
   public static <T> void encodeTags(FriendlyByteBuf buf, Function<T,ResourceLocation> keyGetter, Map<TagKey<T>,? extends Collection<T>> tags) {
+    encodeTags(buf, keyGetter, Function.identity(), tags);
+  }
+
+  /** Writes a map of tags whose values use a strongly typed ID wrapper. */
+  public static <T,I> void encodeTags(FriendlyByteBuf buf, Function<T,I> keyGetter, Function<I,ResourceLocation> locationGetter, Map<TagKey<T>,? extends Collection<T>> tags) {
     buf.writeVarInt(tags.size());
     for (Entry<TagKey<T>,? extends Collection<T>> entry : tags.entrySet()) {
       buf.writeResourceLocation(entry.getKey().location());
       Collection<T> values = entry.getValue();
       buf.writeVarInt(values.size());
       for (T value : values) {
-        buf.writeResourceLocation(keyGetter.apply(value));
+        buf.writeResourceLocation(locationGetter.apply(keyGetter.apply(value)));
       }
     }
   }

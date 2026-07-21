@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -163,8 +165,8 @@ public class TooltipBuilder {
    *
    * @return the tooltip builder
    */
-  public TooltipBuilder addWithAttribute(INumericToolStat<?> stat, Attribute attribute) {
-    float damage = (float) attribute.getDefaultValue();
+  public TooltipBuilder addWithAttribute(INumericToolStat<?> stat, Holder<Attribute> attribute) {
+    float damage = (float) attribute.value().getDefaultValue();
     Player player = Minecraft.getInstance().player;
     if (player != null) {
       AttributeInstance instance = player.getAttribute(attribute);
@@ -174,6 +176,11 @@ public class TooltipBuilder {
     }
     this.tooltips.add(stat.formatValue(damage + tool.getStats().get(stat).floatValue()));
     return this;
+  }
+
+  /** Compatibility overload for callers that still store an attribute value. */
+  public TooltipBuilder addWithAttribute(INumericToolStat<?> stat, Attribute attribute) {
+    return addWithAttribute(stat, BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute));
   }
 
   /**

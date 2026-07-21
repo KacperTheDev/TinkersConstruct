@@ -1,7 +1,9 @@
 package slimeknights.tconstruct.tools.modules.armor;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -56,6 +58,10 @@ public record LightspeedAttributeModule(String unique, UUID uuid, Attribute attr
     this(unique, UUID.nameUUIDFromBytes(unique.getBytes()), attribute, operation, lightLayer, minLight, amount, damageChance);
   }
 
+  public LightspeedAttributeModule(String unique, Holder<Attribute> attribute, Operation operation, LightLayer lightLayer, int minLight, float amount, float damageChance) {
+    this(unique, attribute.value(), operation, lightLayer, minLight, amount, damageChance);
+  }
+
   @Override
   public RecordLoadable<LightspeedAttributeModule> getLoader() {
     return LOADER;
@@ -79,13 +85,14 @@ public record LightspeedAttributeModule(String unique, UUID uuid, Attribute attr
       return;
     }
     // must have speed
-    AttributeInstance attribute = living.getAttribute(this.attribute);
+    AttributeInstance attribute = living.getAttribute(net.minecraft.core.registries.BuiltInRegistries.ATTRIBUTE.wrapAsHolder(this.attribute));
     if (attribute == null) {
       return;
     }
     // start by removing the attribute, we are likely going to give it a new number
-    if (attribute.getModifier(uuid) != null) {
-      attribute.removeModifier(uuid);
+    ResourceLocation id = slimeknights.tconstruct.library.utils.AttributeIdUtil.fromLegacyUuid(uuid);
+    if (attribute.getModifier(id) != null) {
+      attribute.removeModifier(id);
     }
 
     // not above air
@@ -94,7 +101,7 @@ public record LightspeedAttributeModule(String unique, UUID uuid, Attribute attr
     int light = getLight(level, pos);
     if (light > minLight) {
       int scaledLight = light - minLight;
-      attribute.addTransientModifier(new AttributeModifier(uuid, unique, scaledLight * amount * modifier.getEffectiveLevel(), operation));
+      attribute.addTransientModifier(new AttributeModifier(id, scaledLight * amount * modifier.getEffectiveLevel(), operation));
 
       // damage boots
       if (level.random.nextFloat() < (damageChance * scaledLight)) {
@@ -111,9 +118,10 @@ public record LightspeedAttributeModule(String unique, UUID uuid, Attribute attr
       IToolStackView newTool = context.getReplacementTool();
       // damaging the tool will trigger this hook, so ensure the new tool has the same level
       if (newTool == null || newTool.isBroken() || newTool.getModifier(modifier.getId()).getEffectiveLevel() != modifier.getEffectiveLevel()) {
-        AttributeInstance attribute = livingEntity.getAttribute(this.attribute);
-        if (attribute != null && attribute.getModifier(uuid) != null) {
-          attribute.removeModifier(uuid);
+        AttributeInstance attribute = livingEntity.getAttribute(net.minecraft.core.registries.BuiltInRegistries.ATTRIBUTE.wrapAsHolder(this.attribute));
+        ResourceLocation id = slimeknights.tconstruct.library.utils.AttributeIdUtil.fromLegacyUuid(uuid);
+        if (attribute != null && attribute.getModifier(id) != null) {
+          attribute.removeModifier(id);
         }
       }
     }
@@ -130,7 +138,7 @@ public record LightspeedAttributeModule(String unique, UUID uuid, Attribute attr
     }
     float boost = amount * (light - minLight) * entry.getEffectiveLevel();
     if (boost > 0) {
-      if (operation == Operation.ADDITION) {
+      if (operation == Operation.ADD_VALUE) {
         // multiplies addition boost by 10 and displays as a percent as the players base movement speed is 0.1 and is in unknown units
         // percentages make sense
         boost *= 10;

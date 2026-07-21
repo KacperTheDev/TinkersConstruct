@@ -228,6 +228,7 @@ public class StatsCommand {
     MULTIPLY("float_stat");
     private final String key = name().toLowerCase(Locale.US);
     private final String stat;
+
   }
   private enum Operation {
     MODIFY, SET;

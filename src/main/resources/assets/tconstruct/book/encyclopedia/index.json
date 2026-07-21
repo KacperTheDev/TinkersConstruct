@@ -12,19 +12,19 @@
     "data": "sections/tools.json",
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:pickaxe",
-        "nbt": {
-          "tic_broken": false,
-          "tic_display": true,
-          "Damage": 0,
-          "tic_materials": [
-            "tconstruct:ui_render#head",
-            "tconstruct:ui_render#handle",
-            "tconstruct:ui_render#extra"
-          ]
-        }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:pickaxe",
+                "custom_data": {
+                  "tic_broken": false,
+                  "tic_display": true,
+                  "Damage": 0,
+                  "tic_materials": [
+                    "tconstruct:ui_render#head",
+                    "tconstruct:ui_render#handle",
+                    "tconstruct:ui_render#extra"
+                  ]
+                }
+              }
     }
   },
   {
@@ -33,10 +33,12 @@
     "extraData": { "tconstruct:material_tier": { "type": "tconstruct:melee_harvest", "detailed": true }},
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:pick_head",
-        "nbt": { "Material": "tconstruct:ui_render#extra_large" }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:pick_head",
+                "custom_data": {
+                  "Material": "tconstruct:ui_render#extra_large"
+                }
+              }
     }
   },
   {
@@ -45,10 +47,12 @@
     "extraData": { "tconstruct:material_tier": { "type": "tconstruct:ranged", "detailed": true }},
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:bow_limb",
-        "nbt": { "Material": "tconstruct:ui_render#handle" }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:bow_limb",
+                "custom_data": {
+                  "Material": "tconstruct:ui_render#handle"
+                }
+              }
     }
   },
   {
@@ -57,10 +61,12 @@
     "extraData": { "tconstruct:material_tier": { "type": "tconstruct:ammo", "detailed": true }},
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:arrow_head",
-        "nbt": { "Material": "tconstruct:ui_render#head" }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:arrow_head",
+                "custom_data": {
+                  "Material": "tconstruct:ui_render#head"
+                }
+              }
     }
   },
   {
@@ -68,18 +74,18 @@
     "data": "sections/armor.json",
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:plate_chestplate",
-        "nbt": {
-          "tic_broken": false,
-          "tic_display": true,
-          "Damage": 0,
-          "tic_materials": [
-            "tconstruct:ui_render#extra",
-            "tconstruct:ui_render#head"
-          ]
-        }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:plate_chestplate",
+                "custom_data": {
+                  "tic_broken": false,
+                  "tic_display": true,
+                  "Damage": 0,
+                  "tic_materials": [
+                    "tconstruct:ui_render#extra",
+                    "tconstruct:ui_render#head"
+                  ]
+                }
+              }
     }
   },
   {
@@ -88,10 +94,12 @@
     "extraData": { "tconstruct:material_tier": { "type": "tconstruct:armor", "detailed": true } },
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:leggings_plating",
-        "nbt": { "Material": "tconstruct:ui_render#large" }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:leggings_plating",
+                "custom_data": {
+                  "Material": "tconstruct:ui_render#large"
+                }
+              }
     }
   },
   {
@@ -146,12 +154,12 @@
     "data": "sections/upgrades.json",
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:creative_slot",
-        "nbt": {
-          "slot": "upgrades"
-        }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:creative_slot",
+                "custom_data": {
+                  "slot": "upgrades"
+                }
+              }
     }
   },
   {
@@ -159,12 +167,12 @@
     "data": "sections/defense.json",
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:creative_slot",
-        "nbt": {
-          "slot": "defense"
-        }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:creative_slot",
+                "custom_data": {
+                  "slot": "defense"
+                }
+              }
     }
   },
   {
@@ -172,12 +180,12 @@
     "data": "sections/slotless.json",
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:creative_slot",
-        "nbt": {
-          "slot": "slotless"
-        }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:creative_slot",
+                "custom_data": {
+                  "slot": "slotless"
+                }
+              }
     }
   },
   {
@@ -185,12 +193,12 @@
     "data": "sections/abilities.json",
     "icon": {
       "item": {
-        "type": "forge:nbt",
-        "item": "tconstruct:creative_slot",
-        "nbt": {
-          "slot": "abilities"
-        }
-      }
+                "type": "tconstruct:book_stack",
+                "item": "tconstruct:creative_slot",
+                "custom_data": {
+                  "slot": "abilities"
+                }
+              }
     }
   }
 ]

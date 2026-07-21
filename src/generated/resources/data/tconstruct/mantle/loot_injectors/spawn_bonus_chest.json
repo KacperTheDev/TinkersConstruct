@@ -7,34 +7,7 @@
           "type": "minecraft:item",
           "functions": [
             {
-              "function": "tconstruct:add_tool_data",
-              "materials": [
-                {
-                  "type": "tconstruct:random",
-                  "material": {
-                    "type": "mantle:inverted",
-                    "inverted_type": "mantle:tag",
-                    "tag": "tconstruct:exclude_from_loot"
-                  },
-                  "tier": {
-                    "max": 1
-                  }
-                },
-                {
-                  "type": "tconstruct:first"
-                },
-                {
-                  "type": "tconstruct:random",
-                  "material": {
-                    "type": "mantle:inverted",
-                    "inverted_type": "mantle:tag",
-                    "tag": "tconstruct:exclude_from_loot"
-                  },
-                  "tier": {
-                    "max": 1
-                  }
-                }
-              ]
+              "function": "tconstruct:add_tool_data"
             }
           ],
           "name": "tconstruct:hand_axe",
@@ -49,34 +22,7 @@
           "type": "minecraft:item",
           "functions": [
             {
-              "function": "tconstruct:add_tool_data",
-              "materials": [
-                {
-                  "type": "tconstruct:random",
-                  "material": {
-                    "type": "mantle:inverted",
-                    "inverted_type": "mantle:tag",
-                    "tag": "tconstruct:exclude_from_loot"
-                  },
-                  "tier": {
-                    "max": 1
-                  }
-                },
-                {
-                  "type": "tconstruct:first"
-                },
-                {
-                  "type": "tconstruct:random",
-                  "material": {
-                    "type": "mantle:inverted",
-                    "inverted_type": "mantle:tag",
-                    "tag": "tconstruct:exclude_from_loot"
-                  },
-                  "tier": {
-                    "max": 1
-                  }
-                }
-              ]
+              "function": "tconstruct:add_tool_data"
             }
           ],
           "name": "tconstruct:pickaxe",

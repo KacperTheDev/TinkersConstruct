@@ -81,6 +81,8 @@ public abstract class MultiblockCuboid<T extends MultiblockStructureData> {
   @Setter(AccessLevel.PROTECTED) @Getter
   private MultiblockResult lastResult = NO_ATTEMPT;
 
+  protected void setLastResult(MultiblockResult lastResult) { this.lastResult = lastResult; }
+
   /**
    * Constructor with default belowLimit of 64 and innerLimit of 9
    */
@@ -445,7 +447,7 @@ public abstract class MultiblockCuboid<T extends MultiblockStructureData> {
     ListTag list = rootTag.getList(key, Tag.TAG_COMPOUND);
     List<BlockPos> collection = new ArrayList<>(list.size());
     for (int i = 0; i < list.size(); i++) {
-      BlockPos pos = NbtUtils.readBlockPos(list.getCompound(i));
+      BlockPos pos = TagUtil.readBlockPos(list.get(i));
       if (!pos.equals(BlockPos.ZERO)) {
         collection.add(pos.offset(offset));
       }

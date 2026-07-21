@@ -12,12 +12,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.event.EventHooks;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.apache.commons.lang3.StringUtils;
 import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.tconstruct.TConstruct;
@@ -56,7 +56,7 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
 
   /** Last crafted crafting recipe */
   @Nullable @Getter
-  private ITinkerStationRecipe lastRecipe;
+  private RecipeHolder<ITinkerStationRecipe> lastRecipe;
   /** Result inventory, lazy loads results */
   @Getter
   private final LazyResultContainer craftingResult;
@@ -86,7 +86,6 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
   public TinkerStationBlockEntity(BlockPos pos, BlockState state, int slots) {
     super(TinkerTables.tinkerStationTile.get(), pos, state, NAME, slots);
     this.itemHandler = new ConfigurableInvWrapperCapability(this, false, false);
-    this.itemHandlerCap = LazyOptional.of(() -> this.itemHandler);
     this.inventoryWrapper = new TinkerStationContainerWrapper(this);
     this.craftingResult = new LazyResultContainer(this);
   }
@@ -157,18 +156,19 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
       RecipeManager manager = this.level.getServer().getRecipeManager();
 
       // first, try the cached recipe
-      ITinkerStationRecipe recipe = lastRecipe;
+      RecipeHolder<ITinkerStationRecipe> recipeHolder = lastRecipe;
       // if it does not match, find a new recipe
-      if (recipe == null || !recipe.matches(this.inventoryWrapper, this.level)) {
-        recipe = manager.getRecipeFor(TinkerRecipeTypes.TINKER_STATION.get(), this.inventoryWrapper, this.level).orElse(null);
+      if (recipeHolder == null || !recipeHolder.value().matches(this.inventoryWrapper, this.level)) {
+        recipeHolder = manager.getRecipeFor(TinkerRecipeTypes.TINKER_STATION.get(), this.inventoryWrapper, this.level).orElse(null);
       }
 
       // if we have a recipe, fetch its result
       boolean needsSync = true;
-      if (recipe != null) {
+      if (recipeHolder != null) {
+        ITinkerStationRecipe recipe = recipeHolder.value();
         // sync if the recipe is different
-        if (lastRecipe != recipe) {
-          this.lastRecipe = recipe;
+        if (lastRecipe != recipeHolder) {
+          this.lastRecipe = recipeHolder;
           this.syncToRelevantPlayers(this::syncRecipe);
           needsSync = false;
         }
@@ -187,8 +187,8 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
       }
     }
     // client side only needs to update result, server syncs message elsewhere
-    else if (this.lastRecipe != null && this.lastRecipe.matches(this.inventoryWrapper, level)) {
-      RecipeResult<LazyToolStack> validatedResult = this.lastRecipe.getValidatedResult(this.inventoryWrapper, level.registryAccess());
+    else if (this.lastRecipe != null && this.lastRecipe.value().matches(this.inventoryWrapper, level)) {
+      RecipeResult<LazyToolStack> validatedResult = this.lastRecipe.value().getValidatedResult(this.inventoryWrapper, level.registryAccess());
       if (validatedResult.isSuccess()) {
         result = validatedResult.getResult();
       } else if (validatedResult.hasError()) {
@@ -218,17 +218,17 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
 
     // fire crafting events
     resultItem.onCraftedBy(this.level, player, amount);
-    ForgeEventFactory.firePlayerCraftingEvent(player, resultItem, this.inventoryWrapper);
+    EventHooks.firePlayerCraftingEvent(player, resultItem, this.inventoryWrapper);
     this.playCraftSound(player);
 
     // fetch this before updating inputs so they can do input sensitive shrinking
     ItemStack tinkerable = this.getItem(TINKER_SLOT);
-    int shrinkToolSlot = tinkerable.isEmpty() ? 0 : lastRecipe.shrinkToolSlotBy(result, inventoryWrapper);
+    int shrinkToolSlot = tinkerable.isEmpty() ? 0 : lastRecipe.value().shrinkToolSlotBy(result, inventoryWrapper);
 
     // run the recipe, will shrink inputs
     // run both sides for the sake of shift clicking
     this.inventoryWrapper.setPlayer(player);
-    this.lastRecipe.updateInputs(result, inventoryWrapper, !level.isClientSide);
+    this.lastRecipe.value().updateInputs(result, inventoryWrapper, !level.isClientSide);
     this.inventoryWrapper.setPlayer(null);
 
     // remove the center slot item, just clear it entirely (if you want shrinking you should use the outer slots or ask nicely for a shrink amount hook)
@@ -236,7 +236,7 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
       if (tinkerable.getCount() <= shrinkToolSlot) {
         this.setItem(TINKER_SLOT, ItemStack.EMPTY);
       } else {
-        this.setItem(TINKER_SLOT, ItemHandlerHelper.copyStackWithSize(tinkerable, tinkerable.getCount() - shrinkToolSlot));
+        this.setItem(TINKER_SLOT, slimeknights.tconstruct.library.utils.ItemStackDataUtil.copyStackWithSize(tinkerable, tinkerable.getCount() - shrinkToolSlot));
       }
     }
     this.itemName = "";
@@ -302,7 +302,7 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
    * Updates the recipe from the server
    * @param recipe  New recipe
    */
-  public void updateRecipe(ITinkerStationRecipe recipe) {
+  public void updateRecipe(RecipeHolder<ITinkerStationRecipe> recipe) {
     this.lastRecipe = recipe;
     this.craftingResult.clearContent();
   }
@@ -347,8 +347,8 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
   }
 
   @Override
-  public void load(CompoundTag tags) {
-    super.load(tags);
+  protected void loadAdditional(CompoundTag tags, net.minecraft.core.HolderLookup.Provider registries) {
+    super.loadAdditional(tags, registries);
     if (tags.contains(MATERIAL_TAG, Tag.TAG_STRING)) {
       material = Objects.requireNonNullElse(MaterialVariantId.tryParse(tags.getString(MATERIAL_TAG)), IMaterial.UNKNOWN_ID);
       RetexturedHelper.onTextureUpdated(this);

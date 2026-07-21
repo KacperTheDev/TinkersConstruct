@@ -45,6 +45,12 @@ public enum SlimeType implements StringRepresentable {
   /** Tag for slime balls of this type */
   private final TagKey<Item> slimeballTag;
 
+  public int getColor() { return color; }
+  public MapColor getMapColor() { return mapColor; }
+  public boolean isNether() { return nether; }
+  public int getLightLevel() { return lightLevel; }
+  @Override public String getSerializedName() { return serializedName; }
+
   SlimeType(int color,  MapColor mapColor, boolean nether, int lightLevel) {
     this.color = color;
     this.mapColor = mapColor;
@@ -56,6 +62,10 @@ public enum SlimeType implements StringRepresentable {
 
   SlimeType(int color, MapColor mapColor, boolean nether) {
     this(color, mapColor, nether, 0);
+  }
+
+  public TagKey<Item> getSlimeballTag() {
+    return slimeballTag;
   }
 
   private FoliageType foliageType;

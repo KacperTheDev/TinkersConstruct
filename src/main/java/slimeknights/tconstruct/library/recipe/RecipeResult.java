@@ -98,6 +98,11 @@ public class RecipeResult<T> {
       super(true);
       this.result = result;
     }
+
+    @Override
+    public T getResult() {
+      return result;
+    }
   }
 
   /** Class for failure, which has a message */
@@ -108,6 +113,11 @@ public class RecipeResult<T> {
     private Failure(Component message) {
       super(false);
       this.message = message;
+    }
+
+    @Override
+    public Component getMessage() {
+      return message;
     }
 
     @Override

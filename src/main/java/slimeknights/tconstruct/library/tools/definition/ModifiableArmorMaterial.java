@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 public class ModifiableArmorMaterial extends DummyArmorMaterial {
   /** Array of all four armor slot types */
   public static final EquipmentSlot[] ARMOR_SLOTS = {EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD};
+  public static final ArmorItem.Type[] ARMOR_TYPES = {ArmorItem.Type.BOOTS, ArmorItem.Type.LEGGINGS, ArmorItem.Type.CHESTPLATE, ArmorItem.Type.HELMET};
 
   /** Array of slot index to tool definition for the slot */
   private final ToolDefinition[] armorDefinitions;
@@ -35,7 +36,7 @@ public class ModifiableArmorMaterial extends DummyArmorMaterial {
 
   /** Creates a modifiable armor material, creates tool definition for all four armor slots */
   public static ModifiableArmorMaterial create(ResourceLocation id, SoundEvent equipSound) {
-    return create(id, equipSound, ArmorItem.Type.values());
+    return create(id, equipSound, ARMOR_TYPES);
   }
 
   /**
@@ -45,6 +46,7 @@ public class ModifiableArmorMaterial extends DummyArmorMaterial {
    */
   @Nullable
   public ToolDefinition getArmorDefinition(ArmorItem.Type slotType) {
-    return armorDefinitions[slotType.ordinal()];
+    int index = slotType.ordinal();
+    return index < armorDefinitions.length ? armorDefinitions[index] : null;
   }
 }

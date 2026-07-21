@@ -23,6 +23,7 @@ public class EquipmentChangeContext extends EquipmentContext {
   @Nullable @Getter
   private final IToolStackView originalTool;
 
+  @Nullable
   public EquipmentChangeContext(LivingEntity entity, EquipmentSlot changedSlot, ItemStack original, ItemStack replacement) {
     super(entity);
     this.changedSlot = changedSlot;

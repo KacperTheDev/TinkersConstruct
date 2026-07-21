@@ -1,8 +1,8 @@
 package slimeknights.tconstruct.tools.modules;
 
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.TierSortingRegistry;
-import net.minecraftforge.fluids.FluidStack;
+import slimeknights.tconstruct.library.utils.TierRegistry;
+import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.data.loadable.primitive.BooleanLoadable;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
@@ -58,7 +58,7 @@ public record MeltingFluidEffectiveModule(IJsonPredicate<BlockState> predicate, 
           FluidStack meltingResult = MeltingRecipeLookup.findResult(state.getBlock(), temperature);
           return (!meltingResult.isEmpty() && (currentFluid.isEmpty() || currentFluid.isFluidEqual(meltingResult)))
                  // tier must also match
-                 && (ignoreTier || TierSortingRegistry.isCorrectTierForDrops(MiningTierToolHook.getTier(tool), state));
+                 && (ignoreTier || TierRegistry.isCorrectTierForDrops(MiningTierToolHook.getTier(tool), state));
         }
       }
     }

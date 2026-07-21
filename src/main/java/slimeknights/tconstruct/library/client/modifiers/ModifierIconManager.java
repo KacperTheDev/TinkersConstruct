@@ -13,9 +13,9 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.bus.api.IEventBus;
+
 import slimeknights.mantle.data.listener.IEarlySafeManagerReloadListener;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.TConstruct;
@@ -51,7 +51,7 @@ public class ModifierIconManager implements IEarlySafeManagerReloadListener {
    * Initializes this manager, registering it relevant event busses
    */
   public static void init() {
-    IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+    IEventBus bus = net.neoforged.fml.ModLoadingContext.get().getActiveContainer().getEventBus();
     bus.addListener(ModifierIconManager::onResourceManagerRegister);
   }
 
