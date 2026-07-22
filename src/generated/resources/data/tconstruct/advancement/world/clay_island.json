@@ -3,13 +3,13 @@
   "criteria": {
     "found_island": {
       "conditions": {
-        "items": [
-          {
-            "items": "minecraft:clay_ball"
+        "player": {
+          "location": {
+            "structures": "tconstruct:clay_island"
           }
-        ]
+        }
       },
-      "trigger": "minecraft:inventory_changed"
+      "trigger": "minecraft:location"
     }
   },
   "display": {

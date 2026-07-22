@@ -24,7 +24,6 @@ import slimeknights.tconstruct.library.tools.helper.ToolAttackUtil;
 import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -44,7 +43,6 @@ public class CustomExplosion extends Explosion {
   protected final Entity source;
   protected final DamageSource damageSource;
   protected final ExplosionDamageCalculator damageCalculator;
-  protected final List<BlockPos> toBlow = new ArrayList<>();
   protected final java.util.Map<Player,Vec3> hitPlayers = new HashMap<>();
   /** Size of the hollowed out cube determining the number of rays to cast */
   private static final int RAY_COUNT = 16;
@@ -144,7 +142,10 @@ public class CustomExplosion extends Explosion {
         }
       }
     }
-    toBlow.addAll(set);
+    // Explosion#finalizeExplosion() and the client sync both use the superclass list.
+    // In 1.21 the field became private, so writing to a shadow list silently disabled
+    // block destruction and fire placement for custom fluid explosions.
+    getToBlow().addAll(set);
   }
 
   /** Called to run the logic for damaging and blasting back entities in range */

@@ -5,7 +5,16 @@
       "conditions": {
         "items": [
           {
-            "items": "tconstruct:scorched_lantern"
+            "items": "tconstruct:scorched_lantern",
+            "count": {
+              "min": 64
+            },
+            "components": {
+              "tconstruct:fluid_stack": {
+                "amount": 50,
+                "id": "tconstruct:molten_manyullyn"
+              }
+            }
           }
         ]
       },
@@ -15,7 +24,16 @@
       "conditions": {
         "items": [
           {
-            "items": "tconstruct:seared_lantern"
+            "items": "tconstruct:seared_lantern",
+            "count": {
+              "min": 64
+            },
+            "components": {
+              "tconstruct:fluid_stack": {
+                "amount": 50,
+                "id": "tconstruct:molten_manyullyn"
+              }
+            }
           }
         ]
       },

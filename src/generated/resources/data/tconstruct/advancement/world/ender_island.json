@@ -3,13 +3,13 @@
   "criteria": {
     "found_island": {
       "conditions": {
-        "items": [
-          {
-            "items": "tconstruct:ender_slime_sapling"
+        "player": {
+          "location": {
+            "structures": "tconstruct:end_slime_island"
           }
-        ]
+        }
       },
-      "trigger": "minecraft:inventory_changed"
+      "trigger": "minecraft:location"
     }
   },
   "display": {

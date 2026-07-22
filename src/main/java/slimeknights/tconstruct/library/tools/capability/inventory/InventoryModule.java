@@ -154,7 +154,9 @@ public class InventoryModule implements ModifierModule, InventoryModifierHook, V
       for (int i = 0; i < list.size(); i++) {
         CompoundTag compound = list.getCompound(i);
         if (compound.getInt(TAG_SLOT) == slot) {
-          return ItemStack.parseOptional(RegistryAccessUtil.getRegistryAccess(), compound);
+          return compound.contains("id", Tag.TAG_STRING)
+            ? ItemStack.parseOptional(RegistryAccessUtil.getRegistryAccess(), compound)
+            : ItemStack.EMPTY;
         }
       }
     }
@@ -163,50 +165,54 @@ public class InventoryModule implements ModifierModule, InventoryModifierHook, V
 
   @Override
   public void setStack(IToolStackView tool, ModifierEntry modifier, int slot, ItemStack stack) {
-    if (slot < getSlots(tool, modifier)) {
-      ListTag list;
-      ModDataNBT modData = tool.getPersistentData();
-      // if the tag exists, fetch it
-      ResourceLocation key = getKey(modifier.getModifier());
-      int insertIndex = 0;
-      if (modData.contains(key, Tag.TAG_LIST)) {
-        list = modData.get(key, GET_COMPOUND_LIST);
-        // first, try to find an existing stack in the slot
-        for (int i = 0; i < list.size(); i++) {
-          CompoundTag compound = list.getCompound(i);
-          int listSlot = compound.getInt(TAG_SLOT);
-          if (listSlot == slot) {
-            if (stack.isEmpty()) {
-              list.remove(i);
-            } else {
-              compound.getAllKeys().clear();
-              writeStack(stack, slot, compound);
-            }
-            return;
-          // try to keep the stacks in order by inserting after the last slot smaller than the target
-          } else if (listSlot < slot) {
-            insertIndex = i + 1;
-          }
-        }
-      } else if (stack.isEmpty()) {
-        // nothing to do if empty
-        return;
-      } else {
-        list = new ListTag();
-        modData.put(key, list);
-      }
+    if (slot < 0 || slot >= getSlots(tool, modifier)) {
+      return;
+    }
 
-      // list did not contain the slot, so add it
-      if (!stack.isEmpty()) {
-        CompoundTag compound = writeStack(stack, slot, new CompoundTag());
-        // if out of bounds, just put at the end. Shouldn't happen
-        if (insertIndex > list.size()) {
-          list.add(compound);
+    ModDataNBT modData = tool.getPersistentData();
+    ResourceLocation key = getKey(modifier.getModifier());
+    ListTag list = modData.contains(key, Tag.TAG_LIST) ? modData.get(key, GET_COMPOUND_LIST) : new ListTag();
+    int insertIndex = 0;
+
+    // first, try to find an existing stack in the slot
+    for (int i = 0; i < list.size(); i++) {
+      CompoundTag compound = list.getCompound(i);
+      int listSlot = compound.getInt(TAG_SLOT);
+      if (listSlot == slot) {
+        if (stack.isEmpty()) {
+          list.remove(i);
+          if (list.isEmpty()) {
+            modData.remove(key);
+          } else {
+            // ListTag is mutable, so explicitly put it back to notify component-backed ToolStack data.
+            modData.put(key, list);
+          }
         } else {
-          list.add(insertIndex, compound);
+          list.set(i, writeStack(stack, slot, new CompoundTag()));
+          // ListTag is mutable, so explicitly put it back to notify component-backed ToolStack data.
+          modData.put(key, list);
         }
+        return;
+      }
+      // try to keep the stacks in order by inserting after the last slot smaller than the target
+      if (listSlot < slot) {
+        insertIndex = i + 1;
       }
     }
+
+    // list did not contain the slot, so add it unless the new stack is empty
+    if (stack.isEmpty()) {
+      return;
+    }
+    CompoundTag compound = writeStack(stack, slot, new CompoundTag());
+    // if out of bounds, just put at the end. Shouldn't happen
+    if (insertIndex > list.size()) {
+      list.add(compound);
+    } else {
+      list.add(insertIndex, compound);
+    }
+    // Do this after mutating the list. Putting an empty list first would sync before the item was added.
+    modData.put(key, list);
   }
 
 
@@ -275,9 +281,12 @@ public class InventoryModule implements ModifierModule, InventoryModifierHook, V
    * @return Tag written to, same as {@code compound}.
    */
   public static CompoundTag writeStack(ItemStack stack, int slot, CompoundTag compound) {
-    stack.save(RegistryAccessUtil.getRegistryAccess(), compound);
-    compound.putInt(TAG_SLOT, slot);
-    return compound;
+    Tag encoded = stack.save(RegistryAccessUtil.getRegistryAccess(), compound);
+    if (!(encoded instanceof CompoundTag encodedCompound)) {
+      throw new IllegalStateException("ItemStack did not encode to a compound tag");
+    }
+    encodedCompound.putInt(TAG_SLOT, slot);
+    return encodedCompound;
   }
 
   @Override
@@ -295,7 +304,9 @@ public class InventoryModule implements ModifierModule, InventoryModifierHook, V
           // slot must be valid
           int slot = compound.getInt(TAG_SLOT);
           if (slot < max) {
-            ItemStack stack = ItemStack.parseOptional(RegistryAccessUtil.getRegistryAccess(), compound);
+            ItemStack stack = compound.contains("id", Tag.TAG_STRING)
+              ? ItemStack.parseOptional(RegistryAccessUtil.getRegistryAccess(), compound)
+              : ItemStack.EMPTY;
             if (!stack.isEmpty() && predicate.test(stack)) {
               return new StackMatch(stack, slot);
             }
@@ -323,7 +334,9 @@ public class InventoryModule implements ModifierModule, InventoryModifierHook, V
           // slot must be valid
           int slot = compound.getInt(TAG_SLOT);
           if (slot < max) {
-            parsed[slot] = ItemStack.parseOptional(RegistryAccessUtil.getRegistryAccess(), compound);
+            parsed[slot] = compound.contains("id", Tag.TAG_STRING)
+              ? ItemStack.parseOptional(RegistryAccessUtil.getRegistryAccess(), compound)
+              : ItemStack.EMPTY;
           }
         }
         // add stacks into the list

@@ -4,29 +4,26 @@ import com.google.common.collect.Sets;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementRewards;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.AdvancementRequirements.Strategy;
-import net.minecraft.advancements.critereon.ContextAwarePredicate;
-import net.minecraft.advancements.critereon.EnchantmentPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.ItemUsedOnLocationTrigger;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
-import net.minecraft.advancements.critereon.NbtPredicate;
 import net.minecraft.advancements.critereon.PlayerInteractTrigger;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPredicate;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
@@ -41,13 +38,16 @@ import net.minecraft.world.item.Tiers;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.SimpleFluidContent;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.mantle.registration.object.ItemObject;
 import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.common.TinkerModule;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.json.ConfigEnabledCondition;
 import slimeknights.tconstruct.common.registration.CastItemObject;
@@ -65,7 +65,6 @@ import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.modifiers.util.LazyModifier;
 import slimeknights.tconstruct.library.tools.nbt.MaterialIdNBT;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
-import slimeknights.tconstruct.library.utils.NBTTags;
 import slimeknights.tconstruct.shared.TinkerCommons;
 import slimeknights.tconstruct.shared.TinkerMaterials;
 import slimeknights.tconstruct.shared.block.SlimeType;
@@ -87,9 +86,8 @@ import slimeknights.tconstruct.world.block.FoliageType;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
@@ -98,6 +96,7 @@ import java.util.stream.Stream;
 
 public class AdvancementsProvider extends GenericDataProvider {
   private final CompletableFuture<HolderLookup.Provider> lookupProvider;
+  private HolderLookup.Provider registries;
 
   /** Advancment consumer instance */
   protected Consumer<AdvancementHolder> advancementConsumer;
@@ -382,7 +381,7 @@ public class AdvancementsProvider extends GenericDataProvider {
             resource("foundry/blaze"), foundry, AdvancementType.GOAL, builder -> {
       Consumer<SearedTankBlock> with = block -> {
         builder.addCriterion(BuiltInRegistries.BLOCK.getKey(block).getPath(),
-                              hasItem(block));
+                              hasFluidContainer(block, TinkerFluids.blazingBlood.get(), block.getCapacity(), 1));
         builder.requirements(Strategy.OR);
       };
       TinkerSmeltery.searedTank.forEach(with);
@@ -394,7 +393,7 @@ public class AdvancementsProvider extends GenericDataProvider {
             resource("foundry/manyullyn_lanterns"), foundry, AdvancementType.CHALLENGE, builder -> {
       Consumer<SearedLanternBlock> with = block -> {
         builder.addCriterion(BuiltInRegistries.BLOCK.getKey(block).getPath(),
-                              hasItem(block));
+                              hasFluidContainer(block, TinkerFluids.moltenManyullyn.get(), block.getCapacity(), 64));
         builder.requirements(Strategy.OR);
       };
       with.accept(TinkerSmeltery.searedLantern.get());
@@ -405,15 +404,15 @@ public class AdvancementsProvider extends GenericDataProvider {
     AdvancementHolder tinkersGadgetry = builder(TinkerCommons.tinkersGadgetry, resource("world/tinkers_gadgetry"), materialsAndYou, AdvancementType.TASK, builder ->
       builder.addCriterion("crafted_book", hasItem(TinkerCommons.tinkersGadgetry)));
     builder(TinkerWorld.slimeSapling.get(FoliageType.EARTH), resource("world/earth_island"), tinkersGadgetry, AdvancementType.GOAL, builder ->
-      builder.addCriterion("found_island", hasItem(TinkerWorld.slimeSapling.get(FoliageType.EARTH))));
+      builder.addCriterion("found_island", locatedInStructure(TinkerStructures.earthSlimeIsland)));
     AdvancementHolder skyslimeIsland = builder(TinkerWorld.slimeSapling.get(FoliageType.SKY), resource("world/sky_island"), tinkersGadgetry, AdvancementType.GOAL, builder ->
-      builder.addCriterion("found_island", hasItem(TinkerWorld.slimeSapling.get(FoliageType.SKY))));
+      builder.addCriterion("found_island", locatedInStructure(TinkerStructures.skySlimeIsland)));
     builder(TinkerWorld.slimeSapling.get(FoliageType.BLOOD), resource("world/blood_island"), tinkersGadgetry, AdvancementType.GOAL, builder ->
-      builder.addCriterion("found_island", hasItem(TinkerWorld.slimeSapling.get(FoliageType.BLOOD))));
+      builder.addCriterion("found_island", locatedInStructure(TinkerStructures.bloodIsland)));
     builder(TinkerWorld.slimeSapling.get(FoliageType.ENDER), resource("world/ender_island"), tinkersGadgetry, AdvancementType.GOAL, builder ->
-      builder.addCriterion("found_island", hasItem(TinkerWorld.slimeSapling.get(FoliageType.ENDER))));
+      builder.addCriterion("found_island", locatedInStructure(TinkerStructures.endSlimeIsland)));
     builder(Items.CLAY_BALL, resource("world/clay_island"), tinkersGadgetry, AdvancementType.GOAL, builder ->
-      builder.addCriterion("found_island", hasItem(Items.CLAY_BALL)));
+      builder.addCriterion("found_island", locatedInStructure(TinkerStructures.clayIsland)));
     builder(TinkerCommons.slimeball.get(SlimeType.ICHOR), resource("world/slime_collector"), tinkersGadgetry, AdvancementType.TASK, builder -> {
       for (SlimeType type : SlimeType.values()) {
         builder.addCriterion(type.getSerializedName(), hasTag(type.getSlimeballTag()));
@@ -421,7 +420,9 @@ public class AdvancementsProvider extends GenericDataProvider {
       builder.addCriterion("magma_cream", hasItem(Items.MAGMA_CREAM));
     });
     builder(TinkerGadgets.piggyBackpack, resource("world/piggybackpack"), tinkersGadgetry, AdvancementType.GOAL, builder ->
-      builder.addCriterion("used_pack", hasItem(TinkerGadgets.piggyBackpack)));
+      builder.addCriterion("used_pack", PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(
+        ItemPredicate.Builder.item().of(TinkerGadgets.piggyBackpack),
+        Optional.of(EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.PIG))))));
     AdvancementHolder slimesuit = builder(new MaterialIdNBT(List.of(MaterialIds.bone, MaterialIds.skyslime)).updateStack(new ItemStack(TinkerTools.slimesuit.get(ArmorItem.Type.CHESTPLATE))), resource("world/slimesuit"), skyslimeIsland, AdvancementType.GOAL, builder ->
       TinkerTools.slimesuit.forEach((type, armor) -> builder.addCriterion("crafted_" + type.getName(), hasItem(armor))));
     builder(new MaterialIdNBT(List.of(MaterialIds.glass, MaterialIds.enderslime)).updateStack(new ItemStack(TinkerTools.slimesuit.get(ArmorItem.Type.HELMET))),
@@ -478,6 +479,27 @@ public class AdvancementsProvider extends GenericDataProvider {
   }
 
 
+  /** Creates a criterion requiring the player to be inside the given structure. */
+  private Criterion<?> locatedInStructure(ResourceKey<Structure> structure) {
+    Holder<Structure> holder = registries.lookupOrThrow(Registries.STRUCTURE).getOrThrow(structure);
+    return PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inStructure(holder));
+  }
+
+  /** Creates an inventory criterion for a fluid container using the 1.21 data component. */
+  private Criterion<?> hasFluidContainer(ItemLike item, Fluid fluid, int amount, int count) {
+    SimpleFluidContent content = SimpleFluidContent.copyOf(new FluidStack(fluid, amount));
+    DataComponentPredicate components = DataComponentPredicate.builder()
+      .expect(TinkerModule.FLUID_STACK_COMPONENT.get(), content)
+      .build();
+    ItemPredicate.Builder predicate = ItemPredicate.Builder.item()
+      .of(item)
+      .hasComponents(components);
+    if (count > 1) {
+      predicate.withCount(MinMaxBounds.Ints.atLeast(count));
+    }
+    return InventoryChangeTrigger.TriggerInstance.hasItems(predicate.build());
+  }
+
   /** Creates an inventory criterion backed by Tinkers' custom tool sub-predicate. */
   private Criterion<?> hasTool(ToolStackItemPredicate predicate) {
     return InventoryChangeTrigger.TriggerInstance.hasItems(
@@ -520,6 +542,7 @@ public class AdvancementsProvider extends GenericDataProvider {
           conditionals.add(new Conditional(id, advancement));
         }
       };
+      this.registries = codecRegistries;
       generate();
       var ops = RegistryOps.create(com.mojang.serialization.JsonOps.INSTANCE, codecRegistries);
       return allOf(Stream.concat(

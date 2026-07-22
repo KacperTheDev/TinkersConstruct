@@ -163,7 +163,9 @@ public final class TinkerSmeltery extends TinkerModule {
     event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, heater.get(), (blockEntity, side) -> blockEntity.getItemCapability());
     event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, castingTank.get(), (blockEntity, side) -> blockEntity.getFluidCapability());
     event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, basin.get(), (blockEntity, side) -> blockEntity.getTank());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, basin.get(), (blockEntity, side) -> blockEntity.getItemCapability());
     event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, table.get(), (blockEntity, side) -> blockEntity.getTank());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, table.get(), (blockEntity, side) -> blockEntity.getItemCapability());
     event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, smeltery.get(), (blockEntity, side) -> blockEntity.getItemCapability());
     event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, foundry.get(), (blockEntity, side) -> blockEntity.getItemCapability());
     event.registerBlockEntity(SMELTERY_TANK_CAPABILITY, smeltery.get(), (blockEntity, side) -> blockEntity.getFluidCapability());

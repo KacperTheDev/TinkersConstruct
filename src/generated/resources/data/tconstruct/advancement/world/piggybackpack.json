@@ -3,13 +3,14 @@
   "criteria": {
     "used_pack": {
       "conditions": {
-        "items": [
-          {
-            "items": "tconstruct:piggy_backpack"
-          }
-        ]
+        "entity": {
+          "type": "minecraft:pig"
+        },
+        "item": {
+          "items": "tconstruct:piggy_backpack"
+        }
       },
-      "trigger": "minecraft:inventory_changed"
+      "trigger": "minecraft:player_interacted_with_entity"
     }
   },
   "display": {

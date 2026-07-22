@@ -3,13 +3,13 @@
   "criteria": {
     "found_island": {
       "conditions": {
-        "items": [
-          {
-            "items": "tconstruct:blood_slime_sapling"
+        "player": {
+          "location": {
+            "structures": "tconstruct:blood_island"
           }
-        ]
+        }
       },
-      "trigger": "minecraft:inventory_changed"
+      "trigger": "minecraft:location"
     }
   },
   "display": {
