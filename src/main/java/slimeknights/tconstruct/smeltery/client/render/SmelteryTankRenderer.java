@@ -9,7 +9,6 @@ import net.minecraft.core.Direction;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import slimeknights.mantle.client.render.FluidRenderer;
 import slimeknights.tconstruct.library.client.TinkerRenderTypes;
@@ -126,7 +125,7 @@ public class SmelteryTankRenderer {
     float[] yBounds = getBlockBounds(yd, yMin, yMax);
 
     // render each side
-    Matrix4f matrix = matrices.last().pose();
+    PoseStack.Pose pose = matrices.last();
     Vector3f from = new Vector3f();
     Vector3f to = new Vector3f();
     int rotation = upsideDown ? 180 : 0;
@@ -135,15 +134,15 @@ public class SmelteryTankRenderer {
         for(int x = 0; x <= xd; x++) {
           from.set(xBounds[x], yBounds[y], zBounds[z]);
           to.set(xBounds[x + 1], yBounds[y + 1], zBounds[z + 1]);
-          if (x == 0)  FluidRenderer.putTexturedQuad(builder, matrix, still, from, to, Direction.WEST,  color, brightness, rotation, false);
-          if (x == xd) FluidRenderer.putTexturedQuad(builder, matrix, still, from, to, Direction.EAST,  color, brightness, rotation, false);
-          if (z == 0)  FluidRenderer.putTexturedQuad(builder, matrix, still, from, to, Direction.NORTH, color, brightness, rotation, false);
-          if (z == zd) FluidRenderer.putTexturedQuad(builder, matrix, still, from, to, Direction.SOUTH, color, brightness, rotation, false);
-          if (y == yd) FluidRenderer.putTexturedQuad(builder, matrix, still, from, to, Direction.UP,    color, brightness, rotation, false);
+          if (x == 0)  FluidRenderer.putTexturedQuad(builder, pose, still, from, to, Direction.WEST,  color, brightness, rotation, false);
+          if (x == xd) FluidRenderer.putTexturedQuad(builder, pose, still, from, to, Direction.EAST,  color, brightness, rotation, false);
+          if (z == 0)  FluidRenderer.putTexturedQuad(builder, pose, still, from, to, Direction.NORTH, color, brightness, rotation, false);
+          if (z == zd) FluidRenderer.putTexturedQuad(builder, pose, still, from, to, Direction.SOUTH, color, brightness, rotation, false);
+          if (y == yd) FluidRenderer.putTexturedQuad(builder, pose, still, from, to, Direction.UP,    color, brightness, rotation, false);
           if (y == 0) {
             // increase Y position slightly to prevent z fighting on neighboring fluids
             from.y = from.y() + 0.001f;
-            FluidRenderer.putTexturedQuad(builder, matrix, still,   from, to, Direction.DOWN,  color, brightness, rotation, false);
+            FluidRenderer.putTexturedQuad(builder, pose, still,   from, to, Direction.DOWN,  color, brightness, rotation, false);
           }
         }
       }

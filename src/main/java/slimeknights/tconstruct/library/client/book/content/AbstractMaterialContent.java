@@ -63,10 +63,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -308,6 +310,24 @@ public abstract class AbstractMaterialContent extends PageContent {
   /** Adds the material category icon */
   protected void addCategory(List<ItemElement> displayTools, MaterialId material) {}
 
+  /**
+   * Creates a stable display key for a material fluid recipe.
+   * Recipe IDs are not safe for this purpose during 1.21 recipe decoding, as the same context ID may be reused.
+   * The book only needs to collapse duplicate client/server recipe instances with identical visible inputs.
+   */
+  private static String getFluidRecipeDisplayKey(MaterialFluidRecipe recipe) {
+    StringBuilder key = new StringBuilder();
+    MaterialVariant input = recipe.getInput();
+    key.append(input == null ? "-" : input.getVariant())
+       .append("->")
+       .append(recipe.getOutput().getVariant());
+    recipe.getFluids().stream()
+      .map(fluid -> BuiltInRegistries.FLUID.getKey(fluid.getFluid()) + "@" + fluid.getAmount())
+      .sorted()
+      .forEach(fluid -> key.append('|').append(fluid));
+    return key.toString();
+  }
+
   /** Adds items to the display tools list for all relevant recipes */
   protected void addPrimaryDisplayItems(List<ItemElement> displayTools, MaterialVariantId materialId) {
     // part builder
@@ -334,9 +354,15 @@ public abstract class AbstractMaterialContent extends PageContent {
       displayTools.add(elementItem);
     }
 
-    // composite casting
+    // composite casting. The shared static lookup receives matching server and client recipe instances in
+    // singleplayer, so collapse only semantically identical display entries here. Do not deduplicate the global
+    // recipe lookup by recipe ID, as material fluid recipes may receive a non-unique context ID during decoding.
     List<MaterialFluidRecipe> composites = MaterialCastingLookup.getCompositeFluids(materialId);
+    Set<String> displayedComposites = new HashSet<>();
     for (MaterialFluidRecipe composite : composites) {
+      if (!displayedComposites.add(getFluidRecipeDisplayKey(composite))) {
+        continue;
+      }
       MaterialVariant input = composite.getInput();
       if (input != null && !materialVariant.matchesVariant(input.getVariant())) {
         MaterialVariantId inputId = input.getVariant();
