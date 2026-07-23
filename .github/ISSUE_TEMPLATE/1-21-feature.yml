@@ -1,0 +1,122 @@
+name: 1.21.1 Feature Suggestion
+description: Suggest a larger gameplay feature for the unofficial 1.21.1 port.
+labels: ["1.21.1", "Feature", "Unreviewed"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This tracker is for the unofficial Tinkers' Construct NeoForge 1.21.1 port.
+        Do not post port-related requests on the official SlimeKnights GitHub or Discord server.
+
+        Please search existing issues and check the official roadmap and FAQ before submitting:
+
+        * **[Existing issues](../../issues)**
+        * **[Official roadmap](https://slimeknights.github.io/docs/roadmap/)**
+        * **[What's New](https://slimeknights.github.io/docs/whats-new/)**
+        * **[FAQ](https://slimeknights.github.io/faq/)**
+
+  - type: markdown
+    attributes:
+      value: "## Versions"
+
+  - type: markdown
+    attributes:
+      value: |
+        List the last version of the port you played before making this suggestion, to ensure you are not missing a newer feature.
+
+  - type: input
+    id: minecraft-version
+    attributes:
+      label: Minecraft Version
+      value: 1.21.1
+    validations:
+      required: true
+
+  - type: input
+    id: neoforge-version
+    attributes:
+      label: NeoForge Version
+      placeholder: "Example: 21.1.176"
+    validations:
+      required: true
+
+  - type: input
+    id: mantle-version
+    attributes:
+      label: Mantle Version
+    validations:
+      required: true
+
+  - type: input
+    id: tinkers-version
+    attributes:
+      label: "Tinkers' Construct Version"
+      description: "'Latest' is not a valid answer; write the exact version number or build identifier."
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Feature Description
+
+        Larger features require substantially more design, implementation, balancing, and maintenance than simple enhancements.
+
+  - type: textarea
+    id: feature
+    attributes:
+      label: Feature description
+      description: "Describe the feature in detail, including how it is obtained, used, balanced, and how it fits Tinkers' Construct."
+    validations:
+      required: true
+
+  - type: textarea
+    id: advantages
+    attributes:
+      label: Advantages
+      description: "Explain the advantages over similar existing features and why players would benefit."
+    validations:
+      required: true
+
+  - type: textarea
+    id: disadvantages
+    attributes:
+      label: Disadvantages
+      description: "Explain its limitations and where other features should remain better."
+    validations:
+      required: true
+
+  - type: textarea
+    id: addon
+    attributes:
+      label: Why not an addon?
+      description: "Explain why this belongs in the port itself rather than a separate addon."
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: "Add mockups, screenshots, related mods, or other useful context."
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: "## Confirm the following"
+
+  - type: dropdown
+    id: searched
+    attributes:
+      label: Searched for an existing feature suggestion?
+      description: "Select all that apply."
+      multiple: true
+      options:
+        - Searched open and closed issues
+        - Checked the FAQ and common suggestions
+        - Checked the official roadmap
+        - Checked the in-game books
+        - I did not search
+    validations:
+      required: true

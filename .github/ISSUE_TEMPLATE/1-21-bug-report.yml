@@ -1,0 +1,159 @@
+name: 1.21.1 Bug Report
+description: Report an issue with the unofficial NeoForge 1.21.1 port.
+labels: ["1.21.1", "Bug", "Unreviewed"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This tracker is for the unofficial Tinkers' Construct NeoForge 1.21.1 port.
+        Do not report issues from this port to the official SlimeKnights GitHub or Discord server.
+
+        Before submitting an issue, please search the following links to make sure your issue is not already covered:
+
+        * **[Pinned issues](../../issues)**: Some commonly reported issues may be pinned.
+        * **[Open and closed issues](../../issues)**: Search for an existing report.
+        * **[Official roadmap](https://slimeknights.github.io/docs/roadmap/)**: Describes upstream plans and unimplemented features.
+        * **[What's New](https://slimeknights.github.io/docs/whats-new/)**: Describes major Tinkers' Construct 3 changes.
+        * **[FAQ](https://slimeknights.github.io/faq/)**: Answers many common questions.
+
+        Please fill in the following template completely.
+
+  - type: markdown
+    attributes:
+      value: "## Versions"
+
+  - type: input
+    id: minecraft-version
+    attributes:
+      label: Minecraft Version
+      value: 1.21.1
+    validations:
+      required: true
+
+  - type: input
+    id: neoforge-version
+    attributes:
+      label: NeoForge Version
+      placeholder: "Example: 21.1.176"
+    validations:
+      required: true
+
+  - type: input
+    id: mantle-version
+    attributes:
+      label: Mantle Version
+      description: "Use the exact version shown in the Mods menu or latest.log."
+    validations:
+      required: true
+
+  - type: input
+    id: tinkers-version
+    attributes:
+      label: "Tinkers' Construct Version"
+      description: "'Latest' is not a valid answer; write the exact version number or build identifier."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - Singleplayer
+        - Multiplayer client
+        - Dedicated server
+        - Both singleplayer and multiplayer
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: "## Issue Description"
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the issue
+      description: "Explain what happened and what you expected to happen instead."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: "Provide the smallest reliable sequence of steps that reproduces the issue."
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or crash report
+      description: "Paste a link to latest.log, debug.log, or the crash report when relevant. Do not paste the entire log directly into the issue."
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: "## Minimal Mods"
+
+  - type: dropdown
+    id: just-tinkers
+    attributes:
+      label: "Can you reproduce with only NeoForge, Mantle, and Tinkers' Construct?"
+      description: "Test in a clean profile whenever possible."
+      options:
+        - I have not tried
+        - "No"
+        - "Yes"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: performance-enhancers
+    attributes:
+      label: Performance and rendering mods
+      description: "Select the minimal set present when the issue was reproduced."
+      multiple: true
+      options:
+        - Sodium
+        - Embeddium
+        - Iris
+        - OptiFine
+        - ImmediatelyFast
+        - Other (list below)
+        - None of the above
+    validations:
+      required: true
+
+  - type: textarea
+    id: other-mods
+    attributes:
+      label: Other mods
+      description: "If the issue needs other mods, list the smallest set required to reproduce it, including exact versions."
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Confirm the following
+
+        Please check the pinned issues, search open and closed issues, and consult the FAQ and in-game books before submitting.
+
+  - type: dropdown
+    id: searched
+    attributes:
+      label: Searched for known issues?
+      description: Select all that apply.
+      multiple: true
+      options:
+        - Checked pinned issues
+        - Searched open issues
+        - Searched closed issues
+        - Checked the FAQ
+        - Checked the in-game books
+        - I did not search
+    validations:
+      required: true

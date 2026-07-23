@@ -1,0 +1,111 @@
+name: 1.21.1 Simple Enhancement
+description: Suggest a small change to existing gameplay in the unofficial 1.21.1 port.
+labels: ["1.21.1", "Enhancement", "Unreviewed"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This tracker is for the unofficial Tinkers' Construct NeoForge 1.21.1 port.
+        Do not post port-related requests on the official SlimeKnights GitHub or Discord server.
+
+        Please search existing issues and check the official roadmap and FAQ before submitting:
+
+        * **[Existing issues](../../issues)**
+        * **[Official roadmap](https://slimeknights.github.io/docs/roadmap/)**
+        * **[What's New](https://slimeknights.github.io/docs/whats-new/)**
+        * **[FAQ](https://slimeknights.github.io/faq/)**
+
+  - type: markdown
+    attributes:
+      value: "## Versions"
+
+  - type: markdown
+    attributes:
+      value: |
+        List the last version of the port you played before making this suggestion, to ensure you are not missing a newer change.
+
+  - type: input
+    id: minecraft-version
+    attributes:
+      label: Minecraft Version
+      value: 1.21.1
+    validations:
+      required: true
+
+  - type: input
+    id: neoforge-version
+    attributes:
+      label: NeoForge Version
+      placeholder: "Example: 21.1.176"
+    validations:
+      required: true
+
+  - type: input
+    id: mantle-version
+    attributes:
+      label: Mantle Version
+    validations:
+      required: true
+
+  - type: input
+    id: tinkers-version
+    attributes:
+      label: "Tinkers' Construct Version"
+      description: "'Latest' is not a valid answer; write the exact version number or build identifier."
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: "## Enhancement Description"
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem description
+      description: "Describe the problem or limitation you are trying to solve."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Suggested solution
+      description: "Describe the small change you would suggest."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: "Describe existing alternatives and why they do not solve the problem."
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: "Add screenshots, videos, related mods, or other useful context."
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: "## Confirm the following"
+
+  - type: dropdown
+    id: searched
+    attributes:
+      label: Searched for an existing enhancement?
+      description: "Select all that apply."
+      multiple: true
+      options:
+        - Searched open and closed issues
+        - Checked the FAQ
+        - Checked the official roadmap
+        - Checked the in-game books
+        - I did not search
+    validations:
+      required: true

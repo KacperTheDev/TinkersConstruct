@@ -1,0 +1,127 @@
+name: 1.21.1 Technical/API Request
+description: Suggest a technical or API change for the unofficial NeoForge 1.21.1 port.
+labels: ["1.21.1", "Enhancement", "TiC Api", "Unreviewed"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This tracker is for the unofficial Tinkers' Construct NeoForge 1.21.1 port.
+        Do not post port-related requests on the official SlimeKnights GitHub or Discord server.
+
+        Please search existing issues and check the official roadmap and FAQ before submitting:
+
+        * **[Existing issues](../../issues)**
+        * **[Official roadmap](https://slimeknights.github.io/docs/roadmap/)**
+        * **[FAQ](https://slimeknights.github.io/faq/)**
+
+  - type: markdown
+    attributes:
+      value: "## Versions"
+
+  - type: markdown
+    attributes:
+      value: |
+        List the last version of the port your addon or modpack targets, to ensure the requested API does not already exist.
+
+  - type: input
+    id: minecraft-version
+    attributes:
+      label: Minecraft Version
+      value: 1.21.1
+    validations:
+      required: true
+
+  - type: input
+    id: neoforge-version
+    attributes:
+      label: NeoForge Version
+      placeholder: "Example: 21.1.176"
+    validations:
+      required: true
+
+  - type: input
+    id: mantle-version
+    attributes:
+      label: Mantle Version
+    validations:
+      required: true
+
+  - type: input
+    id: tinkers-version
+    attributes:
+      label: "Tinkers' Construct Version"
+      description: "'Latest' is not a valid answer; write the exact version number or build identifier."
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## API Request Description
+
+        A useful API request should meet at least one of these criteria:
+
+        * It is useful to the base port itself.
+        * It solves a common problem for multiple addons.
+        * It requires a small base-mod change that cannot reasonably be implemented without mixins.
+
+        Port-specific APIs are not guaranteed to be accepted upstream by SlimeKnights.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem description
+      description: "What technical problem are you trying to solve?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: api
+    attributes:
+      label: Suggested API
+      description: "Describe the proposed API, including expected inputs, outputs, lifecycle, and example usage where useful."
+    validations:
+      required: true
+
+  - type: textarea
+    id: addon
+    attributes:
+      label: Why does the base port need this?
+      description: "Explain why this cannot be handled cleanly in an addon and who else would benefit."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: "Describe existing APIs, events, capabilities, or workarounds and why they are insufficient."
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: "Add example code, related issues, screenshots, or links to affected addons."
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: "## Confirm the following"
+
+  - type: dropdown
+    id: searched
+    attributes:
+      label: Searched for an existing API request?
+      description: "Select all that apply."
+      multiple: true
+      options:
+        - Searched open and closed issues
+        - Checked the FAQ
+        - Checked the official roadmap
+        - Reviewed existing Mantle and Tinkers APIs
+        - I did not search
+    validations:
+      required: true
